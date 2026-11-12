@@ -1,1 +1,61 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Hit TV Admin</title><link rel="stylesheet" href="style.css"></head>
+<body style="padding-bottom:20px;">
+<header class="top-header"><div class="logo">HIT <span>TV</span> <small>ADMIN</small></div><a href="index.html" style="color:#2E7DFF;">View App</a></header>
+<main style="padding:14px;">
+<h2>Admin Panel</h2><p class="sub">What you set here is what plays in the app.</p>
 
+<div class="card"><h3>1. Main Live Stream</h3>
+<label>Live Title</label><input id="liveTitle" style="width:100%;padding:12px;margin:6px 0;border-radius:10px;background:#0A1628;color:#fff;border:1px solid #1E3A6E;">
+<label>Live Description</label><input id="liveDesc" style="width:100%;padding:12px;margin:6px 0;border-radius:10px;background:#0A1628;color:#fff;border:1px solid #1E3A6E;">
+<label>Live Video URL (m3u8 / mp4)</label><input id="liveUrl" style="width:100%;padding:12px;margin:6px 0;border-radius:10px;background:#0A1628;color:#fff;border:1px solid #1E3A6E;">
+</div>
+
+<div class="card"><h3>2. Channels (One per line: Name | Description | URL)</h3>
+<textarea id="channels" rows="5" style="width:100%;padding:12px;border-radius:10px;background:#0A1628;color:#fff;border:1px solid #1E3A6E;"></textarea>
+</div>
+
+<div class="card"><h3>3. Inbox Message</h3>
+<input id="inboxMsg" placeholder="New message to users" style="width:100%;padding:12px;margin:6px 0;border-radius:10px;background:#0A1628;color:#fff;border:1px solid #1E3A6E;">
+<button onclick="addInbox()" style="background:#2E7DFF;color:#fff;border:none;padding:11px 18px;border-radius:10px;font-weight:800;">Add Inbox</button>
+</div>
+
+<div class="card"><h3>4. Banner Image URL</h3>
+<input id="bannerUrl" placeholder="https://... image link" style="width:100%;padding:12px;margin:6px 0;border-radius:10px;background:#0A1628;color:#fff;border:1px solid #1E3A6E;">
+<button onclick="addBanner()" style="background:#2E7DFF;color:#fff;border:none;padding:11px 18px;border-radius:10px;font-weight:800;">Add Banner</button>
+</div>
+
+<div class="card"><h3>5. Audio Song</h3>
+<input id="songTitle" placeholder="Song Title" style="width:100%;padding:12px;margin:6px 0;border-radius:10px;background:#0A1628;color:#fff;border:1px solid #1E3A6E;">
+<input id="songArtist" placeholder="Artist Name" style="width:100%;padding:12px;margin:6px 0;border-radius:10px;background:#0A1628;color:#fff;border:1px solid #1E3A6E;">
+<input id="songUrl" placeholder="Song MP3 Link" style="width:100%;padding:12px;margin:6px 0;border-radius:10px;background:#0A1628;color:#fff;border:1px solid #1E3A6E;">
+<button onclick="addSong()" style="background:#2E7DFF;color:#fff;border:none;padding:11px 18px;border-radius:10px;font-weight:800;">Add Song</button>
+</div>
+
+<button onclick="saveAll()" style="width:100%;background:#00D68F;color:#000;border:none;padding:15px;border-radius:14px;font-weight:900;font-size:16px;margin-top:10px;">SAVE ALL - UPDATE APP</button>
+<p id="saveMsg" class="success"></p>
+
+<div class="card"><h3>Artist Submissions</h3><div id="artistList"></div></div>
+</main>
+<script>
+let cfg = JSON.parse(localStorage.getItem('hit_tv_config') || 'null');
+if(!cfg){ cfg = { liveTitle:"Hit TV Live", liveDesc:"Live", liveUrl:"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", channels:[], inbox:[], banners:[], songs:[] }; }
+document.getElementById('liveTitle').value = cfg.liveTitle;
+document.getElementById('liveDesc').value = cfg.liveDesc;
+document.getElementById('liveUrl').value = cfg.liveUrl;
+document.getElementById('channels').value = cfg.channels.map(c=>`${c.name} | ${c.desc} | ${c.url}`).join('\n');
+function saveAll(){
+  cfg.liveTitle = document.getElementById('liveTitle').value;
+  cfg.liveDesc = document.getElementById('liveDesc').value;
+  cfg.liveUrl = document.getElementById('liveUrl').value;
+  cfg.channels = document.getElementById('channels').value.split('\n').filter(l=>l.trim()).map(l=>{ const p=l.split('|'); return {name:p[0].trim(), desc:(p[1]||'').trim(), url:(p[2]||'').trim()}; });
+  localStorage.setItem('hit_tv_config', JSON.stringify(cfg));
+  document.getElementById('saveMsg').innerText = 'Saved! Open Home App, it will show new live now.';
+}
+function addInbox(){ const m=document.getElementById('inboxMsg').value; if(!m) return; cfg.inbox.unshift({from:"Hit TV Admin", msg:m, time:"Now"}); localStorage.setItem('hit_tv_config', JSON.stringify(cfg)); alert('Inbox added'); }
+function addBanner(){ const b=document.getElementById('bannerUrl').value; if(!b) return; cfg.banners.push(b); localStorage.setItem('hit_tv_config', JSON.stringify(cfg)); alert('Banner added'); }
+function addSong(){ const t=document.getElementById('songTitle').value; const a=document.getElementById('songArtist').value; const u=document.getElementById('songUrl').value; if(!t||!u) return; cfg.songs.push({title:t, artist:a, src:u}); localStorage.setItem('hit_tv_config', JSON.stringify(cfg)); alert('Song added'); }
+const subs = JSON.parse(localStorage.getItem('hit_artist_submissions')||'[]');
+document.getElementById('artistList').innerHTML = subs.length ? subs.map(s=>`<div class="inbox-item"><div><b>${s.artist}</b> - ${s.song}<br><small>${s.phone} | ${s.location} | ${s.genre}<br>${s.msg} | <a href="${s.link}" style="color:#2E7DFF;">Song Link</a></small></div></div>`).join('') : 'No submissions yet';
+</script>
+</body></html>
