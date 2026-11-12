@@ -4,23 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HIT TV APP</title>
+<link rel="icon" href="logo.png">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
 body{background:#0a1628;color:#fff;padding-bottom:70px}
-.top{display:flex;justify-content:space-between;align-items:center;padding:12px 14px}
-.logo{font-weight:900;font-size:18px} .logo span{color:#00aaff}
+.top{display:flex;justify-content:space-between;align-items:center;padding:10px 14px}
+.logo-row{display:flex;align-items:center;gap:8px}
+.logo-img{width:42px;height:42px;border-radius:10px;object-fit:cover}
+.logo-text{font-weight:900;font-size:18px;line-height:1} .logo-text span{color:#00aaff} .logo-text small{font-size:10px;color:#888;font-weight:400}
 .online{font-size:11px;color:#00ff88}
 .live-badge{background:#ff2222;color:#fff;font-size:11px;font-weight:900;padding:4px 8px;border-radius:6px;display:inline-block;margin:10px 14px}
 .video-wrap{padding:0 14px}
-video,iframe{width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;display:block}
-#youtubePlayer{display:none;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000}
+video,iframe{width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;display:block;pointer-events:none}
+#youtubePlayer{display:none;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000;pointer-events:none}
 .live-title{padding:12px 14px}
 .live-title b{font-size:15px} .live-title p{font-size:12px;color:#aaa;margin-top:3px}
-h3{padding:10px 14px;font-size:14px}
-.channels{display:flex;gap:10px;padding:0 14px}
-.ch{flex:1;background:#12233f;padding:10px;border-radius:10px;border:1px solid #1e3a5f;cursor:pointer}
-.ch.active{border-color:#00aaff;background:#1a3a5f}
-.ch b{font-size:12px} .ch p{font-size:10px;color:#888} .ch small{color:#00ff88;font-size:10px}
 .comments{margin:14px;background:#12233f;border-radius:12px;padding:12px}
 .comments b{font-size:13px}
 .msg{background:#0a1628;padding:8px 10px;border-radius:8px;margin-top:8px;font-size:12px}
@@ -33,21 +31,21 @@ h3{padding:10px 14px;font-size:14px}
 </style>
 </head>
 <body>
-<div class="top"><div class="logo">HIT <span>TV</span> <small style="font-size:10px;color:#888">APP</small></div><div class="online">● Online</div></div>
+<div class="top">
+  <div class="logo-row">
+    <img src="logo.png" class="logo-img" alt="Hit TV">
+    <div class="logo-text">HIT <span>TV</span><br><small>APP</small></div>
+  </div>
+  <div class="online">● Online</div>
+</div>
 <div class="live-badge">● LIVE</div>
 <div class="video-wrap">
-  <!-- LIVE VIDEO - NO CONTROLS, NO SEEK, TRUE LIVE -->
-  <video id="liveVideo" autoplay muted playsinline preload="auto" disablepictureinpicture controlslist="nodownload noplaybackrate"></video>
-  <!-- YOUTUBE LIVE - NO CONTROLS -->
+  <!-- LIVE VIDEO - NO BUTTON, NO CONTROLS, AUTO PLAY ONLY -->
+  <video id="liveVideo" autoplay muted playsinline preload="auto" disablepictureinpicture controlslist="nodownload noplaybackrate noremoteplayback"></video>
+  <!-- YOUTUBE LIVE - NO BUTTON, NO CONTROLS -->
   <div id="youtubePlayer"><iframe id="youtubeFrame" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
 </div>
 <div class="live-title"><b id="liveTitle">Hit TV Live - Morning Show</b><p id="liveDesc">Live from Kampala - Hit TV</p></div>
-<h3>Live Channels</h3>
-<div class="channels">
-  <div class="ch active" onclick="switchCh('Hit TV Main','Main Channel',this)"><b>Hit TV Main</b><p>Main Channel</p><small>LIVE</small></div>
-  <div class="ch" onclick="switchCh('Hit News','News 24/7',this)"><b>Hit News</b><p>News 24/7</p><small>LIVE</small></div>
-  <div class="ch" onclick="switchCh('Hit Sports','Sports Live',this)"><b>Hit Sports</b><p>Sports Live</p><small>LIVE</small></div>
-</div>
 <div class="comments"><b>Live Comments</b><div id="commentList"><div class="msg"><b>Hit TV:</b> Welcome to live comments</div></div><div class="input-row"><input id="commentInput" placeholder="Write a comment..."><button onclick="sendComment()">Send</button></div></div>
 <div class="bottom"><div class="active">🏠<br>Home</div><div>🔔<br>Notifications</div><div>🎵<br>Audio</div><div>👤<br>Artist</div></div>
 <script src="app.js"></script>
