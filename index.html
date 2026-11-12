@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hit TV App</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0A1628">
+</head>
+<body>
+
+<!-- SPLASH LIKE INSTAGRAM -->
+<div id="splash">
+  <div class="splash-logo">HIT<span>TV</span></div>
+  <div class="splash-loader"></div>
+  <p>from Hit Media</p>
+</div>
+
+<!-- HEADER -->
+<header class="top-header">
+  <div class="logo">HIT <span>TV</span> <small>APP</small></div>
+  <div class="header-right">
+    <span id="onlineDot" class="dot online"></span>
+    <span id="onlineText">Online</span>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ========== HOME TAB ========== -->
+<section id="tab-home" class="tab active">
+  <!-- 4:3 LIVE VIDEO -->
+  <div class="video-box">
+    <video id="mainVideo" controls playsinline poster="">
+      <source id="videoSource" src="" type="application/x-mpegURL">
+    </video>
+    <div class="live-badge"><span class="live-dot"></span> LIVE</div>
+    <div class="video-title" id="videoTitle">Hit TV Live</div>
+    <div class="video-desc" id="videoDesc">Loading live stream from Admin...</div>
+  </div>
+
+  <!-- CHANNELS SET BY ADMIN -->
+  <h3 class="section-title">Live Channels</h3>
+  <div class="channel-row" id="channelRow">
+    <!-- Admin channels load here -->
+  </div>
+
+  <!-- COMMENTING SECTION -->
+  <div class="comment-section">
+    <h3>Live Comments</h3>
+    <div id="commentsList"></div>
+    <div class="comment-input">
+      <input id="commentInput" placeholder="Write a comment...">
+      <button onclick="addComment()">Send</button>
+    </div>
+  </div>
+</section>
+
+<!-- ========== NOTIFICATIONS TAB ========== -->
+<section id="tab-notif" class="tab">
+  <h2>Notifications</h2>
+  <div class="card">
+    <h3>Inbox</h3>
+    <div id="inboxList"></div>
+  </div>
+  <div class="card">
+    <h3>Banners</h3>
+    <div id="bannerList"></div>
+  </div>
+  <div class="card rate-card">
+    <h3>Rate Us</h3>
+    <p>How is your experience on Hit TV?</p>
+    <div class="stars" id="stars">★★★★★</div>
+    <textarea id="rateMsg" placeholder="Write your feedback..."></textarea>
+    <button onclick="rateApp()">Submit Rating</button>
+  </div>
+</section>
+
+<!-- ========== AUDIO TAB ========== -->
+<section id="tab-audio" class="tab">
+  <h2>Audio Streams</h2>
+  <p class="sub">Songs uploaded by Hit TV Admin</p>
+  <div class="song-list" id="songList"></div>
+  <audio id="audioPlayer" controls></audio>
+</section>
+
+<!-- ========== ARTIST CONSOLE TAB ========== -->
+<section id="tab-artist" class="tab">
+  <h2>Artist Console</h2>
+  <p class="sub">Are you an artist? Fill your details, submit to Hit TV Admin.</p>
+  <form class="artist-form" onsubmit="submitArtist(event)">
+    <label>Artist / Stage Name</label>
+    <input id="artistName" required placeholder="e.g. King Moses">
+    <label>Real Name</label>
+    <input id="realName" required placeholder="Your real name">
+    <label>Phone / WhatsApp</label>
+    <input id="artistPhone" required placeholder="0780...">
+    <label>District / Location</label>
+    <input id="artistLocation" placeholder="e.g. Kitagata, Sheema">
+    <label>Music Type</label>
+    <select id="artistGenre">
+      <option>Afrobeat</option><option>Dancehall</option><option>Gospel</option><option>Hip Hop</option><option>Zouk</option><option>Other</option>
+    </select>
+    <label>Song Title</label>
+    <input id="songTitle" required placeholder="Song title">
+    <label>Your Message To Admin</label>
+    <textarea id="artistMsg" placeholder="Tell us about your song..."></textarea>
+    <label>Song Link (YouTube / Google Drive)</label>
+    <input id="songLink" placeholder="Paste link here">
+    <button type="submit">Submit To Admin</button>
+  </form>
+  <p id="artistSuccess" class="success"></p>
+</section>
+
+</main>
+
+<!-- BOTTOM NAV - PROFESSIONAL SVG, NO EMOJIS -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" onclick="showTab('home',this)">
+    <svg viewBox="0 0 24 24"><path d="M12 2L2 12h3v9h6v-6h2v6h6v-9h3L12 2z"/></svg>
+    <span>Home</span>
+  </button>
+  <button class="nav-btn" onclick="showTab('notif',this)">
+    <svg viewBox="0 0 24 24"><path d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6v-5a6 6 0 0 0-12 0v5l-2 2h16l-2-2z"/></svg>
+    <span>Notifications</span>
+    <b class="notif-badge" id="notifCount">3</b>
+  </button>
+  <button class="nav-btn" onclick="showTab('audio',this)">
+    <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+    <span>Audio</span>
+  </button>
+  <button class="nav-btn" onclick="showTab('artist',this)">
+    <svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 2c-5 0-9 2.5-9 6v2h18v-2c0-3.5-4-6-9-6z"/></svg>
+    <span>Artist</span>
+  </button>
+</nav>
+
+<script src="app.js"></script>
+</body>
+  </html>
