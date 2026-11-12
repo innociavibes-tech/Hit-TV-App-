@@ -1,1 +1,22 @@
-
+{
+  "name": "Hit TV App",
+  "short_name": "Hit TV",
+  "description": "Hit TV - Live TV, Audio Streams and Artist Console",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0A1628",
+  "theme_color": "#0A1628",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192x192/2E7DFF/ffffff?text=HIT",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512/2E7DFF/ffffff?text=HIT",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
