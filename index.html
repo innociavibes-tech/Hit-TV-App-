@@ -3,141 +3,53 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hit TV App</title>
-<link rel="stylesheet" href="style.css">
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0A1628">
+<title>HIT TV APP</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#0a1628;color:#fff;padding-bottom:70px}
+.top{display:flex;justify-content:space-between;align-items:center;padding:12px 14px}
+.logo{font-weight:900;font-size:18px} .logo span{color:#00aaff}
+.online{font-size:11px;color:#00ff88}
+.live-badge{background:#ff2222;color:#fff;font-size:11px;font-weight:900;padding:4px 8px;border-radius:6px;display:inline-block;margin:10px 14px}
+.video-wrap{padding:0 14px}
+video,iframe{width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;display:block}
+#youtubePlayer{display:none;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000}
+.live-title{padding:12px 14px}
+.live-title b{font-size:15px} .live-title p{font-size:12px;color:#aaa;margin-top:3px}
+h3{padding:10px 14px;font-size:14px}
+.channels{display:flex;gap:10px;padding:0 14px}
+.ch{flex:1;background:#12233f;padding:10px;border-radius:10px;border:1px solid #1e3a5f;cursor:pointer}
+.ch.active{border-color:#00aaff;background:#1a3a5f}
+.ch b{font-size:12px} .ch p{font-size:10px;color:#888} .ch small{color:#00ff88;font-size:10px}
+.comments{margin:14px;background:#12233f;border-radius:12px;padding:12px}
+.comments b{font-size:13px}
+.msg{background:#0a1628;padding:8px 10px;border-radius:8px;margin-top:8px;font-size:12px}
+.input-row{display:flex;gap:8px;margin-top:10px}
+.input-row input{flex:1;background:#0a1628;border:1px solid #2a4a6f;color:#fff;padding:9px;border-radius:8px;outline:none}
+.input-row button{background:#00aaff;border:0;color:#fff;padding:9px 14px;border-radius:8px;font-weight:700}
+.bottom{position:fixed;bottom:0;left:0;right:0;background:#0a1628;display:flex;justify-content:space-around;padding:10px 0;border-top:1px solid #1e3a5f}
+.bottom div{text-align:center;font-size:11px;color:#888;cursor:pointer}
+.bottom div.active{color:#00aaff}
+</style>
 </head>
 <body>
-
-<!-- SPLASH LIKE INSTAGRAM -->
-<div id="splash">
-  <div class="splash-logo">HIT<span>TV</span></div>
-  <div class="splash-loader"></div>
-  <p>from Hit Media</p>
+<div class="top"><div class="logo">HIT <span>TV</span> <small style="font-size:10px;color:#888">APP</small></div><div class="online">● Online</div></div>
+<div class="live-badge">● LIVE</div>
+<div class="video-wrap">
+  <!-- LIVE VIDEO - NO CONTROLS, NO SEEK, TRUE LIVE -->
+  <video id="liveVideo" autoplay muted playsinline preload="auto" disablepictureinpicture controlslist="nodownload noplaybackrate"></video>
+  <!-- YOUTUBE LIVE - NO CONTROLS -->
+  <div id="youtubePlayer"><iframe id="youtubeFrame" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
 </div>
-
-<!-- HEADER -->
-<header class="top-header">
-  <div class="logo">HIT <span>TV</span> <small>APP</small></div>
-  <div class="header-right">
-    <span id="onlineDot" class="dot online"></span>
-    <span id="onlineText">Online</span>
-  </div>
-</header>
-
-<main id="main">
-
-<!-- ========== HOME TAB ========== -->
-<section id="tab-home" class="tab active">
-  <!-- 4:3 LIVE VIDEO -->
-  <div class="video-box">
-    <video id="mainVideo" controls playsinline poster="">
-      <source id="videoSource" src="" type="application/x-mpegURL">
-    </video>
-    <div class="live-badge"><span class="live-dot"></span> LIVE</div>
-    <div class="video-title" id="videoTitle">Hit TV Live</div>
-    <div class="video-desc" id="videoDesc">Loading live stream from Admin...</div>
-  <div id="youtubePlayer" style="display:none; width:100%; aspect-ratio:16/9; border-radius:12px; overflow:hidden; margin-top:10px;">
-  <iframe id="youtubeFrame" width="100%" height="100%" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
-  </div>
-
-  <!-- CHANNELS SET BY ADMIN -->
-  <h3 class="section-title">Live Channels</h3>
-  <div class="channel-row" id="channelRow">
-    <!-- Admin channels load here -->
-  </div>
-
-  <!-- COMMENTING SECTION -->
-  <div class="comment-section">
-    <h3>Live Comments</h3>
-    <div id="commentsList"></div>
-    <div class="comment-input">
-      <input id="commentInput" placeholder="Write a comment...">
-      <button onclick="addComment()">Send</button>
-    </div>
-  </div>
-</section>
-
-<!-- ========== NOTIFICATIONS TAB ========== -->
-<section id="tab-notif" class="tab">
-  <h2>Notifications</h2>
-  <div class="card">
-    <h3>Inbox</h3>
-    <div id="inboxList"></div>
-  </div>
-  <div class="card">
-    <h3>Banners</h3>
-    <div id="bannerList"></div>
-  </div>
-  <div class="card rate-card">
-    <h3>Rate Us</h3>
-    <p>How is your experience on Hit TV?</p>
-    <div class="stars" id="stars">★★★★★</div>
-    <textarea id="rateMsg" placeholder="Write your feedback..."></textarea>
-    <button onclick="rateApp()">Submit Rating</button>
-  </div>
-</section>
-
-<!-- ========== AUDIO TAB ========== -->
-<section id="tab-audio" class="tab">
-  <h2>Audio Streams</h2>
-  <p class="sub">Songs uploaded by Hit TV Admin</p>
-  <div class="song-list" id="songList"></div>
-  <audio id="audioPlayer" controls></audio>
-</section>
-
-<!-- ========== ARTIST CONSOLE TAB ========== -->
-<section id="tab-artist" class="tab">
-  <h2>Artist Console</h2>
-  <p class="sub">Are you an artist? Fill your details, submit to Hit TV Admin.</p>
-  <form class="artist-form" onsubmit="submitArtist(event)">
-    <label>Artist / Stage Name</label>
-    <input id="artistName" required placeholder="e.g. King Moses">
-    <label>Real Name</label>
-    <input id="realName" required placeholder="Your real name">
-    <label>Phone / WhatsApp</label>
-    <input id="artistPhone" required placeholder="0780...">
-    <label>District / Location</label>
-    <input id="artistLocation" placeholder="e.g. Kitagata, Sheema">
-    <label>Music Type</label>
-    <select id="artistGenre">
-      <option>Afrobeat</option><option>Dancehall</option><option>Gospel</option><option>Hip Hop</option><option>Zouk</option><option>Other</option>
-    </select>
-    <label>Song Title</label>
-    <input id="songTitle" required placeholder="Song title">
-    <label>Your Message To Admin</label>
-    <textarea id="artistMsg" placeholder="Tell us about your song..."></textarea>
-    <label>Song Link (YouTube / Google Drive)</label>
-    <input id="songLink" placeholder="Paste link here">
-    <button type="submit">Submit To Admin</button>
-  </form>
-  <p id="artistSuccess" class="success"></p>
-</section>
-
-</main>
-
-<!-- BOTTOM NAV - PROFESSIONAL SVG, NO EMOJIS -->
-<nav class="bottom-nav">
-  <button class="nav-btn active" onclick="showTab('home',this)">
-    <svg viewBox="0 0 24 24"><path d="M12 2L2 12h3v9h6v-6h2v6h6v-9h3L12 2z"/></svg>
-    <span>Home</span>
-  </button>
-  <button class="nav-btn" onclick="showTab('notif',this)">
-    <svg viewBox="0 0 24 24"><path d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6v-5a6 6 0 0 0-12 0v5l-2 2h16l-2-2z"/></svg>
-    <span>Notifications</span>
-    <b class="notif-badge" id="notifCount">3</b>
-  </button>
-  <button class="nav-btn" onclick="showTab('audio',this)">
-    <svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
-    <span>Audio</span>
-  </button>
-  <button class="nav-btn" onclick="showTab('artist',this)">
-    <svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 2c-5 0-9 2.5-9 6v2h18v-2c0-3.5-4-6-9-6z"/></svg>
-    <span>Artist</span>
-  </button>
-</nav>
-
+<div class="live-title"><b id="liveTitle">Hit TV Live - Morning Show</b><p id="liveDesc">Live from Kampala - Hit TV</p></div>
+<h3>Live Channels</h3>
+<div class="channels">
+  <div class="ch active" onclick="switchCh('Hit TV Main','Main Channel',this)"><b>Hit TV Main</b><p>Main Channel</p><small>LIVE</small></div>
+  <div class="ch" onclick="switchCh('Hit News','News 24/7',this)"><b>Hit News</b><p>News 24/7</p><small>LIVE</small></div>
+  <div class="ch" onclick="switchCh('Hit Sports','Sports Live',this)"><b>Hit Sports</b><p>Sports Live</p><small>LIVE</small></div>
+</div>
+<div class="comments"><b>Live Comments</b><div id="commentList"><div class="msg"><b>Hit TV:</b> Welcome to live comments</div></div><div class="input-row"><input id="commentInput" placeholder="Write a comment..."><button onclick="sendComment()">Send</button></div></div>
+<div class="bottom"><div class="active">🏠<br>Home</div><div>🔔<br>Notifications</div><div>🎵<br>Audio</div><div>👤<br>Artist</div></div>
 <script src="app.js"></script>
 </body>
-  </html>
+</html>
