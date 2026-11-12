@@ -20,8 +20,8 @@ function loadLive(){
     vid.style.display = "none";
     vid.pause();
     ytBox.style.display = "block";
-    // TRUE LIVE YOUTUBE - NO CONTROLS, NO FORWARD, NO SEEK
-    ytFrame.src = "https://www.youtube.com/embed/" + getYoutubeId(url) + "?autoplay=1&mute=1&playsinline=1&rel=0&controls=0&disablekb=1&modestbranding=1&fs=0&iv_load_policy=3";
+    // TRUE LIVE - NO PLAY BUTTON, NO CONTROLS, AUTO PLAY ONLY
+    ytFrame.src = "https://www.youtube.com/embed/" + getYoutubeId(url) + "?autoplay=1&mute=1&playsinline=1&rel=0&controls=0&disablekb=1&modestbranding=1&fs=0&iv_load_policy=3&showinfo=0";
   } else {
     ytBox.style.display = "none";
     ytFrame.src = "";
@@ -31,22 +31,17 @@ function loadLive(){
   }
 }
 
-// LIVE LOCK - BLOCK SEEK FORWARD ON NORMAL VIDEO
+// BLOCK ALL PRESS ON VIDEO - VIEWER CANNOT PLAY / STOP / SEEK
 const liveVideoEl = document.getElementById('liveVideo');
 if(liveVideoEl){
+  liveVideoEl.addEventListener('click', e => { e.preventDefault(); liveVideoEl.play().catch(()=>{}); });
   liveVideoEl.addEventListener('seeking', function(){
     if(liveVideoEl.duration && liveVideoEl.currentTime < liveVideoEl.duration - 2){
       liveVideoEl.currentTime = liveVideoEl.duration;
     }
   });
   liveVideoEl.addEventListener('contextmenu', e => e.preventDefault());
-}
-
-function switchCh(title, desc, el){
-  document.querySelectorAll('.ch').forEach(c=>c.classList.remove('active'));
-  if(el) el.classList.add('active');
-  document.getElementById('liveTitle').innerText = title;
-  document.getElementById('liveDesc').innerText = desc;
+  liveVideoEl.addEventListener('pause', () => { liveVideoEl.play().catch(()=>{}); });
 }
 
 function sendComment(){
@@ -59,7 +54,6 @@ function sendComment(){
   inp.value = "";
 }
 
-// LOAD FROM FIREBASE - LIVE UPDATE EVERY 5 SECONDS
 async function loadConfig(){
   try{
     const res = await fetch(DB + "/config.json");
