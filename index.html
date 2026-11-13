@@ -38,9 +38,14 @@ body{background:#0a1628;color:#fff;padding-bottom:80px}
 .submit-btn{width:100%;background:#00cc66;border:0;color:#fff;padding:13px;border-radius:10px;font-weight:900}
 .audio-card{background:#12233f;padding:14px;border-radius:12px;margin-bottom:10px}
 .audio-actions{display:flex;gap:8px;margin-top:10px}.a-btn{flex:1;border:0;padding:9px;border-radius:8px;font-weight:900;color:#fff}.a-play{background:#00aaff}.a-dl{background:#ff2222}
-.bottom{position:fixed;bottom:0;left:0;right:0;background:#0a1628;display:flex;border-top:1px solid #1e3a5f;z-index:100}
-.tab-btn{flex:1;background:none;border:0;color:#888;font-size:11px;font-weight:700;padding:12px 0;cursor:pointer}
+/* TABS DESIGN - FIXED - ICON + WORD + BLUE LINE */
+.bottom{position:fixed;bottom:0;left:0;right:0;background:#0a1628;display:flex;border-top:1px solid #1e3a5f;z-index:100;padding:8px 0 6px}
+.tab-btn{flex:1;background:none;border:0;color:#888;font-size:10px;font-weight:700;padding:4px 0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
 .tab-btn.active{color:#fff}
+.tab-icon{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tab-btn.active .tab-icon{stroke:#00aaff}
+.tab-line{width:24px;height:3px;background:#00aaff;border-radius:3px;opacity:0}
+.tab-btn.active .tab-line{opacity:1}
 </style>
 </head>
 <body>
@@ -73,20 +78,34 @@ body{background:#0a1628;color:#fff;padding-bottom:80px}
 
 <div id="page-artist" class="page"><h3>Artist Console</h3><p style="font-size:12px;color:#aaa;margin:6px 0 12px">Submit your song to Hit TV Admin.</p><div class="card"><b>Submit Your Song</b><br><br><input id="aName" class="field" placeholder="Artist Name *"><input id="aPhone" class="field" placeholder="Phone / WhatsApp *"><input id="aGenre" class="field" placeholder="Genre"><input id="aLink" class="field" placeholder="YouTube Link *"><textarea id="aBio" class="field" placeholder="About You..."></textarea><button class="submit-btn" onclick="submitArtist()">SUBMIT TO HIT TV</button><p id="submitMsg" style="font-size:12px;color:#00ff88;margin-top:8px"></p></div></div>
 
+<!-- BOTTOM TABS - NOW WITH ICONS + DESIGN -->
 <div class="bottom">
-  <button class="tab-btn active" id="tab-home" onclick="showPage('home')">HOME</button>
-  <button class="tab-btn" id="tab-notif" onclick="showPage('notif')">NOTIFICATIONS</button>
-  <button class="tab-btn" id="tab-audio" onclick="showPage('audio')">AUDIO</button>
-  <button class="tab-btn" id="tab-artist" onclick="showPage('artist')">ARTIST</button>
+  <button class="tab-btn active" id="tab-home" onclick="showPage('home')">
+    <svg class="tab-icon" viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5V21H3z"/><path d="M9 21v-6h6v6"/></svg>
+    HOME
+    <div class="tab-line"></div>
+  </button>
+  <button class="tab-btn" id="tab-notif" onclick="showPage('notif')">
+    <svg class="tab-icon" viewBox="0 0 24 24"><path d="M18 9a6 6 0 1 0-12 0c0 6-2 7-2 7h16s-2-1-2-7"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>
+    NOTIFICATIONS
+    <div class="tab-line"></div>
+  </button>
+  <button class="tab-btn" id="tab-audio" onclick="showPage('audio')">
+    <svg class="tab-icon" viewBox="0 0 24 24"><path d="M9 18V6l12-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+    AUDIO
+    <div class="tab-line"></div>
+  </button>
+  <button class="tab-btn" id="tab-artist" onclick="showPage('artist')">
+    <svg class="tab-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/></svg>
+    ARTIST
+    <div class="tab-line"></div>
+  </button>
 </div>
 
 <script>
 var DB="https://hit-tv-app-40fb9-default-rtdb.firebaseio.com";
 var currentId="", currentLiveUrl="", currentTitle="Hit TV Live", currentAudioId=null, lineup=[], lineupIndex=0, lineupMode=false, lineupTimer=null, myUser="", myUserKey="";
-
-// Splash - hide after 2 seconds, ALWAYS, no waiting for internet
 setTimeout(function(){ document.getElementById('splash').style.display='none'; checkLogin(); }, 2000);
-
 function checkLogin(){
   var saved=null; try{ saved=localStorage.getItem('hittv_username'); }catch(e){}
   if(saved){ myUser=saved; document.getElementById('myUsername').innerText="@"+myUser; }
@@ -100,11 +119,9 @@ function createAccount(){
   myUser=name; document.getElementById('myUsername').innerText="@"+name;
   try{ localStorage.setItem('hittv_username', name); }catch(e){}
   document.getElementById('signup').classList.remove('show');
-  // Save to Admin in background - if it fails, app still works
   try{ fetch(DB+"/users.json",{method:"POST",body:JSON.stringify({username:name, registered:new Date().toLocaleString(), lastSeen:new Date().toLocaleString(), lastSeenTime:Date.now()})}); }catch(e){}
 }
 function getId(u){ if(!u) return ""; var m=u.match(/(?:youtu\.be\/|v=|shorts\/|embed\/|live\/)([A-Za-z0-9_-]{11})/); return m?m[1]:""; }
-// SIMPLE TABS - THIS IS THE FIX - ONLY 4 IDS, NOTHING ELSE
 function showPage(n){
   document.getElementById('page-home').style.display = (n==='home' ? 'block' : 'none');
   document.getElementById('page-notif').style.display = (n==='notif' ? 'block' : 'none');
@@ -177,4 +194,4 @@ function playLineup(){
 load(); setInterval(load, 10000);
 </script>
 </body>
-                                                                                                                       </html>
+  </html>
