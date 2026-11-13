@@ -2,31 +2,49 @@
 <html>
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>HIT TV APP</title>
-<style>*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}body{background:#0a1628;color:#fff;padding-bottom:70px}.top{display:flex;justify-content:space-between;align-items:center;padding:12px 14px}.logo-text{font-weight:900;font-size:24px}.logo-text span{color:#00aaff}.logo-text small{font-size:10px;color:#888;letter-spacing:2px}.online{font-size:11px;color:#00ff88}.badge{background:#ff2222;font-size:11px;font-weight:900;padding:4px 8px;border-radius:6px;display:inline-block;margin:10px 14px}.video-wrap{padding:0 14px}.video-box{width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden;position:relative}.video-box video{width:100%;height:100%;display:block;background:#000;position:relative;z-index:2}.video-box iframe{width:100%;height:100%;border:0;display:none;position:relative;z-index:3}#noVideo{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;font-size:18px;background:#000;z-index:1}#noVideo small{font-size:12px;color:#888;font-weight:400;margin-top:6px}#soundHint{position:absolute;bottom:10px;left:10px;z-index:10;background:rgba(0,0,0,0.7);color:#fff;padding:6px 10px;border-radius:20px;font-size:11px;font-weight:700;display:none}.title{padding:12px 14px}.title b{font-size:15px}.title p{font-size:12px;color:#aaa;margin-top:3px}
-.nowplaying{background:linear-gradient(90deg,#ff2222,#ff5500);margin:0 14px;margin-top:10px;padding:12px;border-radius:10px;display:flex;gap:10px;align-items:center}
-.nowplaying .dot{width:10px;height:10px;background:#fff;border-radius:50%;flex-shrink:0;animation:blink 1s infinite}
-@keyframes blink{0%{opacity:1}50%{opacity:0.2}100%{opacity:1}}
-.nowplaying small{font-size:10px;letter-spacing:1px;opacity:0.9}
-.nowplaying b{font-size:15px;display:block;margin-top:2px}
-.download-row{display:flex;gap:10px;padding:0 14px;margin-top:12px}.download-btn{flex:1;border:0;padding:11px 8px;border-radius:10px;font-weight:900;font-size:13px;color:#fff;cursor:pointer}.btn-video{background:#ff2222}.btn-audio{background:#00aaff}.comments{margin:14px;background:#12233f;border-radius:12px;padding:12px}.msg{background:#0a1628;padding:8px 10px;border-radius:8px;margin-top:8px;font-size:12px}.row{display:flex;gap:8px;margin-top:10px}.row input{flex:1;background:#0a1628;border:1px solid #2a4a6f;color:#fff;padding:9px;border-radius:8px;outline:none}.row button{background:#00aaff;border:0;color:#fff;padding:9px 14px;border-radius:8px;font-weight:700}.page{display:none;padding:14px}.page.active{display:block}.card{background:#12233f;padding:12px;border-radius:12px;margin-bottom:10px}.card b{font-size:14px}.card p{font-size:12px;color:#aaa;margin-top:4px}.field{width:100%;background:#0a1628;border:1px solid #2a4a6f;color:#fff;padding:11px;border-radius:8px;outline:none;margin-bottom:9px;font-size:13px}textarea.field{min-height:70px}.submit-btn{width:100%;background:#00cc66;border:0;color:#fff;padding:13px;border-radius:10px;font-weight:900;font-size:14px;cursor:pointer}.audio-card{background:#12233f;padding:14px;border-radius:12px;margin-bottom:10px}.audio-card b{font-size:14px}.audio-card p{font-size:12px;color:#aaa;margin-top:4px}.audio-actions{display:flex;gap:8px;margin-top:10px}.a-btn{flex:1;border:0;padding:9px;border-radius:8px;font-weight:900;font-size:12px;color:#fff;cursor:pointer}.a-play{background:#00aaff}.a-dl{background:#ff2222}.a-play.playing{background:#ffaa00}.bottom{position:fixed;bottom:0;left:0;right:0;background:#0a1628;display:flex;justify-content:space-around;padding:12px 0 10px;border-top:1px solid #1e3a5f;z-index:100}.bottom div{text-align:center;font-size:11px;color:#888;font-weight:700;cursor:pointer;flex:1;padding:4px}.bottom div.active{color:#fff}.bottom div.active .tab-line{opacity:1}.tab-icon{width:22px;height:22px;margin:0 auto 4px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;pointer-events:none}.tab-line{width:22px;height:3px;background:#00aaff;border-radius:3px;margin:4px auto 0;opacity:0}</style>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}body{background:#0a1628;color:#fff;padding-bottom:70px}
+#splash{position:fixed;top:0;left:0;right:0;bottom:0;background:#0a1628;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.5s}
+#splash.hide{opacity:0;pointer-events:none}.splash-logo{font-weight:900;font-size:48px}.splash-logo span{color:#00aaff}.splash-app{font-size:11px;color:#888;letter-spacing:5px;margin-top:4px}.splash-loader{width:44px;height:44px;border:4px solid #1e3a5f;border-top:4px solid #00aaff;border-radius:50%;animation:spin 0.9s linear infinite;margin-top:28px}@keyframes spin{to{transform:rotate(360deg)}}.splash-loading{font-size:12px;color:#888;margin-top:12px}.splash-from{position:absolute;bottom:28px;font-size:11px;color:#555}
+/* SIGN UP - USERNAME ONLY - ONCE */
+#signup{position:fixed;top:0;left:0;right:0;bottom:0;background:#0a1628;z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+#signup.show{display:flex}
+.signup-logo{font-weight:900;font-size:42px}.signup-logo span{color:#00aaff}.signup-app{font-size:11px;color:#888;letter-spacing:5px;margin:4px 0 20px}
+.signup-card{background:#12233f;width:100%;max-width:340px;padding:20px;border-radius:14px}
+.signup-card b{font-size:17px}.signup-card p{font-size:12px;color:#aaa;margin:6px 0 14px}
+.signup-input{width:100%;background:#0a1628;border:1px solid #2a4a6f;color:#fff;padding:13px;border-radius:10px;outline:none;font-size:15px;text-align:center;margin-bottom:12px}
+.signup-btn{width:100%;background:#00aaff;border:0;color:#fff;padding:14px;border-radius:10px;font-weight:900;font-size:15px;cursor:pointer}
+.top{display:flex;justify-content:space-between;align-items:center;padding:12px 14px}.logo-text{font-weight:900;font-size:24px}.logo-text span{color:#00aaff}.logo-text small{font-size:10px;color:#888;letter-spacing:2px}.online{font-size:11px;color:#00ff88}.badge{background:#ff2222;font-size:11px;font-weight:900;padding:4px 8px;border-radius:6px;display:inline-block;margin:10px 14px}.video-wrap{padding:0 14px}.video-box{width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden;position:relative}.video-box video{width:100%;height:100%;display:block;background:#000;position:relative;z-index:2}.video-box iframe{width:100%;height:100%;border:0;display:none;position:relative;z-index:3}#noVideo{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;font-size:18px;background:#000;z-index:1}#noVideo small{font-size:12px;color:#888;font-weight:400;margin-top:6px}#soundHint{position:absolute;bottom:10px;left:10px;z-index:10;background:rgba(0,0,0,0.7);color:#fff;padding:6px 10px;border-radius:20px;font-size:11px;font-weight:700;display:none}.title{padding:12px 14px}.title b{font-size:15px}.title p{font-size:12px;color:#aaa;margin-top:3px}
+.nowplaying{background:linear-gradient(90deg,#0077ff,#00aaff);margin:0 14px;margin-top:10px;padding:14px;border-radius:10px;display:flex;gap:10px;align-items:center;box-shadow:0 4px 14px rgba(0,170,255,0.35)}
+.nowplaying .dot{width:12px;height:12px;background:#fff;border-radius:50%;flex-shrink:0;animation:blink 1s infinite}@keyframes blink{0%{opacity:1}50%{opacity:0.2}100%{opacity:1}}
+.nowplaying small{font-size:10px;letter-spacing:1.5px;color:#fff;opacity:0.95;font-weight:700}.nowplaying b{font-size:17px;display:block;margin-top:3px;color:#fff;font-weight:900;line-height:1.2}
+.download-row{display:flex;gap:10px;padding:0 14px;margin-top:12px}.download-btn{flex:1;border:0;padding:11px 8px;border-radius:10px;font-weight:900;font-size:13px;color:#fff;cursor:pointer}.btn-video{background:#ff2222}.btn-audio{background:#00aaff}.comments{margin:14px;background:#12233f;border-radius:12px;padding:12px}.msg{background:#0a1628;padding:8px 10px;border-radius:8px;margin-top:8px;font-size:12px}.row{display:flex;gap:8px;margin-top:10px}.row input{flex:1;background:#0a1628;border:1px solid #2a4a6f;color:#fff;padding:9px;border-radius:8px;outline:none}.row button{background:#00aaff;border:0;color:#fff;padding:9px 14px;border-radius:8px;font-weight:700}.page{display:none;padding:14px}.page.active{display:block}.card{background:#12233f;padding:12px;border-radius:12px;margin-bottom:10px}.card b{font-size:14px}.card p{font-size:12px;color:#aaa;margin-top:4px}.field{width:100%;background:#0a1628;border:1px solid #2a4a6f;color:#fff;padding:11px;border-radius:8px;outline:none;margin-bottom:9px;font-size:13px}textarea.field{min-height:70px}.submit-btn{width:100%;background:#00cc66;border:0;color:#fff;padding:13px;border-radius:10px;font-weight:900;font-size:14px;cursor:pointer}.audio-card{background:#12233f;padding:14px;border-radius:12px;margin-bottom:10px}.audio-card b{font-size:14px}.audio-card p{font-size:12px;color:#aaa;margin-top:4px}.audio-actions{display:flex;gap:8px;margin-top:10px}.a-btn{flex:1;border:0;padding:9px;border-radius:8px;font-weight:900;font-size:12px;color:#fff;cursor:pointer}.a-play{background:#00aaff}.a-dl{background:#ff2222}.a-play.playing{background:#ffaa00}.bottom{position:fixed;bottom:0;left:0;right:0;background:#0a1628;display:flex;justify-content:space-around;padding:12px 0 10px;border-top:1px solid #1e3a5f;z-index:100}.bottom div{text-align:center;font-size:11px;color:#888;font-weight:700;cursor:pointer;flex:1;padding:4px}.bottom div.active{color:#fff}.bottom div.active .tab-line{opacity:1}.tab-icon{width:22px;height:22px;margin:0 auto 4px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;pointer-events:none}.tab-line{width:22px;height:3px;background:#00aaff;border-radius:3px;margin:4px auto 0;opacity:0}
+</style>
 </head>
 <body>
-<div class="top"><div class="logo-text">HIT <span>TV</span><br><small>APP</small></div><div class="online">● Online</div></div>
+
+<div id="splash"><div class="splash-logo">HIT <span>TV</span></div><div class="splash-app">APP</div><div class="splash-loader"></div><div class="splash-loading">Loading...</div><div class="splash-from">from Hit TV</div></div>
+
+<!-- CREATE ACCOUNT - USERNAME ONLY -->
+<div id="signup">
+  <div class="signup-logo">HIT <span>TV</span></div>
+  <div class="signup-app">APP</div>
+  <div class="signup-card">
+    <b>Welcome to Hit TV 👋</b>
+    <p>Create account with your username only. Sign up once, next time you open app, no sign in again.</p>
+    <input id="usernameInput" class="signup-input" placeholder="Choose username - e.g hitfan1" maxlength="20">
+    <button class="signup-btn" onclick="createAccount()">CREATE ACCOUNT & WATCH →</button>
+    <p id="signupMsg" style="color:#00ff88"></p>
+    <p style="font-size:11px;color:#666;margin-top:10px">No password. No email. Just username.</p>
+  </div>
+</div>
+
+<div class="top"><div class="logo-text">HIT <span>TV</span><br><small>APP</small></div><div><div class="online">● Online</div><div id="myUsername" style="font-size:11px;color:#00aaff;font-weight:700;text-align:right;margin-top:2px"></div></div></div>
 <div id="page-home" class="page active">
 <div class="badge">● LIVE</div>
 <div class="video-wrap"><div class="video-box"><div id="noVideo">HIT TV LIVE<small>Waiting for live video...</small></div><video id="liveVideo" autoplay playsinline preload="auto"></video><iframe id="ytFrame" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe><div id="soundHint">Tap anywhere for sound</div></div></div>
 <div class="title"><b id="liveTitle">Hit TV Live</b><p id="liveDesc">Live from Kampala - Hit TV</p><p id="lineupInfo" style="color:#00aaff;font-size:12px;margin-top:4px"></p></div>
-
-<!-- NOW PLAYING - BEFORE DOWNLOAD BUTTONS -->
-<div class="nowplaying">
-  <div class="dot"></div>
-  <div>
-    <small>● NOW PLAYING</small>
-    <b id="nowPlayingTitle">Hit TV Live</b>
-    <small id="nowPlayingSub">Waiting for Admin...</small>
-  </div>
-</div>
-
+<div class="nowplaying"><div class="dot"></div><div><small>● NOW PLAYING</small><b id="nowPlayingTitle">Hit TV Live</b><small id="nowPlayingSub">Waiting for Admin...</small></div></div>
 <div class="download-row"><button class="download-btn btn-video" onclick="downloadVideo()">⬇ Download Video</button><button class="download-btn btn-audio" onclick="downloadAudio()">⬇ Download Audio</button></div>
 <div class="comments"><b>Live Comments</b><div id="commentList"><div class="msg"><b>Hit TV:</b> Welcome to live comments</div></div><div class="row"><input id="commentInput" placeholder="Write a comment..."><button onclick="sendComment()">Send</button></div></div>
 </div>
@@ -38,15 +56,59 @@
 const DB="https://hit-tv-app-40fb9-default-rtdb.firebaseio.com";
 let soundOn=false, currentId="", currentLiveUrl="", currentTitle="Hit TV Live", currentAudioId=null;
 let lineup=[], lineupIndex=0, lineupMode=false, lineupTimer=null;
+let myUser="", myUserKey="";
+// SPLASH + SIGNUP LOGIC - SIGN UP ONCE ONLY
+window.onload=function(){
+  setTimeout(()=>{
+    let s=document.getElementById('splash'); if(s){ s.classList.add('hide'); setTimeout(()=>{ s.style.display='none'; checkLogin(); },500); }
+  }, 2000);
+};
+function checkLogin(){
+  let saved = localStorage.getItem('hittv_username');
+  let savedKey = localStorage.getItem('hittv_userkey');
+  if(saved && savedKey){
+    myUser=saved; myUserKey=savedKey;
+    document.getElementById('myUsername').innerText="@"+myUser;
+    // Update Last Seen - he is watching now
+    updateLastSeen();
+    // Update Last Seen every 30 sec while watching
+    setInterval(updateLastSeen, 30000);
+  } else {
+    // First time - show signup
+    document.getElementById('signup').classList.add('show');
+  }
+}
+async function createAccount(){
+  let name=document.getElementById('usernameInput').value.trim().replace(/[^a-zA-Z0-9_]/g,'');
+  if(!name || name.length<3){ alert("Please choose username, at least 3 letters"); return; }
+  document.getElementById('signupMsg').innerText="Creating your account...";
+  try{
+    let now=new Date();
+    let data={username:name, registered:now.toLocaleString(), registeredDate:now.toLocaleDateString(), lastSeen:now.toLocaleString(), lastSeenTime:now.getTime(), visits:1};
+    let r=await fetch(DB+"/users.json",{method:"POST",body:JSON.stringify(data)});
+    let res=await r.json();
+    myUser=name; myUserKey=res.name;
+    localStorage.setItem('hittv_username', name);
+    localStorage.setItem('hittv_userkey', res.name);
+    document.getElementById('myUsername').innerText="@"+name;
+    document.getElementById('signup').classList.remove('show');
+    setInterval(updateLastSeen, 30000);
+    // Set comment name to username
+  }catch(e){ document.getElementById('signupMsg').innerText="Failed, try again"; }
+}
+async function updateLastSeen(){
+  if(!myUserKey) return;
+  try{
+    await fetch(DB+"/users/"+myUserKey+"/lastSeen.json",{method:"PUT",body:JSON.stringify(new Date().toLocaleString())});
+    await fetch(DB+"/users/"+myUserKey+"/lastSeenTime.json",{method:"PUT",body:JSON.stringify(Date.now())});
+  }catch(e){}
+}
+// Also update lastSeen when user leaves / closes
+window.addEventListener('beforeunload', updateLastSeen);
 function getId(u){ if(!u) return ""; let m=u.match(/(?:youtu\.be\/|v=|shorts\/|embed\/|live\/)([A-Za-z0-9_-]{11})/); return m?m[1]:""; }
 function showPage(n){ document.querySelectorAll('.page').forEach(p=>{p.style.display='none';p.classList.remove('active');}); let pg=document.getElementById('page-'+n); if(pg){pg.style.display='block';pg.classList.add('active');} document.querySelectorAll('.bottom div').forEach(d=>d.classList.remove('active')); let t=document.getElementById('tab-'+n); if(t) t.classList.add('active'); enableSound(); window.scrollTo(0,0); if(n==='audio') loadAudioStreams(); if(n==='notif') loadNotifs(); }
 function goHome(){ showPage('home'); }
-// UPDATE NOW PLAYING BAR - THIS IS THE NEW PART
-function setNowPlaying(title, sub){
-  document.getElementById('nowPlayingTitle').innerText = title || "Hit TV Live";
-  document.getElementById('nowPlayingSub').innerText = sub || "";
-  document.getElementById('liveTitle').innerText = title || "Hit TV Live";
-}
+function setNowPlaying(title, sub){ document.getElementById('nowPlayingTitle').innerText = title || "Hit TV Live"; document.getElementById('nowPlayingSub').innerText = sub || ""; document.getElementById('liveTitle').innerText = title || "Hit TV Live"; }
 async function submitArtist(){ let name=document.getElementById('aName').value.trim(), phone=document.getElementById('aPhone').value.trim(), genre=document.getElementById('aGenre').value.trim(), link=document.getElementById('aLink').value.trim(), bio=document.getElementById('aBio').value.trim(); if(!name||!phone||!link){ alert("Please fill Artist Name, Phone and YouTube Link"); return; } let msg=document.getElementById('submitMsg'); msg.innerText="Sending to Hit TV..."; try{ await fetch(DB+"/submissions.json",{method:"POST",body:JSON.stringify({name,phone,genre,link,bio,time:new Date().toLocaleString()})}); msg.innerText="✅ Sent! Hit TV will check your song."; document.getElementById('aName').value="";document.getElementById('aPhone').value="";document.getElementById('aGenre').value="";document.getElementById('aLink').value="";document.getElementById('aBio').value=""; }catch(e){ msg.innerText="Failed, try again."; } }
 async function loadNotifs(){ let el=document.getElementById('notifList'); try{ let r=await fetch(DB+"/notifications.json"); let d=await r.json(); if(!d){ el.innerHTML="<div class='card'><b>Welcome to Hit TV App</b><p>Stay tuned for live shows.</p></div>"; return; } let html=""; Object.keys(d).reverse().forEach(k=>{ let n=d[k]; html+=`<div class="card"><b>${n.title||''}</b><p>${n.msg||''}</p><p style="font-size:11px">${n.time||''}</p></div>`; }); el.innerHTML=html; }catch(e){} }
 async function loadAudioStreams(){ let list=document.getElementById('audioList'); try{ let r=await fetch(DB+"/audioStreams.json"); let data=await r.json(); if(!data){ list.innerHTML='<p style="color:#aaa">No audio streams yet.</p>'; return; } let html=""; Object.keys(data).forEach(key=>{ let s=data[key]; html+=`<div class="audio-card"><b>${s.title||''}</b><p>Artist: ${s.artist||''} • ${s.genre||''}</p><div class="audio-actions"><button class="a-btn a-play" id="play-${key}" onclick="playStream('${key}','${s.url||''}','${(s.title||'').replace(/'/g,"")}')">▶ Play</button><button class="a-btn" style="background:#333" onclick="pauseStream()">❚❚ Pause</button><button class="a-btn a-dl" onclick="downloadStream('${s.url||''}','${(s.title||'song').replace(/'/g,"")}')">⬇ Download</button></div></div>`; }); list.innerHTML=html; }catch(e){} }
@@ -57,63 +119,5 @@ function downloadVideo(){ if(!currentLiveUrl){alert("No video yet");return;} if(
 function downloadAudio(){ if(!currentLiveUrl){alert("No audio yet");return;} if(currentId){window.open("https://www.youtube.com/watch?v="+currentId,"_blank");alert("For YouTube, tap Share > Download inside YouTube.");return;} let a=document.createElement('a');a.href=currentLiveUrl;a.download=currentTitle.replace(/[^a-z0-9]/gi,'_')+".mp3";a.target="_blank";document.body.appendChild(a);a.click();a.remove(); }
 function enableSound(){ if(soundOn) return; soundOn=true; let vid=document.getElementById('liveVideo'), yt=document.getElementById('ytFrame'), hint=document.getElementById('soundHint'); if(hint) hint.style.display="none"; vid.muted=false; vid.play().catch(()=>{}); if(yt.style.display==="block"&&currentId){ yt.src="https://www.youtube.com/embed/"+currentId+"?autoplay=1&mute=0&playsinline=1&controls=0&rel=0&modestbranding=1"; } }
 document.addEventListener('click',enableSound); document.addEventListener('touchstart',enableSound);
-// LINE UP AUTO PLAY - LIKE TV
-function playLineupItem(){
-  if(!lineup.length){ setNowPlaying("Hit TV Live","Line Up empty - Admin will add songs"); show("", "Hit TV Live", "Line Up empty"); return; }
-  if(lineupIndex>=lineup.length) lineupIndex=0;
-  let item=lineup[lineupIndex];
-  // THIS CHANGES TITLE AUTOMATICALLY
-  setNowPlaying(item.title, "📺 LINE UP - Song " + (lineupIndex+1) + " / " + lineup.length + " - Playing now");
-  document.getElementById('lineupInfo').innerText="📺 LINE UP - Now Playing "+(lineupIndex+1)+" / "+lineup.length;
-  showLineupVideo(item.url, item.title, "Line Up - Auto Play");
-  clearTimeout(lineupTimer);
-  lineupTimer=setTimeout(()=>{ lineupIndex++; playLineupItem(); }, 240000);
-}
-function showLineupVideo(url,title,desc){
-  currentLiveUrl=url; currentTitle=title;
-  document.getElementById('liveDesc').innerText=desc;
-  let vid=document.getElementById('liveVideo'), yt=document.getElementById('ytFrame'), no=document.getElementById('noVideo'), hint=document.getElementById('soundHint');
-  let id=getId(url);
-  if(id){ currentId=id; vid.style.display="none"; vid.pause(); no.style.display="none"; yt.style.display="block"; if(!soundOn) hint.style.display="block"; yt.src="https://www.youtube.com/embed/"+id+"?autoplay=1&mute=0&playsinline=1&controls=0&rel=0&modestbranding=1"; }
-  else if(url){ yt.style.display="none"; yt.src=""; no.style.display="none"; vid.style.display="block"; if(vid.src!==url) vid.src=url; vid.muted=false; vid.play().catch(()=>{}); vid.onended=()=>{ lineupIndex++; playLineupItem(); }; }
-}
-function show(url,title,desc){
-  document.getElementById('lineupInfo').innerText="";
-  clearTimeout(lineupTimer);
-  currentLiveUrl=url||""; currentTitle=title||"Hit TV Live";
-  // ALSO UPDATE NOW PLAYING FOR SINGLE LIVE
-  setNowPlaying(currentTitle, desc || "Live from Kampala - Hit TV");
-  document.getElementById('liveDesc').innerText=desc||"Live from Kampala - Hit TV";
-  let vid=document.getElementById('liveVideo'), yt=document.getElementById('ytFrame'), no=document.getElementById('noVideo'), hint=document.getElementById('soundHint');
-  let id=getId(url);
-  if(id){ currentId=id; vid.style.display="none"; vid.pause(); no.style.display="none"; yt.style.display="block"; if(!soundOn) hint.style.display="block"; let ns="https://www.youtube.com/embed/"+id+"?autoplay=1&mute=0&playsinline=1&controls=0&rel=0&modestbranding=1"; if(yt.src!==ns) yt.src=ns; }
-  else if(url){ yt.style.display="none"; yt.src=""; no.style.display="none"; vid.style.display="block"; if(!soundOn) hint.style.display="block"; if(vid.src!==url) vid.src=url; vid.muted=false; vid.play().catch(()=>{vid.muted=true;vid.play().catch(()=>{});}); }
-  else { yt.style.display="none"; yt.src=""; vid.style.display="none"; hint.style.display="none"; no.style.display="flex"; setNowPlaying("Hit TV Live","Waiting for Admin to go Live or Start Line Up"); }
-}
-function sendComment(){ let inp=document.getElementById('commentInput'); if(!inp.value.trim()) return; let d=document.createElement('div'); d.className='msg'; d.innerHTML='<b>You:</b> '+inp.value; document.getElementById('commentList').appendChild(d); inp.value=""; }
-async function load(){
-  try{
-    let r=await fetch(DB+"/config.json"); let data=await r.json();
-    if(data && data.mode==="lineup"){
-      lineupMode=true;
-      let lr=await fetch(DB+"/lineup.json"); let ld=await lr.json();
-      let newList=ld?Object.keys(ld).map(k=>ld[k]):[];
-      if(JSON.stringify(newList)!==JSON.stringify(lineup)){
-        lineup=newList;
-        if(lineupIndex>=lineup.length) lineupIndex=0;
-        playLineupItem();
-      }
-    } else if(data && data.mode==="live"){
-      lineupMode=false; clearTimeout(lineupTimer);
-      show(data.liveUrl, data.liveTitle, data.liveDesc);
-    } else {
-      if(!lineupMode) show("", "Hit TV Live", "Waiting for Admin");
-    }
-  }catch(e){}
-  loadAudioStreams();
-}
-load(); setInterval(load, 8000);
-setInterval(()=>{ if(lineupMode) load(); }, 15000);
-</script>
-</body>
-                                                                  </html>
+function playLineupItem(){ if(!lineup.length){ setNowPlaying("Hit TV Live","Line Up empty"); show("", "Hit TV Live", "Line Up empty"); return; } if(lineupIndex>=lineup.length) lineupIndex=0; let item=lineup[lineupIndex]; setNowPlaying(item.title, "📺 LINE UP - Song " + (lineupIndex+1) + " / " + lineup.length + " - Playing now"); document.getElementById('lineupInfo').innerText="📺 LINE UP - Now Playing "+(lineupIndex+1)+" / "+lineup.length; showLineupVideo(item.url, item.title, "Line Up - Auto Play"); clearTimeout(lineupTimer); lineupTimer=setTimeout(()=>{ lineupIndex++; playLineupItem(); }, 240000); }
+function showLineupVi
