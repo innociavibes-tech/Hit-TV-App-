@@ -23,7 +23,7 @@ body{background:#0a1628;color:#fff;padding-bottom:80px}
 .video-box video{width:100%;height:100%;display:block}
 .video-box iframe{width:100%;height:100%;border:0;display:none}
 #noVideo{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;background:#000}
-.nowplaying{background:#0077ff;background:linear-gradient(90deg,#0077ff,#00aaff);margin:10px 14px 0;padding:14px;border-radius:10px}
+.nowplaying{background:linear-gradient(90deg,#0077ff,#00aaff);margin:10px 14px 0;padding:14px;border-radius:10px}
 .nowplaying small{font-size:10px;letter-spacing:1px;color:#fff;font-weight:700}
 .nowplaying b{font-size:18px;display:block;margin-top:3px;color:#fff;font-weight:900}
 .download-row{display:flex;gap:10px;padding:12px 14px 0}
@@ -38,7 +38,6 @@ body{background:#0a1628;color:#fff;padding-bottom:80px}
 .submit-btn{width:100%;background:#00cc66;border:0;color:#fff;padding:13px;border-radius:10px;font-weight:900}
 .audio-card{background:#12233f;padding:14px;border-radius:12px;margin-bottom:10px}
 .audio-actions{display:flex;gap:8px;margin-top:10px}.a-btn{flex:1;border:0;padding:9px;border-radius:8px;font-weight:900;color:#fff}.a-play{background:#00aaff}.a-dl{background:#ff2222}
-/* TABS DESIGN - FIXED - ICON + WORD + BLUE LINE */
 .bottom{position:fixed;bottom:0;left:0;right:0;background:#0a1628;display:flex;border-top:1px solid #1e3a5f;z-index:100;padding:8px 0 6px}
 .tab-btn{flex:1;background:none;border:0;color:#888;font-size:10px;font-weight:700;padding:4px 0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
 .tab-btn.active{color:#fff}
@@ -69,16 +68,16 @@ body{background:#0a1628;color:#fff;padding-bottom:80px}
   <div style="padding:12px 14px"><b id="liveTitle">Hit TV Live</b><p id="liveDesc" style="font-size:12px;color:#aaa">Live from Kampala - Hit TV</p></div>
   <div class="nowplaying"><small>● NOW PLAYING</small><b id="nowPlayingTitle">Hit TV Live</b><small id="nowPlayingSub">Waiting for Admin...</small></div>
   <div class="download-row"><button class="download-btn" style="background:#ff2222" onclick="downloadVideo()">⬇ Download Video</button><button class="download-btn" style="background:#00aaff" onclick="downloadAudio()">⬇ Download Audio</button></div>
+  <p id="dlMsg" style="font-size:12px;color:#00ff88;padding:6px 14px 0"></p>
   <div class="comments"><b>Live Comments</b><div id="commentList"><div class="msg"><b>Hit TV:</b> Welcome</div></div><div class="row"><input id="commentInput" placeholder="Write a comment..."><button onclick="sendComment()">Send</button></div></div>
 </div>
 
 <div id="page-notif" class="page"><h3>Notifications</h3><br><div id="notifList"><div class="card"><b>Welcome to Hit TV App</b><p>Stay tuned for live shows.</p></div></div></div>
 
-<div id="page-audio" class="page"><h3>Audio Streams</h3><p style="font-size:12px;color:#aaa;margin:6px 0 12px">Songs uploaded by Hit TV Admin</p><div id="audioList">Loading...</div><audio id="audioPlayer"></audio><iframe id="ytAudio" style="display:none"></iframe><p id="nowPlaying" style="font-size:12px;color:#00aaff;margin-top:6px"></p></div>
+<div id="page-audio" class="page"><h3>Audio Streams</h3><p style="font-size:12px;color:#aaa;margin:6px 0 12px">Songs uploaded by Hit TV Admin - Tap Play, Download goes to your Files</p><div id="audioList">Loading...</div><audio id="audioPlayer"></audio><iframe id="ytAudio" style="display:none"></iframe><p id="nowPlaying" style="font-size:12px;color:#00aaff;margin-top:6px"></p></div>
 
 <div id="page-artist" class="page"><h3>Artist Console</h3><p style="font-size:12px;color:#aaa;margin:6px 0 12px">Submit your song to Hit TV Admin.</p><div class="card"><b>Submit Your Song</b><br><br><input id="aName" class="field" placeholder="Artist Name *"><input id="aPhone" class="field" placeholder="Phone / WhatsApp *"><input id="aGenre" class="field" placeholder="Genre"><input id="aLink" class="field" placeholder="YouTube Link *"><textarea id="aBio" class="field" placeholder="About You..."></textarea><button class="submit-btn" onclick="submitArtist()">SUBMIT TO HIT TV</button><p id="submitMsg" style="font-size:12px;color:#00ff88;margin-top:8px"></p></div></div>
 
-<!-- BOTTOM TABS - NOW WITH ICONS + DESIGN -->
 <div class="bottom">
   <button class="tab-btn active" id="tab-home" onclick="showPage('home')">
     <svg class="tab-icon" viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5V21H3z"/><path d="M9 21v-6h6v6"/></svg>
@@ -122,6 +121,7 @@ function createAccount(){
   try{ fetch(DB+"/users.json",{method:"POST",body:JSON.stringify({username:name, registered:new Date().toLocaleString(), lastSeen:new Date().toLocaleString(), lastSeenTime:Date.now()})}); }catch(e){}
 }
 function getId(u){ if(!u) return ""; var m=u.match(/(?:youtu\.be\/|v=|shorts\/|embed\/|live\/)([A-Za-z0-9_-]{11})/); return m?m[1]:""; }
+function isYouTube(u){ return u && (u.includes('youtube.com') || u.includes('youtu.be')); }
 function showPage(n){
   document.getElementById('page-home').style.display = (n==='home' ? 'block' : 'none');
   document.getElementById('page-notif').style.display = (n==='notif' ? 'block' : 'none');
@@ -151,15 +151,35 @@ function loadNotifs(){
 function loadAudioStreams(){
   fetch(DB+"/audioStreams.json").then(function(r){return r.json()}).then(function(data){
     if(!data){ document.getElementById('audioList').innerHTML='<p style="color:#aaa">No audio streams yet.</p>'; return; }
-    var html=""; Object.keys(data).forEach(function(key){ var s=data[key]; html+='<div class="audio-card"><b>'+s.title+'</b><p style="font-size:12px;color:#aaa">Artist: '+s.artist+'</p><div class="audio-actions"><button class="a-btn a-play" onclick="playStream(\''+key+'\',\''+s.url+'\',\''+s.title+'\')">▶ Play</button><button class="a-btn" style="background:#333" onclick="pauseStream()">Pause</button><button class="a-btn a-dl" onclick="downloadStream(\''+s.url+'\')">Download</button></div></div>'; });
+    var html=""; Object.keys(data).forEach(function(key){ var s=data[key]; var isYT=isYouTube(s.url); var dlLabel=isYT?'YouTube - No Download':'⬇ Download To Files'; html+='<div class="audio-card"><b>'+s.title+'</b><p style="font-size:12px;color:#aaa">Artist: '+s.artist+'</p><div class="audio-actions"><button class="a-btn a-play" onclick="playStream(\''+key+'\',\''+s.url+'\',\''+s.title+'\')">▶ Play</button><button class="a-btn" style="background:#333" onclick="pauseStream()">Pause</button><button class="a-btn a-dl" onclick="downloadStream(\''+s.url+'\',\''+s.title+'\')">'+dlLabel+'</button></div></div>'; });
     document.getElementById('audioList').innerHTML=html;
   }).catch(function(){});
 }
 function pauseStream(){ document.getElementById('audioPlayer').pause(); document.getElementById('ytAudio').src=""; document.getElementById('nowPlaying').innerText="Paused"; }
 function playStream(key,url,title){ var p=document.getElementById('audioPlayer'), yt=document.getElementById('ytAudio'); var id=getId(url); if(id){ yt.src="https://www.youtube.com/embed/"+id+"?autoplay=1"; } else { p.src=url; p.play(); } document.getElementById('nowPlaying').innerText="Now Playing: "+title; }
-function downloadStream(url){ var id=getId(url); if(id){ window.open("https://www.youtube.com/watch?v="+id,"_blank"); return; } var a=document.createElement('a'); a.href=url; a.target="_blank"; a.click(); }
-function downloadVideo(){ if(!currentLiveUrl){alert("No video yet");return;} if(currentId){window.open("https://www.youtube.com/watch?v="+currentId,"_blank");return;} var a=document.createElement('a'); a.href=currentLiveUrl; a.target="_blank"; a.click(); }
-function downloadAudio(){ if(!currentLiveUrl){alert("No audio yet");return;} if(currentId){window.open("https://www.youtube.com/watch?v="+currentId,"_blank");return;} var a=document.createElement('a'); a.href=currentLiveUrl; a.target="_blank"; a.click(); }
+
+// *** REAL DOWNLOAD TO FILES - THIS IS THE FIX ***
+async function downloadFile(url, filename, ext){
+  if(!url){ alert("No file yet"); return; }
+  if(isYouTube(url)){ alert("This song is from YouTube. YouTube does NOT allow downloading to Files.\n\nAsk HIT TV Admin to upload this song as Direct MP4 / MP3 link (Google Drive / Cloudinary). Then download will go to your Files."); return; }
+  var msg=document.getElementById('dlMsg'); if(msg) msg.innerText="Downloading... Please wait, check your Files / Downloads...";
+  try{
+    // Try real download to Files
+    var res=await fetch(url);
+    var blob=await res.blob();
+    var blobUrl=URL.createObjectURL(blob);
+    var a=document.createElement('a'); a.href=blobUrl; a.download=filename.replace(/[^a-z0-9]/gi,'_')+"."+ext; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(blobUrl); }, 5000);
+    if(msg) msg.innerText="✅ Downloaded! Check your Files / Downloads / Gallery";
+  }catch(e){
+    // Fallback - open direct link, phone will download it
+    var a2=document.createElement('a'); a2.href=url; a2.download=filename.replace(/[^a-z0-9]/gi,'_')+"."+ext; a2.target="_blank"; document.body.appendChild(a2); a2.click(); a2.remove();
+    if(msg) msg.innerText="✅ Download started! Check your Files / Downloads";
+  }
+}
+function downloadStream(url,title){ downloadFile(url, title||"song", "mp3"); }
+function downloadVideo(){ downloadFile(currentLiveUrl, currentTitle||"video", "mp4"); }
+function downloadAudio(){ downloadFile(currentLiveUrl, currentTitle||"audio", "mp3"); }
 function show(url,title,desc){
   currentLiveUrl=url||""; currentTitle=title||"Hit TV Live";
   setNowPlaying(currentTitle, desc||"");
@@ -194,4 +214,4 @@ function playLineup(){
 load(); setInterval(load, 10000);
 </script>
 </body>
-  </html>
+                                                                                                                                        </html>
