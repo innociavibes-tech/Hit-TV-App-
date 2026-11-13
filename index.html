@@ -7,7 +7,9 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
 body{background:#0a1628;color:#fff;padding-bottom:80px}
-#splash{position:fixed;top:0;left:0;right:0;bottom:0;background:#0a1628;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center}
+/* SPLASH - CAN NEVER GET STUCK - CSS HIDES IT AFTER 3 SEC EVEN IF JS FAILS */
+#splash{position:fixed;top:0;left:0;right:0;bottom:0;background:#0a1628;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;animation:splashHide 0.5s ease 3s forwards}
+@keyframes splashHide{to{opacity:0;visibility:hidden;display:none}}
 .splash-logo{font-weight:900;font-size:48px}.splash-logo span{color:#00aaff}
 .splash-loader{width:40px;height:40px;border:4px solid #1e3a5f;border-top:4px solid #00aaff;border-radius:50%;animation:spin 0.9s linear infinite;margin-top:20px}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -23,7 +25,6 @@ body{background:#0a1628;color:#fff;padding-bottom:80px}
 .video-box video{width:100%;height:100%;display:block}
 .video-box iframe{width:100%;height:100%;border:0;display:none}
 #noVideo{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;background:#000;z-index:2}
-/* BLOCK SEEK - NO FORWARD / BACK - TV LIKE */
 #videoBlock{position:absolute;top:0;left:0;right:0;bottom:0;z-index:3;background:transparent}
 #soundBtn{position:absolute;bottom:10px;right:10px;z-index:5;background:#ff2222;color:#fff;border:0;padding:10px 14px;border-radius:20px;font-weight:900;font-size:13px;display:none;box-shadow:0 4px 12px rgba(0,0,0,.6)}
 #tapSoundBanner{position:absolute;top:0;left:0;right:0;bottom:0;z-index:4;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.65);text-align:center}
@@ -71,11 +72,9 @@ body{background:#0a1628;color:#fff;padding-bottom:80px}
   <div class="badge">● LIVE</div>
   <div class="video-wrap"><div class="video-box">
     <div id="noVideo">HIT TV LIVE<br><small style="font-size:12px;color:#888">Waiting for Admin...</small></div>
-    <video id="liveVideo" autoplay playsinline controlsList="nodownload noplaybackrate" disablePictureInPicture></video>
-    <div id="ytPlayer" style="width:100%;height:100%;display:none"></div>
-    <!-- BLOCK - STOPS SEEK / FORWARD / BACK - TV LIKE -->
+    <video id="liveVideo" autoplay playsinline></video>
+    <iframe id="ytFrame" allow="autoplay; encrypted-media" allowfullscreen></iframe>
     <div id="videoBlock"></div>
-    <!-- TAP FOR SOUND - BIG BUTTON -->
     <div id="tapSoundBanner"><div style="font-size:40px">🔊</div><b style="font-size:18px">TAP FOR SOUND</b><p style="font-size:12px;color:#ccc;margin-top:4px">Tap to hear HIT TV</p><button onclick="enableSound()">🔊 TAP FOR SOUND</button></div>
     <button id="soundBtn" onclick="enableSound()">🔊 TAP FOR SOUND</button>
   </div></div>
@@ -99,16 +98,18 @@ body{background:#0a1628;color:#fff;padding-bottom:80px}
   <button class="tab-btn" id="tab-artist" onclick="showPage('artist')"><svg class="tab-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/></svg>ARTIST<div class="tab-line"></div></button>
 </div>
 
-<script src="https://www.youtube.com/iframe_api"></script>
 <script>
+// SPLASH BACKUP - HIDE AFTER 2 SEC NO MATTER WHAT, EVEN IF OTHER CODE FAILS
+setTimeout(function(){ try{ var s=document.getElementById('splash'); if(s) s.style.display='none'; checkLogin(); }catch(e){} }, 2000);
 var DB="https://hit-tv-app-40fb9-default-rtdb.firebaseio.com";
-var currentId="", currentLiveUrl="", currentTitle="Hit TV Live", lineup=[], lineupIndex=0, lineupTimer=null, myUser="", ytPlayer=null, ytReady=false, pendingVideoId=null, soundOn=false, isLineupMode=false;
-setTimeout(function(){ document.getElementById('splash').style.display='none'; checkLogin(); }, 2000);
+var currentId="", currentLiveUrl="", currentTitle="Hit TV Live", lineup=[], lineupIndex=0, myUser="", soundOn=false, isLineupMode=false;
 function checkLogin(){
-  var saved=null; try{ saved=localStorage.getItem('hittv_username'); }catch(e){}
-  if(saved){ myUser=saved; document.getElementById('myUsername').innerText="@"+myUser; }
-  else if(localStorage.getItem('hittv_guest')==='1'){ myUser="Guest"; document.getElementById('myUsername').innerText="@Guest"; }
-  else{ document.getElementById('signup').classList.add('show'); }
+  try{
+    var saved=localStorage.getItem('hittv_username');
+    if(saved){ myUser=saved; document.getElementById('myUsername').innerText="@"+myUser; }
+    else if(localStorage.getItem('hittv_guest')==='1'){ myUser="Guest"; document.getElementById('myUsername').innerText="@Guest"; }
+    else{ document.getElementById('signup').classList.add('show'); }
+  }catch(e){}
 }
 function skipSignup(){ try{ localStorage.setItem('hittv_guest','1'); }catch(e){} myUser="Guest"; document.getElementById('myUsername').innerText="@Guest"; document.getElementById('signup').classList.remove('show'); }
 function createAccount(){
@@ -135,70 +136,47 @@ function showPage(n){
   if(n==='notif') loadNotifs();
 }
 function setNowPlaying(t,s){ document.getElementById('nowPlayingTitle').innerText=t; document.getElementById('nowPlayingSub').innerText=s||""; document.getElementById('liveTitle').innerText=t; }
-
-// *** YOUTUBE API - FIX 1 + 2 + 3 ***
-function onYouTubeIframeAPIReady(){
-  ytReady=true;
-  ytPlayer=new YT.Player('ytPlayer',{
-    height:'100%', width:'100%',
-    playerVars:{autoplay:1, controls:0, disablekb:1, modestbranding:1, rel:0, playsinline:1, fs:0},
-    events:{onReady:onPlayerReady, onStateChange:onPlayerStateChange}
-  });
-}
-function onPlayerReady(e){ if(pendingVideoId){ e.target.loadVideoById(pendingVideoId); } }
-function onPlayerStateChange(e){
-  // YT.PlayerState.ENDED = 0 - Song finished -> Play NEXT song - THIS FIXES AUTOPLAY
-  if(e.data===0 && isLineupMode){
-    lineupIndex++;
-    playLineup();
-  }
-  // If video is playing and muted, show TAP FOR SOUND
-  if(e.data===1 && ytPlayer && ytPlayer.isMuted && ytPlayer.isMuted()){
-    showTapSound();
-  }
-}
-function showTapSound(){
-  if(soundOn) return;
-  document.getElementById('tapSoundBanner').style.display='flex';
-  document.getElementById('soundBtn').style.display='block';
-}
+function showTapSound(){ if(soundOn) return; document.getElementById('tapSoundBanner').style.display='flex'; document.getElementById('soundBtn').style.display='block'; }
 function enableSound(){
   soundOn=true;
   document.getElementById('tapSoundBanner').style.display='none';
   document.getElementById('soundBtn').style.display='none';
-  if(ytPlayer){ try{ ytPlayer.unMute(); ytPlayer.setVolume(100); ytPlayer.playVideo(); }catch(e){} }
   var v=document.getElementById('liveVideo'); if(v){ v.muted=false; v.volume=1; v.play(); }
+  // Reload YouTube with sound ON - browser allows sound after user taps button
+  if(currentId){
+    var yt=document.getElementById('ytFrame');
+    yt.src="https://www.youtube.com/embed/"+currentId+"?autoplay=1&mute=0&controls=0&rel=0&playsinline=1"+(isLineupMode && lineup.length>1 ? "&playlist="+lineup.map(function(x){return getId(x.url)}).filter(function(x){return x && x!==currentId}).join(",")+"&loop=1" : "");
+  }
 }
-function show(url,title,desc){
+function show(url,title,desc,playlistIds){
   currentLiveUrl=url||""; currentTitle=title||"Hit TV Live";
   setNowPlaying(currentTitle, desc||"");
   document.getElementById('liveDesc').innerText=desc||"Live from Kampala";
-  var vid=document.getElementById('liveVideo'), no=document.getElementById('noVideo'), ytDiv=document.getElementById('ytPlayer');
+  var vid=document.getElementById('liveVideo'), no=document.getElementById('noVideo'), yt=document.getElementById('ytFrame');
   var id=getId(url);
   if(id){
-    currentId=id;
-    vid.style.display="none"; no.style.display="none"; ytDiv.style.display="block";
+    currentId=id; vid.style.display="none"; no.style.display="none"; yt.style.display="block";
     document.getElementById('videoBlock').style.display="block";
-    // If user already pressed TAP FOR SOUND before, keep sound ON, else start muted and show banner
-    if(ytReady && ytPlayer){
-      if(soundOn){ ytPlayer.unMute(); } else { ytPlayer.mute(); showTapSound(); }
-      ytPlayer.loadVideoById(id);
-    } else { pendingVideoId=id; showTapSound(); }
+    // controls=0 = NO SEEK, NO FORWARD, NO BACK - TV LIKE. playlist = AUTOPLAY NEXT SONG
+    var extra="";
+    if(playlistIds && playlistIds.length>0){ extra="&playlist="+playlistIds.join(",")+"&loop=1"; }
+    var muteVal = soundOn ? "0" : "1";
+    yt.src="https://www.youtube.com/embed/"+id+"?autoplay=1&mute="+muteVal+"&controls=0&rel=0&playsinline=1"+extra;
+    if(!soundOn) showTapSound();
   }
-  else if(url){
-    ytDiv.style.display="none"; no.style.display="none"; vid.style.display="block";
-    document.getElementById('videoBlock').style.display="none";
-    vid.src=url; vid.muted=!soundOn; vid.play(); if(!soundOn) showTapSound();
-  }
-  else{ ytDiv.style.display="none"; vid.style.display="none"; no.style.display="flex"; document.getElementById('videoBlock').style.display="none"; }
+  else if(url){ yt.style.display="none"; no.style.display="none"; vid.style.display="block"; document.getElementById('videoBlock').style.display="none"; vid.src=url; vid.muted=!soundOn; vid.play(); if(!soundOn) showTapSound(); }
+  else{ yt.style.display="none"; vid.style.display="none"; no.style.display="flex"; document.getElementById('videoBlock').style.display="none"; }
 }
 function playLineup(){
   if(!lineup.length) return;
-  if(lineupIndex>=lineup.length) lineupIndex=0; // Loop forever - after last song, go back to song 1
+  if(lineupIndex>=lineup.length) lineupIndex=0;
   var item=lineup[lineupIndex];
   isLineupMode=true;
+  // All IDs for playlist - YouTube will auto-play next by itself
+  var allIds=lineup.map(function(x){return getId(x.url)}).filter(function(x){return x});
+  var restIds=allIds.filter(function(x){return x!==getId(item.url)});
   setNowPlaying(item.title, "LINE UP - Song "+(lineupIndex+1)+" / "+lineup.length+" - TV Auto Play");
-  show(item.url, item.title, "Line Up - Auto Play");
+  show(item.url, item.title, "Line Up - Auto Play", restIds);
 }
 function submitArtist(){
   var name=document.getElementById('aName').value.trim(), phone=document.getElementById('aPhone').value.trim(), link=document.getElementById('aLink').value.trim();
@@ -238,7 +216,9 @@ async function downloadFile(url, filename, ext){
 function downloadStream(url,title){ downloadFile(url, title||"song", "mp3"); }
 function downloadVideo(){ downloadFile(currentLiveUrl, currentTitle||"video", "mp4"); }
 function downloadAudio(){ downloadFile(currentLiveUrl, currentTitle||"audio", "mp3"); }
-
-// *** COMMENTS - FIX 4 - GUEST CAN COMMENT TOO ***
 function sendComment(){
-  var inp=document.getElem
+  var inp=document.getElementById('commentInput'); var text=inp.value.trim(); if(!text) return;
+  var name = myUser || "Guest";
+  var d=document.createElement('div'); d.className='msg'; d.innerHTML='<b>@'+name+':</b> '+text; document.getElementById('commentList').appendChild(d);
+  inp.value="";
+  fetch(DB+"/com
