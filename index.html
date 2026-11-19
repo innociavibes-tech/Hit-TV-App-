@@ -1,103 +1,54 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Hit TV</title>
-<style>
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#fff;color:#111;padding-bottom:80px}
-body.dark{background:#0a1931;color:#fff}
-#offlineBanner{display:none;background:#ffcc00;color:#000;text-align:center;padding:8px;font-weight:700;font-size:13px;position:fixed;top:0;left:0;right:0;z-index:999}
-body.offline #offlineBanner{display:block}
-body.offline{padding-top:32px}
-#topBar{background:#0a1931;color:#fff;padding:12px 15px;display:flex;justify-content:space-between;align-items:center}
-#topBar h1{margin:0;font-size:26px}
-#liveDot{color:#ff3b30;margin:2px 0 0;font-size:12px;font-weight:700}
-#settingsBtn{background:#fff;color:#0a1931;border:0;padding:9px 14px;border-radius:20px;font-weight:700}
-#settingsBox{background:#f2f2f7;margin:10px;padding:15px;border-radius:16px;color:#000}
-body.dark #settingsBox{background:#162a4a;color:#fff}
-#settingsBox button,#settingsBox label{display:block;width:100%;margin:8px 0;padding:13px;border:0;border-radius:12px;background:#0a1931;color:#fff;font-weight:600;text-align:left}
-.hidden{display:none!important}
-.tab{display:none;padding:12px}
-.tab.active{display:block}
-/* HOME ALWAYS DARK BLUE - NEVER CHANGE */
-#tab-home{background:#0a1931!important;color:#fff!important;min-height:100vh;border-radius:0 0 20px 20px}
-#tab-home h2,#tab-home h3,#tab-home p,#tab-home li{color:#fff!important}
-#videoWrap{position:relative}
-#videoBox{position:relative;width:100%;aspect-ratio:4/3;background:#000;border-radius:16px;overflow:hidden}
-#mp4Player,#ytPlayer{width:100%;height:100%;border:0;display:none}
-#noVideo{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:22px;text-align:center}
-#soundBtn{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.7);color:#fff;border:0;padding:10px 14px;border-radius:20px;z-index:10}
-#rotateBtn{position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.7);color:#fff;border:0;width:38px;height:38px;border-radius:50%;z-index:10;font-size:18px}
-#nowPlaying{margin:14px 0}
-#nowPlaying span{background:#ff3b30;color:#fff;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:800}
-#nowPlaying h2{margin:8px 0 0;font-size:22px}
-#downloadRow{display:flex;gap:10px}
-#downloadRow a{flex:1}
-#downloadRow button{width:100%;padding:14px;border:0;border-radius:12px;background:#fff;color:#0a1931;font-weight:700}
-#upNext,#comments{margin-top:18px}
-input{width:100%;padding:14px;margin:7px 0;border:1px solid #ddd;border-radius:12px;background:#fff;color:#000;font-size:16px}
-#sendComment,#submitArtist,#startWatching{width:100%;padding:15px;border:0;border-radius:12px;background:#fff;color:#0a1931;font-weight:700}
-#tab-notif #sendComment,#tab-artist #submitArtist{background:#0a1931;color:#fff}
-.comment{background:#162a4a;padding:10px;border-radius:12px;margin:8px 0;color:#fff}
-body:not(.dark) .comment{background:#f2f2f7;color:#111}
-#tab-home .comment{background:#162a4a!important;color:#fff!important}
-.audioItem{background:#f2f2f7;padding:12px;border-radius:12px;margin:10px 0;display:flex;justify-content:space-between;align-items:center;color:#111}
-body.dark .audioItem{background:#162a4a;color:#fff}
-#welcomeBox{position:fixed;inset:0;background:#0a1931;color:#fff;z-index:1000;display:flex;flex-direction:column;justify-content:center;padding:25px;text-align:center}
-#bottomNav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#0a1931;padding:8px;gap:5px;z-index:100}
-#bottomNav button{flex:1;background:transparent;color:#aaa;border:0;padding:12px 4px;font-weight:700;font-size:12px;border-radius:10px}
-#bottomNav button.active{background:#fff;color:#0a1931}
-</style>
-</head>
-<body>
-<div id="offlineBanner">⚠ You're offline - Hit TV will reconnect automatically</div>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Hit TV</title>
+<style>*{box-sizing:border-box}body{margin:0;font-family:Arial;background:#fff;color:#111;padding-bottom:80px}body.dark{background:#0a1931;color:#fff}#offlineBanner{display:none;background:#ffcc00;color:#000;text-align:center;padding:8px;font-weight:700;position:fixed;top:0;left:0;right:0;z-index:999}body.offline #offlineBanner{display:block}body.offline{padding-top:32px}#topBar{background:#0a1931;color:#fff;padding:12px 15px;display:flex;justify-content:space-between;align-items:center}#topBar h1{margin:0}#liveDot{color:#ff3b30;margin:0;font-size:12px;font-weight:700}#settingsBtn{background:#fff;color:#0a1931;border:0;padding:9px 14px;border-radius:20px;font-weight:700}#settingsBox{background:#f2f2f7;margin:10px;padding:15px;border-radius:16px;color:#000}.hidden{display:none!important}.tab{display:none;padding:12px}.tab.active{display:block}#tab-home{background:#0a1931!important;color:#fff!important;min-height:100vh}#tab-home h2,#tab-home h3,#tab-home p,#tab-home li{color:#fff!important}#videoWrap{position:relative}#videoBox{position:relative;width:100%;aspect-ratio:4/3;background:#000;border-radius:16px;overflow:hidden}#mp4Player,#ytPlayer{width:100%;height:100%;border:0;display:none}#noVideo{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:22px;text-align:center}#ticker{position:absolute;bottom:0;left:0;right:0;background:rgba(255,204,0,.95);color:#000;padding:6px;font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden}#soundBtn{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.7);color:#fff;border:0;padding:10px 14px;border-radius:20px;z-index:10}#rotateBtn{position:absolute;bottom:30px;right:10px;background:rgba(0,0,0,.7);color:#fff;border:0;width:38px;height:38px;border-radius:50%;z-index:10}#downloadRow{display:flex;gap:10px}#downloadRow a{flex:1}#downloadRow button{width:100%;padding:14px;border:0;border-radius:12px;background:#fff;color:#0a1931;font-weight:700}input{width:100%;padding:14px;margin:7px 0;border:1px solid #ddd;border-radius:12px;background:#fff;color:#000}button{cursor:pointer}#sendComment,#submitArtist,#startWatching{width:100%;padding:15px;border:0;border-radius:12px;background:#fff;color:#0a1931;font-weight:700}.comment{background:#162a4a;padding:10px;border-radius:12px;margin:8px 0;color:#fff}.audioItem{background:#f2f2f7;padding:12px;border-radius:12px;margin:10px 0;color:#111}body.dark .audioItem{background:#162a4a;color:#fff}#welcomeBox{position:fixed;inset:0;background:#0a1931;color:#fff;z-index:1000;display:flex;flex-direction:column;justify-content:center;padding:25px;text-align:center}#bottomNav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#0a1931;padding:8px;gap:5px;z-index:100}#bottomNav button{flex:1;background:transparent;color:#aaa;border:0;padding:12px 4px;font-weight:700;font-size:12px;border-radius:10px}#bottomNav button.active{background:#fff;color:#0a1931}</style></head>
+<body><div id="offlineBanner">⚠ You're offline - Hit TV will reconnect automatically</div>
 <header id="topBar"><div><h1>Hit TV</h1><p id="liveDot">● LIVE</p></div><button id="settingsBtn">Settings</button></header>
 <div id="settingsBox" class="hidden"><h3>Settings</h3><label>White / Black Mode <input type="checkbox" id="themeToggle"></label><button id="feedbackBtn">Send Us Feedback</button><button id="updateBtn">Check Updates</button><button id="tvBtn">Connect on TV</button><button id="closeSettings">Close</button></div>
 <main>
-<section id="tab-home" class="tab active">
-<div id="videoWrap"><div id="videoBox"><video id="mp4Player" playsinline></video><div id="ytPlayer"></div><div id="noVideo">Hit TV Live<br><small>Waiting for Admin to go Live</small></div></div><button id="soundBtn">🔊 Sound</button><button id="rotateBtn">⛶</button></div>
-<div id="nowPlaying"><span>NOW PLAYING</span><h2 id="nowTitle">No video playing</h2><p id="nowArtist">Hit TV</p></div>
-<div id="downloadRow"><a id="dlVideo" href="#" download><button>Download Video</button></a><a id="dlAudio" href="#" download><button>Download Audio</button></a></div>
-<div id="upNext"><h3>Up Next</h3><ul id="queueList"></ul></div>
-<div id="comments"><h3>Comments</h3><div id="commentList"></div><input id="commentName" placeholder="Your name"><input id="commentText" placeholder="Say something..."><button id="sendComment">Send Comment</button></div>
-</section>
-<section id="tab-notif" class="tab"><h2>Inbox</h2><div id="notifList"><p>No messages yet</p></div></section>
+<section id="tab-home" class="tab active"><div id="videoWrap"><div id="videoBox"><video id="mp4Player" playsinline></video><div id="ytPlayer"></div><div id="noVideo">Hit TV Live<br><small>Waiting for Admin</small></div><div id="ticker">Welcome to Hit TV</div></div><button id="soundBtn">🔊 Sound</button><button id="rotateBtn">⛶</button></div><div id="nowPlaying"><span>NOW PLAYING</span><h2 id="nowTitle">No video playing</h2><p id="nowArtist">Hit TV</p><p id="nowDesc"></p></div><div id="downloadRow"><a id="dlVideo" href="#" download><button>Download Video</button></a><a id="dlAudio" href="#" download><button>Download Audio</button></a></div><div><h3>Up Next - Line-Up</h3><ul id="queueList"></ul></div><div><h3>Comments</h3><div id="commentList"></div><input id="commentName" placeholder="Your name"><input id="commentText" placeholder="Say something..."><button id="sendComment">Send Comment</button></div></section>
+<section id="tab-notif" class="tab"><h2>Inbox</h2><div id="notifList"></div></section>
 <section id="tab-audio" class="tab"><h2>Audio Streams</h2><div id="audioList"></div></section>
-<section id="tab-artist" class="tab"><h2>Artist Console</h2><input id="artistName" placeholder="Artist / Stage Name"><input id="artistPhone" placeholder="Phone / WhatsApp"><input id="artistTitle" placeholder="Song Title"><input id="artistLink" placeholder="YouTube Link or MP3 Link"><button id="submitArtist">Submit To Admin For Approval</button><p id="artistMsg"></p></section>
+<section id="tab-artist" class="tab"><h2>Artist Console</h2><input id="artistName" placeholder="Artist Name"><input id="artistPhone" placeholder="Phone / WhatsApp"><input id="artistTitle" placeholder="Song Title"><input id="artistLink" placeholder="YouTube / MP3 Link"><button id="submitArtist">Submit To Admin</button><p id="artistMsg"></p></section>
 </main>
-<div id="welcomeBox"><h1>Hit TV</h1><p>Enter your name to start watching</p><input id="userName" placeholder="Your Name e.g Inno"><button id="startWatching">START WATCHING</button></div>
+<div id="welcomeBox"><h1>Hit TV</h1><p>Enter your name to start watching</p><input id="userName" placeholder="Your Name"><button id="startWatching">START WATCHING</button></div>
 <nav id="bottomNav"><button data-tab="home" class="active">Home</button><button data-tab="notif">Notifications</button><button data-tab="audio">Audio Streams</button><button data-tab="artist">Artist Console</button></nav>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
-let queue=JSON.parse(localStorage.getItem('hitTV_queue')||'[]');
-let currentIndex=0; let isMuted=true;
-const video=document.getElementById('mp4Player'); const ytBox=document.getElementById('ytPlayer');
-if(queue.length===0){ queue=[{title:"Hit TV Intro - Welcome",artist:"Hit TV",url:"https://www.w3schools.com/html/mov_bbb.mp4",type:"mp4",audio:"https://www.w3schools.com/html/mov_bbb.mp4"},{title:"Sample Song 2",artist:"Hit Artist",url:"https://www.youtube.com/watch?v=dQw4w9WgXcQ",type:"youtube",audio:""}]; localStorage.setItem('hitTV_queue',JSON.stringify(queue)); }
-function getYTId(url){let m=url.match(/(?:v=|youtu\.be\/|shorts\/)([A-Za-z0-9_-]{11})/); return m?m[1]:null;}
-function playCurrent(){let item=queue[currentIndex]; if(!item) return; document.getElementById('nowTitle').textContent=item.title; document.getElementById('nowArtist').textContent=item.artist||"Hit TV"; document.getElementById('dlVideo').href=item.url; document.getElementById('dlAudio').href=item.audio||item.url; document.getElementById('noVideo').style.display='none'; if(item.type==='youtube'){video.style.display='none'; video.pause(); ytBox.style.display='block'; let id=getYTId(item.url); ytBox.innerHTML=`<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${id}?autoplay=1&mute=1&controls=0&disablekb=1&rel=0" allow="autoplay; encrypted-media" frameborder="0"></iframe>`;} else {ytBox.style.display='none'; ytBox.innerHTML=''; video.style.display='block'; video.src=item.url; video.controls=false; video.muted=true; video.play().catch(()=>{});} renderQueue();}
-video.onended=()=>{currentIndex++; if(currentIndex>=queue.length) currentIndex=0; playCurrent();};
-function renderQueue(){document.getElementById('queueList').innerHTML=queue.map((q,i)=>`<li style="padding:10px;background:#162a4a;margin:5px 0;border-radius:10px;list-style:none">${i===currentIndex?'▶ ':''}${q.title} - ${q.artist}</li>`).join('');}
-document.getElementById('soundBtn').onclick=()=>{isMuted=!isMuted; if(video.style.display==='block'){video.muted=isMuted;} else {let item=queue[currentIndex]; let id=getYTId(item.url); ytBox.innerHTML=`<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${id}?autoplay=1&mute=${isMuted?1:0}&controls=0&rel=0" allow="autoplay" frameborder="0"></iframe>`;} document.getElementById('soundBtn').textContent=isMuted?'🔊 Sound':'🔇 Mute';};
+const firebaseConfig={apiKey:"AIzaSyAGzXyxBHmvBcWwoyWo4Xjn_1pGRyQjO_M",authDomain:"hittvapp1-29f3a.firebaseapp.com",projectId:"hittvapp1-29f3a",storageBucket:"hittvapp1-29f3a.firebasestorage.app",messagingSenderId:"567256630691",appId:"1:567256630691:web:5e6e22fe24416eb3270616",measurementId:"G-1JKDEMDGWT"};
+firebase.initializeApp(firebaseConfig); const db=firebase.firestore();
+let queue=[], programs=[], currentIndex=0, isMuted=true, liveStatus='play', playedUrls=[];
+const video=document.getElementById('mp4Player'), ytBox=document.getElementById('ytPlayer');
+function getYTId(u){let m=u.match(/(?:v=|youtu\.be\/|shorts\/)([A-Za-z0-9_-]{11})/); return m?m[1]:null;}
+function playItem(item){if(!item) return; document.getElementById('nowTitle').textContent=item.title; document.getElementById('nowArtist').textContent=item.artist||'Hit TV'; document.getElementById('dlVideo').href=item.url; document.getElementById('dlAudio').href=item.audio||item.url; document.getElementById('noVideo').style.display='none'; if(item.type==='youtube'){video.style.display='none'; video.pause(); ytBox.style.display='block'; let id=getYTId(item.url); ytBox.innerHTML=`<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${id}?autoplay=1&mute=1&controls=0&rel=0" allow="autoplay" frameborder="0"></iframe>`;} else {ytBox.style.display='none'; ytBox.innerHTML=''; video.style.display='block'; video.src=item.url; video.controls=false; video.muted=true; video.play().catch(()=>{});} renderQueue();}
+function renderQueue(){document.getElementById('queueList').innerHTML=queue.map((q,i)=>`<li style="padding:10px;background:#162a4a;margin:5px 0;border-radius:10px;list-style:none">${i===currentIndex?'▶ ':''}${q.title}</li>`).join('');}
+function checkProgram(){let now=new Date().toLocaleTimeString('en-GB',{timeZone:'Africa/Kampala',hour:'2-digit',minute:'2-digit'}); let p=programs.find(x=>x.time===now); if(p){playItem(p); return true;} return false;}
+function nextSong(){if(checkProgram()) return; currentIndex++; if(currentIndex>=queue.length) currentIndex=0; if(queue[currentIndex]) playItem(queue[currentIndex]);}
+video.onended=nextSong;
+// Firebase Live Listeners - Auto Play
+db.collection('hitTV_queue').orderBy('created').onSnapshot(s=>{queue=s.docs.map(d=>d.data()); if(queue.length && !video.src && ytBox.innerHTML==='') playItem(queue[0]); renderQueue();});
+db.collection('hitTV_programs').onSnapshot(s=>{programs=s.docs.map(d=>d.data());});
+db.collection('hitTV').doc('live').onSnapshot(d=>{if(!d.exists) return; let v=d.data(); liveStatus=v.status||'play'; if(v.ticker) document.getElementById('ticker').textContent=v.ticker; if(v.title) document.getElementById('nowTitle').textContent=v.title; if(v.artist) document.getElementById('nowArtist').textContent=v.artist; if(v.desc) document.getElementById('nowDesc').textContent=v.desc; if(v.camera){document.getElementById('noVideo').style.display='flex'; document.getElementById('noVideo').innerHTML='LIVE CAMERA<br><small>Admin is Live on Camera</small>'; video.style.display='none'; ytBox.style.display='none';} if(liveStatus==='stop'){video.pause(); ytBox.innerHTML=''; document.getElementById('noVideo').style.display='flex'; document.getElementById('noVideo').innerHTML='Hit TV Paused<br><small>Admin Stopped Live</small>';} });
+db.collection('hitTV_audio').onSnapshot(s=>{document.getElementById('audioList').innerHTML=s.docs.map(d=>{let a=d.data(); return `<div class="audioItem"><div><b>${a.title}</b><br><small>${a.artist}</small><br><audio controls src="${a.url}" style="width:200px"></audio></div><a href="${a.url}" download><button style="padding:10px;background:#0a1931;color:#fff;border:0;border-radius:10px">Download</button></a></div>`}).join('')||'<p>No audio yet</p>';});
+db.collection('hitTV_notif').orderBy('time','desc').onSnapshot(s=>{document.getElementById('notifList').innerHTML=s.docs.map(d=>{let n=d.data(); return `<div class="comment"><b>${n.title}</b><br>${n.text}</div>`}).join('')||'<p>No messages</p>';});
+db.collection('hitTV_comments').orderBy('time','desc').limit(20).onSnapshot(s=>{document.getElementById('commentList').innerHTML=s.docs.map(d=>{let c=d.data(); return `<div class="comment"><b>${c.name}</b><br>${c.text}</div>`}).join('')||'<p>No comments</p>';});
+// Check Program Every 20 sec - EAT
+setInterval(()=>{if(checkProgram()){/* program started */}},20000);
+// Tabs, Sound, Rotate, Settings, Welcome - Same as before
+document.querySelectorAll('#bottomNav button').forEach(b=>{b.onclick=()=>{document.querySelectorAll('#bottomNav button').forEach(x=>x.classList.remove('active')); b.classList.add('active'); document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.getElementById('tab-'+b.dataset.tab).classList.add('active');};});
+document.getElementById('soundBtn').onclick=()=>{isMuted=!isMuted; if(video.style.display==='block') video.muted=isMuted; else {let item=queue[currentIndex]; if(item&&item.type==='youtube'){let id=getYTId(item.url); ytBox.innerHTML=`<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${id}?autoplay=1&mute=${isMuted?1:0}&controls=0&rel=0" allow="autoplay" frameborder="0"></iframe>`;}} document.getElementById('soundBtn').textContent=isMuted?'🔊 Sound':'🔇 Mute';};
 document.getElementById('rotateBtn').onclick=()=>{let box=document.getElementById('videoBox'); if(document.fullscreenElement) document.exitFullscreen(); else box.requestFullscreen().catch(()=>{});};
-document.querySelectorAll('#bottomNav button').forEach(btn=>{btn.onclick=()=>{document.querySelectorAll('#bottomNav button').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.getElementById('tab-'+btn.dataset.tab).classList.add('active'); if(btn.dataset.tab==='notif') loadNotif(); if(btn.dataset.tab==='audio') loadAudio();};});
 document.getElementById('settingsBtn').onclick=()=>document.getElementById('settingsBox').classList.toggle('hidden');
 document.getElementById('closeSettings').onclick=()=>document.getElementById('settingsBox').classList.add('hidden');
-document.getElementById('themeToggle').onchange=(e)=>{document.body.classList.toggle('dark',e.target.checked); localStorage.setItem('hitTV_theme',e.target.checked?'dark':'light');};
+document.getElementById('themeToggle').onchange=e=>{document.body.classList.toggle('dark',e.target.checked); localStorage.setItem('hitTV_theme',e.target.checked?'dark':'light');};
 if(localStorage.getItem('hitTV_theme')==='dark'){document.body.classList.add('dark'); document.getElementById('themeToggle').checked=true;}
-document.getElementById('feedbackBtn').onclick=()=>{let f=prompt('Send Feedback to Admin:'); if(f){let arr=JSON.parse(localStorage.getItem('hitTV_feedback')||'[]'); arr.push({name:localStorage.getItem('hitTV_name')||'Viewer',text:f,time:Date.now()}); localStorage.setItem('hitTV_feedback',JSON.stringify(arr)); alert('Feedback sent to Admin. Thank you!');}};
-document.getElementById('updateBtn').onclick=()=>alert('Hit TV is up to date. Version 1.0');
-document.getElementById('tvBtn').onclick=()=>alert('To Connect on TV: Open hittvapp on your TV browser');
-document.getElementById('sendComment').onclick=()=>{let n=document.getElementById('commentName').value||localStorage.getItem('hitTV_name')||'Viewer'; let t=document.getElementById('commentText').value; if(!t) return alert('Write comment first'); let arr=JSON.parse(localStorage.getItem('hitTV_comments')||'[]'); arr.push({name:n,text:t,time:Date.now()}); localStorage.setItem('hitTV_comments',JSON.stringify(arr)); document.getElementById('commentText').value=''; loadComments();};
-function loadComments(){let arr=JSON.parse(localStorage.getItem('hitTV_comments')||'[]'); document.getElementById('commentList').innerHTML=arr.slice(-20).reverse().map(c=>`<div class="comment"><b>${c.name}</b><br>${c.text}</div>`).join('')||'<p>No comments yet</p>';}
-function loadNotif(){let arr=JSON.parse(localStorage.getItem('hitTV_notif')||'[]'); document.getElementById('notifList').innerHTML=arr.length?arr.reverse().map(n=>`<div class="comment"><b>${n.title}</b><br>${n.text}</div>`).join(''):'<p>No messages yet</p>';}
-function loadAudio(){let arr=JSON.parse(localStorage.getItem('hitTV_audio')||'[]'); if(arr.length===0) arr=[{title:"Demo Audio - Hit Song",artist:"Hit TV",url:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"}]; document.getElementById('audioList').innerHTML=arr.map(a=>`<div class="audioItem"><div><b>${a.title}</b><br><small>${a.artist}</small><br><audio controls src="${a.url}" style="width:200px;margin-top:5px"></audio></div><a href="${a.url}" download><button style="padding:10px;border:0;border-radius:10px;background:#0a1931;color:#fff">Download</button></a></div>`).join('');}
-document.getElementById('submitArtist').onclick=()=>{let data={name:document.getElementById('artistName').value,phone:document.getElementById('artistPhone').value,title:document.getElementById('artistTitle').value,link:document.getElementById('artistLink').value,time:Date.now()}; if(!data.name||!data.title) return alert('Fill Name and Song Title'); let arr=JSON.parse(localStorage.getItem('hitTV_artist')||'[]'); arr.push(data); localStorage.setItem('hitTV_artist',JSON.stringify(arr)); document.getElementById('artistMsg').textContent='Submitted! Admin will review.';};
-document.getElementById('startWatching').onclick=()=>{let n=document.getElementById('userName').value.trim(); if(!n) return alert('Enter your name first'); localStorage.setItem('hitTV_name',n); document.getElementById('welcomeBox').classList.add('hidden'); document.getElementById('commentName').value=n; playCurrent();};
-if(localStorage.getItem('hitTV_name')){document.getElementById('welcomeBox').classList.add('hidden');}
-function updateOnline(){document.body.classList.toggle('offline',!navigator.onLine); if(navigator.onLine){loadNotif(); loadAudio(); loadComments();}}
-window.addEventListener('online',updateOnline); window.addEventListener('offline',updateOnline); updateOnline();
-loadComments(); loadAudio(); renderQueue();
-</script>
-</body>
-  </html>
+document.getElementById('feedbackBtn').onclick=async()=>{let f=prompt('Feedback:'); if(f) await db.collection('hitTV_feedback').add({name:localStorage.getItem('hitTV_name')||'Viewer',text:f,time:Date.now()}); alert('Sent');};
+document.getElementById('updateBtn').onclick=()=>alert('Hit TV v1.0 Up to date');
+document.getElementById('tvBtn').onclick=()=>alert('Open Hit TV on TV browser');
+document.getElementById('sendComment').onclick=async()=>{let n=document.getElementById('commentName').value||localStorage.getItem('hitTV_name')||'Viewer'; let t=document.getElementById('commentText').value; if(!t) return alert('Write comment'); await db.collection('hitTV_comments').add({name:n,text:t,time:Date.now()}); document.getElementById('commentText').value='';};
+document.getElementById('submitArtist').onclick=async()=>{let d={name:document.getElementById('artistName').value,phone:document.getElementById('artistPhone').value,title:document.getElementById('artistTitle').value,link:document.getElementById('artistLink').value,time:Date.now()}; if(!d.name||!d.title) return alert('Fill Name + Title'); await db.collection('hitTV_artist').add(d); document.getElementById('artistMsg').textContent='Submitted! Admin will review.';};
+document.getElementById('startWatching').onclick=async()=>{let n=document.getElementById('userName').value.trim(); if(!n) return alert('Enter name'); localStorage.setItem('hitTV_name',n); document.getElementById('welcomeBox').classList.add('hidden'); document.getElementById('commentName').value=n; await db.collection('hitTV_users').doc(n).set({name:n,lastSeen:Date.now()},{merge:true}); if(queue[0]) playItem(queue[0]);};
+// Online / Last Seen - Update every 30 sec
+setInterval(async()=>{let n=localStorage.getItem('hitTV_name'); if(n) await db.collection('hitTV_users').doc(n).set({name:n,lastSeen:Date.now()},{merge:true});},30000);
+if(localStorage.getItem('hitTV_name')){document.getElementById('welcomeBox').classList.add('hidden'); document.getElementById('commentName').value=localStorage.getItem('hitTV_name');}
+function updateOnline(){document.body.classList.toggle('offline',!navigator.onLine);} window.addEventListener('online',updateOnline); window.addEventListener('offline',updateOnline); updateOnline();
+</script></body></html>
