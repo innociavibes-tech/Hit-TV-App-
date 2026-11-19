@@ -38,3 +38,47 @@ button{cursor:pointer}
 #bottomNav{position:fixed;bottom:0;left:0;right:0;display:flex;background:#0a1931;padding:8px;gap:5px;z-index:100}
 #bottomNav button{flex:1;background:transparent;color:#aaa;border:0;padding:12px 4px;font-weight:700;font-size:12px;border-radius:10px}
 #bottomNav button.active{background:#fff;color:#0a1931}
+/* HIT TV - HOME TAB ALWAYS DARK BLUE - NEVER CHANGE */
+#tab-home {
+  background: #0a1931 !important;
+  color: #ffffff !important;
+  border-radius: 0 0 20px 20px;
+  min-height: 100vh;
+}
+
+#tab-home h2, 
+#tab-home h3, 
+#tab-home p, 
+#tab-home li, 
+#tab-home span {
+  color: #ffffff !important;
+}
+
+#tab-home #nowPlaying span {
+  background: #ff3b30 !important;
+  color: #fff !important;
+}
+
+#tab-home #upNext li,
+#tab-home .comment {
+  background: #162a4a !important;
+  color: #ffffff !important;
+  border: 1px solid #2a4a7a !important;
+}
+
+#tab-home input {
+  background: #ffffff !important;
+  color: #0a1931 !important;
+  border: 1px solid #fff !important;
+}
+
+#tab-home #downloadRow button,
+#tab-home #sendComment {
+  background: #ffffff !important;
+  color: #0a1931 !important;
+}
+
+#tab-home #queueList li {
+  background: #162a4a !important;
+  color: #fff !important;
+}
