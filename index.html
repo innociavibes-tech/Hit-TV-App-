@@ -22,8 +22,7 @@
 <script>
 window.onerror=function(m){ let e=document.getElementById('errorBox'); if(e){ e.style.display='block'; e.textContent='JS ERROR: '+m; } };
 try{ localStorage.removeItem('hitTV_cache_queue'); localStorage.removeItem('hitTV_last_video'); }catch(e){}
-// ===== NEW CONFIG - hit-tv-app-40fb9 - PASTE YOUR 3 KEYS FROM FIREBASE CONSOLE =====
-const firebaseConfig={apiKey:"PASTE_YOUR_APIKEY_HERE",authDomain:"hit-tv-app-40fb9.firebaseapp.com",projectId:"hit-tv-app-40fb9",storageBucket:"hit-tv-app-40fb9.firebasestorage.app",messagingSenderId:"PASTE_YOUR_SENDER_ID_HERE",appId:"PASTE_YOUR_APP_ID_HERE"};
+const firebaseConfig={apiKey:"AIzaSyBT9bXCGb6WgriW1wodo6IeRKOUQ5jdCes",authDomain:"hit-tv-app-40fb9.firebaseapp.com",projectId:"hit-tv-app-40fb9",storageBucket:"hit-tv-app-40fb9.firebasestorage.app",messagingSenderId:"740828744097",appId:"1:740828744097:web:49104b3522d02de64ce3e0"};
 try{ firebase.initializeApp(firebaseConfig); }catch(e){ document.getElementById('errorBox').style.display='block'; document.getElementById('errorBox').textContent='Firebase Init Failed: '+e.message; }
 const db=firebase.firestore();
 let queue=[], programs=[], currentIndex=0, isMuted=true, liveStatus='play', lastForce=0, liveStartedAt=0, isPlaying=false, firebaseLoaded=false;
@@ -33,7 +32,6 @@ function showError(t){ let e=document.getElementById('errorBox'); e.style.displa
 const video=document.getElementById('mp4Player'), ytBox=document.getElementById('ytPlayer'), bigPlay=document.getElementById('bigPlay');
 function getYTId(u){ if(!u) return null; u=u.trim(); let m=u.match(/(?:v=|vi=|youtu\.be\/|shorts\/|live\/|embed\/)([A-Za-z0-9_-]{11})/); if(m) return m[1]; if(u.length===11) return u; return null; }
 function getJoinOffset(){ if(!liveStartedAt) return 0; let off=Math.floor((Date.now()-liveStartedAt)/1000); if(off<0) off=0; if(off>10000) off=0; return off; }
-// ===== FIX 1+2: PLAY LIVE IMMEDIATELY AFTER FIREBASE - NO REFRESH, NO EARLY EMPTY PLAYER =====
 function playLiveNow(){
   if(!liveLoaded || !liveData) return;
   if(!navigator.onLine) return;
@@ -54,7 +52,6 @@ function resumeOnReturn(){
   playLiveNow();
   if(!isPlaying) tryPlay();
 }
-// ===== VIEWER FIX: STOP ALL WHEN ADMIN DELETES / STOPS - DO NOT KEEP PLAYING OLD SONG =====
 function stopAll(){
   isPlaying=false; ytEnded=false;
   try{ video.pause(); video.removeAttribute('src'); video.load(); }catch(e){}
@@ -67,7 +64,6 @@ function stopAll(){
   document.getElementById('nowDesc').textContent='';
   renderQueue();
 }
-// ===== ONLY ADDED: YOUTUBE FINISH -> NEXT SONG IMMEDIATELY =====
 function onYouTubeIframeAPIReady(){ ytReady=true; }
 function watchYTPlayer(){
   try{
@@ -89,7 +85,6 @@ renderQueue();
 db.collection('hitTV_queue').onSnapshot(s=>{ firebaseLoaded=true; queue=s.docs.map(d=>d.data()); renderQueue(); if(!queue.length){ stopAll(); return; } playLiveNow(); tryPlay(); },e=>{ firebaseLoaded=true; renderQueue(); showError('FIREBASE ERROR: '+e.message); });
 db.collection('hitTV_programs').onSnapshot(s=>{programs=s.docs.map(d=>d.data());});
 db.collection('hitTV').doc('live').onSnapshot(d=>{if(!d.exists) return; let v=d.data(); liveData=v; liveLoaded=true; liveStatus=v.status||'play'; if(v.ticker){ let t=document.getElementById('tickerText'); if(t.textContent!==v.ticker){ t.textContent=v.ticker; t.style.animation='none'; void t.offsetWidth; t.style.animation=''; } }
-  // FIX: Admin deleted everything / stopped / cleared live - STOP immediately, do NOT keep playing Paul Boy
   if(!v.camera && (v.status==='stop' || v.loopOn===false || !v.url || v.title==='No video yet')){ stopAll(); return; }
   if(v.title) document.getElementById('nowTitle').textContent=v.title; if(v.artist) document.getElementById('nowArtist').textContent=v.artist; if(v.desc) document.getElementById('nowDesc').textContent=v.desc; if(v.startedAt) liveStartedAt=v.startedAt; if(v.url && v.force && v.force!==lastForce){lastForce=v.force; if(!v.startedAt) liveStartedAt=Date.now(); if(v.status!=='stop' && !v.camera){ let idx=queue.findIndex(q=>(q.url||q.link)===v.url); if(idx>=0) currentIndex=idx; isPlaying=false; playItem({title:v.title,artist:v.artist,url:v.url,type:v.type,audio:v.audio}, true); } } else { playLiveNow(); } if(v.camera){video.style.display='none'; ytBox.style.display='none';} });
 db.collection('hitTV_audio').onSnapshot(s=>{document.getElementById('audioList').innerHTML=s.docs.map(d=>{let a=d.data(); return `<div class="audioItem"><div><b>${a.title}</b><br><small>${a.artist}</small><br><audio controls src="${a.url}" style="width:200px"></audio></div><a href="${a.url}" download><button style="padding:10px;background:#0a1931;color:#fff;border:0;border-radius:10px">Download</button></a></div>`}).join('')||'<p>No audio yet</p>';});
@@ -110,4 +105,4 @@ document.getElementById('updateBtn').onclick=()=>alert('Hit TV v1.0 Up to date')
 document.getElementById('tvBtn').onclick=()=>alert('Open Hit TV on TV browser');
 document.getElementById('sendComment').onclick=async()=>{let n=document.getElementById('commentName').value||localStorage.getItem('hitTV_name')||'Viewer'; let t=document.getElementById('commentText').value; if(!t) return alert('Write comment'); await db.collection('hitTV_comments').add({name:n,text:t,time:Date.now()}); document.getElementById('commentText').value='';};
 document.getElementById('submitArtist').onclick=async()=>{let d={name:document.getElementById('artistName').value,phone:document.getElementById('artistPhone').value,title:document.getElementById('artistTitle').value,link:document.getElementById('artistLink').value,time:Date.now()}; if(!d.name||!d.title) return alert('Fill Name + Title'); await db.collection('hitTV_artist').add(d); document.getElementById('artistMsg').textContent='Submitted! Admin will review.';};
-do
+document.getElementById('startWatching').onclick=()=>{ let n=document.getElementById('userName').value.trim(); if(!n) return alert('Enter name'); localStorage.setItem('hitTV_name',n); document.getElementById('welcomeBox').classList.add('hidden'); document.getElementById('commentName').value=n; try{ db.collection('hitTV_users').doc(n).set({name:n,lastSeen:Date.now()},{merge:true}); }catch(e){} isPlaying=false; playLiveNow(); tryPl
