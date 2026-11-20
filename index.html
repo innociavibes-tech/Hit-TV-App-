@@ -25,12 +25,25 @@ const firebaseConfig={apiKey:"PASTE_YOUR_APIKEY_HERE",authDomain:"hit-tv-app-40f
 try{ firebase.initializeApp(firebaseConfig); }catch(e){ document.getElementById('errorBox').style.display='block'; document.getElementById('errorBox').textContent='Firebase Init Failed: '+e.message; }
 const db=firebase.firestore();
 let queue=[], programs=[], currentIndex=0, isMuted=true, liveStatus='play', lastForce=0, liveStartedAt=0, isPlaying=false, firebaseLoaded=false;
-let ytPlayerObj=null, ytReady=false, ytEnded=false, liveDoc=null, liveLoaded=false;
+let ytPlayerObj=null, ytReady=false, ytEnded=false;
 function showError(t){ let e=document.getElementById('errorBox'); e.style.display='block'; e.textContent=t; }
 const video=document.getElementById('mp4Player'), ytBox=document.getElementById('ytPlayer'), bigPlay=document.getElementById('bigPlay');
 function getYTId(u){ if(!u) return null; u=u.trim(); let m=u.match(/(?:v=|vi=|youtu\.be\/|shorts\/|live\/|embed\/)([A-Za-z0-9_-]{11})/); if(m) return m[1]; if(u.length===11) return u; return null; }
 function getJoinOffset(){ if(!liveStartedAt) return 0; let off=Math.floor((Date.now()-liveStartedAt)/1000); if(off<0) off=0; if(off>10000) off=0; return off; }
-// ===== FIX 1: YOUTUBE FINISH -> NEXT SONG IMMEDIATELY =====
+// ===== VIEWER FIX: STOP ALL WHEN ADMIN DELETES / STOPS - DO NOT KEEP PLAYING OLD SONG =====
+function stopAll(){
+  isPlaying=false; ytEnded=false;
+  try{ video.pause(); video.removeAttribute('src'); video.load(); }catch(e){}
+  try{ if(ytPlayerObj && ytPlayerObj.destroy) ytPlayerObj.destroy(); }catch(e){}
+  ytPlayerObj=null; ytBox.innerHTML=''; ytBox.style.display='none'; video.style.display='none';
+  bigPlay.style.display='none';
+  document.getElementById('videoPlaceholder').style.display='flex';
+  document.getElementById('nowTitle').textContent='No video yet';
+  document.getElementById('nowArtist').textContent='Hit TV';
+  document.getElementById('nowDesc').textContent='';
+  renderQueue();
+}
+// ===== ONLY ADDED: YOUTUBE FINISH -> NEXT SONG IMMEDIATELY =====
 function onYouTubeIframeAPIReady(){ ytReady=true; }
 function watchYTPlayer(){
   try{
@@ -41,34 +54,20 @@ function watchYTPlayer(){
     ytPlayerObj=new YT.Player('ytFrame',{events:{onStateChange:function(e){ if(e.data===YT.PlayerState.ENDED && !ytEnded){ ytEnded=true; nextSong(); } }}});
   }catch(e){}
 }
-// ===== FIX 2: REFRESH JOINS WHERE ADMIN IS, NOT RESTART =====
-function joinLiveTV(){
-  if(isPlaying) return;
-  if(!firebaseLoaded || !liveLoaded) return;
-  if(liveDoc && liveDoc.url){
-    // Use Admin's exact song + exact startedAt
-    let idx=-1;
-    // Admin sends currentId, use it if queue has it - but queue in Viewer has no id, so match by url
-    idx=queue.findIndex(q=>(q.url||q.link)===liveDoc.url);
-    if(idx>=0) currentIndex=idx;
-    if(liveDoc.startedAt) liveStartedAt=liveDoc.startedAt;
-    playItem({title:liveDoc.title,artist:liveDoc.artist,url:liveDoc.url,type:liveDoc.type,audio:liveDoc.audio}, true);
-    return;
-  }
-  if(!queue.length) return;
-  currentIndex=0; playItem(queue[0], true);
-}
 function playItem(item, joinLive){ if(!item) return; let url=item.url||item.link||''; if(!url){ showError('This video has no URL - Admin must re-add it'); return; } isPlaying=true; bigPlay.style.display='none'; document.getElementById('videoPlaceholder').style.display='none'; document.getElementById('nowTitle').textContent=item.title||'Hit TV'; document.getElementById('nowArtist').textContent=item.artist||'Hit TV'; document.getElementById('dlVideo').href=url; document.getElementById('dlAudio').href=item.audio||url; let offset = joinLive ? getJoinOffset() : 0; let isYT=(item.type==='youtube'||url.includes('youtube')||url.includes('youtu.be')); if(isYT){ video.style.display='none'; video.pause(); ytBox.style.display='block'; let id=getYTId(url); if(!id){ showError('Bad YouTube link: '+url); return; } ytBox.innerHTML=`<iframe id="ytFrame" width="100%" height="100%" src="https://www.youtube.com/embed/${id}?autoplay=1&mute=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&playsinline=1&enablejsapi=1&start=${offset}" allow="autoplay; encrypted-media" frameborder="0"></iframe>`; setTimeout(watchYTPlayer,800); } else { ytBox.style.display='none'; ytBox.innerHTML=''; video.style.display='block'; video.src=url; video.controls=false; video.muted=true; video.play().then(()=>{ if(offset>0){ try{ video.currentTime=offset; }catch(e){} } }).catch(()=>{ bigPlay.style.display='flex'; }); video.onloadedmetadata=()=>{ if(offset>0){ try{ video.currentTime=offset; }catch(e){} } }; } renderQueue(); }
-function tryPlay(){ joinLiveTV(); }
+function tryPlay(){ if(!firebaseLoaded) return; if(!queue.length) return; if(isPlaying) return; currentIndex=0; playItem(queue[0], true); }
 function renderQueue(){ let list=document.getElementById('queueList'); if(!firebaseLoaded){ list.innerHTML='<li style="list-style:none;padding:12px;background:#162a4a;border-radius:10px">Loading...</li>'; return; } if(!queue.length){ list.innerHTML='<li style="list-style:none;padding:12px;background:#162a4a;border-radius:10px;color:#fff">No video coming next</li>'; return; } let nextIndex=currentIndex+1; if(nextIndex>=queue.length) nextIndex=0; let q=queue[nextIndex]; if(!q){ list.innerHTML='<li style="list-style:none">No video coming next</li>'; return; } list.innerHTML=`<li style="padding:12px;background:#162a4a;margin:5px 0;border-radius:10px;list-style:none"><b>Up Next: ${q.title||''}</b><br><small>${q.artist||''}</small></li>`; }
 function checkProgram(){let now=new Date().toLocaleTimeString('en-GB',{timeZone:'Africa/Kampala',hour:'2-digit',minute:'2-digit'}); let p=programs.find(x=>x.time===now); if(p){playItem(p,false); return true;} return false;}
-function nextSong(){if(checkProgram()) return; currentIndex++; if(currentIndex>=queue.length) currentIndex=0; if(queue[currentIndex]) playItem(queue[currentIndex],false);}
+function nextSong(){ if(!queue.length){ stopAll(); return; } if(checkProgram()) return; currentIndex++; if(currentIndex>=queue.length) currentIndex=0; if(queue[currentIndex]) playItem(queue[currentIndex],false);}
 video.onended=nextSong;
 bigPlay.onclick=()=>{ bigPlay.style.display='none'; isPlaying=false; if(queue[currentIndex]) playItem(queue[currentIndex], true); if(video.style.display==='block') video.play().catch(()=>{}); };
 renderQueue();
-db.collection('hitTV_queue').onSnapshot(s=>{ firebaseLoaded=true; queue=s.docs.map(d=>d.data()); renderQueue(); tryPlay(); },e=>{ firebaseLoaded=true; renderQueue(); showError('FIREBASE ERROR: '+e.message); });
+db.collection('hitTV_queue').onSnapshot(s=>{ firebaseLoaded=true; queue=s.docs.map(d=>d.data()); renderQueue(); if(!queue.length){ stopAll(); return; } tryPlay(); },e=>{ firebaseLoaded=true; renderQueue(); showError('FIREBASE ERROR: '+e.message); });
 db.collection('hitTV_programs').onSnapshot(s=>{programs=s.docs.map(d=>d.data());});
-db.collection('hitTV').doc('live').onSnapshot(d=>{if(!d.exists) return; let v=d.data(); liveDoc=v; liveLoaded=true; liveStatus=v.status||'play'; if(v.ticker){ let t=document.getElementById('tickerText'); if(t.textContent!==v.ticker){ t.textContent=v.ticker; t.style.animation='none'; void t.offsetWidth; t.style.animation=''; } } if(v.title) document.getElementById('nowTitle').textContent=v.title; if(v.artist) document.getElementById('nowArtist').textContent=v.artist; if(v.desc) document.getElementById('nowDesc').textContent=v.desc; if(v.startedAt) liveStartedAt=v.startedAt; if(v.url && v.force && v.force!==lastForce){lastForce=v.force; if(!v.startedAt) liveStartedAt=Date.now(); if(v.status!=='stop' && !v.camera){ let idx=queue.findIndex(q=>(q.url||q.link)===v.url); if(idx>=0) currentIndex=idx; isPlaying=false; playItem({title:v.title,artist:v.artist,url:v.url,type:v.type,audio:v.audio}, true); } } else if(!isPlaying){ tryPlay(); } if(v.camera){video.style.display='none'; ytBox.style.display='none';} if(liveStatus==='stop'){video.pause(); ytBox.innerHTML='';} });
+db.collection('hitTV').doc('live').onSnapshot(d=>{if(!d.exists) return; let v=d.data(); liveStatus=v.status||'play'; if(v.ticker){ let t=document.getElementById('tickerText'); if(t.textContent!==v.ticker){ t.textContent=v.ticker; t.style.animation='none'; void t.offsetWidth; t.style.animation=''; } }
+  // FIX: Admin deleted everything / stopped / cleared live - STOP immediately, do NOT keep playing Paul Boy
+  if(!v.camera && (v.status==='stop' || v.loopOn===false || !v.url || v.title==='No video yet')){ stopAll(); return; }
+  if(v.title) document.getElementById('nowTitle').textContent=v.title; if(v.artist) document.getElementById('nowArtist').textContent=v.artist; if(v.desc) document.getElementById('nowDesc').textContent=v.desc; if(v.startedAt) liveStartedAt=v.startedAt; if(v.url && v.force && v.force!==lastForce){lastForce=v.force; if(!v.startedAt) liveStartedAt=Date.now(); if(v.status!=='stop' && !v.camera){ let idx=queue.findIndex(q=>(q.url||q.link)===v.url); if(idx>=0) currentIndex=idx; isPlaying=false; playItem({title:v.title,artist:v.artist,url:v.url,type:v.type,audio:v.audio}, true); } } if(v.camera){video.style.display='none'; ytBox.style.display='none';} });
 db.collection('hitTV_audio').onSnapshot(s=>{document.getElementById('audioList').innerHTML=s.docs.map(d=>{let a=d.data(); return `<div class="audioItem"><div><b>${a.title}</b><br><small>${a.artist}</small><br><audio controls src="${a.url}" style="width:200px"></audio></div><a href="${a.url}" download><button style="padding:10px;background:#0a1931;color:#fff;border:0;border-radius:10px">Download</button></a></div>`}).join('')||'<p>No audio yet</p>';});
 db.collection('hitTV_notif').onSnapshot(s=>{let arr=s.docs.map(d=>d.data()).sort((a,b)=>(b.time||0)-(a.time||0)); document.getElementById('notifList').innerHTML=arr.map(n=>`<div class="comment"><b>${n.title}</b><br>${n.text}</div>`).join('')||'<p>No messages</p>';});
 db.collection('hitTV_comments').onSnapshot(s=>{let arr=s.docs.map(d=>d.data()).sort((a,b)=>(b.time||0)-(a.time||0)).slice(0,20); document.getElementById('commentList').innerHTML=arr.map(c=>`<div class="comment"><b>${c.name}</b><br>${c.text}</div>`).join('')||'<p>No comments</p>';});
