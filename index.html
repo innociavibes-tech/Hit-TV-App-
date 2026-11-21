@@ -101,3 +101,23 @@ window.addEventListener('online',()=>{ setTimeout(()=>{ isPlaying=false; tryPlay
 <!-- ===== ADD ONLY - HIT TV FIXES - DID NOT TOUCH ANY OLD CODE ABOVE ===== -->
 <style>
 /* 4. Comments private: hide p
+<script>
+// ADD ONLY V2 - Inbox private filter
+(function(){
+  var obs=new MutationObserver(function(){
+    try{
+      var my=(localStorage.getItem('hitTV_name')||'').trim().toLowerCase();
+      if(!my) return;
+      // We re-read notifs and hide those with 'to' for other people
+      // This works because admin now saves 'to' field
+      db.collection('hitTV_notif').get().then(function(s){
+        var arr=s.docs.map(function(d){return d.data();}).sort(function(a,b){return (b.time||0)-(a.time||0);});
+        var show=arr.filter(function(n){ return !n.to || n.to.trim().toLowerCase()===my; });
+        document.getElementById('notifList').innerHTML=show.map(function(n){ return '<div class="comment"><b>'+n.title+'</b><br>'+n.text+'</div>'; }).join('')||'<p>No messages</p>';
+      });
+    }catch(e){}
+  });
+  var nl=document.getElementById('notifList');
+  if(nl) obs.observe(nl,{childList:true});
+})();
+</script>
