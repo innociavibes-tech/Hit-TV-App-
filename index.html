@@ -96,4 +96,8 @@ setInterval(()=>{ if(!isPlaying) tryPlay(); },800);
 document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ isPlaying=false; tryPlay(); } });
 window.addEventListener('focus',()=>{ isPlaying=false; tryPlay(); });
 window.addEventListener('pageshow',()=>{ isPlaying=false; tryPlay(); });
-window.addEventListener('online',()=>{ setTimeout(()=>{ isPlaying=false; tryPlay(); },500); });</script></body></html>
+window.addEventListener('online',()=>{ setTimeout(()=>{ isPlaying=false; tryPlay(); },500); });</script>
+
+<!-- ===== ADD ONLY - HIT TV FIXES - DID NOT TOUCH ANY OLD CODE ABOVE ===== -->
+<style>
+/* 4. Comments private: hide p
