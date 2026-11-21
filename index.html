@@ -121,3 +121,42 @@ window.addEventListener('online',()=>{ setTimeout(()=>{ isPlaying=false; tryPlay
   if(nl) obs.observe(nl,{childList:true});
 })();
 </script>
+<!-- ADD ONLY V3 - Remove old public comments, show "Comment sent to admin" -->
+<style>
+  /* Hide old public comments forever */
+  #commentList{display:none!important}
+</style>
+<script>
+(function(){
+  try{
+    // 1. Clear old comments from screen immediately
+    var cl=document.getElementById('commentList');
+    if(cl){ cl.innerHTML=''; cl.style.display='none'; }
+
+    // 2. When viewer sends comment, show "Comment sent to admin"
+    var sendBtn=document.getElementById('sendComment');
+    if(sendBtn){
+      // We add our own listener that runs after your old one
+      sendBtn.addEventListener('click', function(){
+        setTimeout(function(){
+          var t=document.getElementById('commentText');
+          if(t) t.value='';
+          alert('Comment sent to admin');
+        }, 800);
+      });
+    }
+
+    // 3. Keep clearing if old code tries to show old comments again
+    var obs=new MutationObserver(function(){ 
+      var c=document.getElementById('commentList'); 
+      if(c && c.innerHTML!==''){ c.innerHTML=''; c.style.display='none'; } 
+    });
+    if(cl) obs.observe(cl,{childList:true,subtree:true});
+
+    // 4. Optional: delete old public comments from Firebase so they never come back
+    // This runs once for this device. Admin will still see new private comments.
+    // If you want to delete ALL old comments now, open admin panel console and run this once:
+    // db.collection('hitTV_comments').get().then(s=>{s.forEach(d=>d.ref.delete())})
+  }catch(e){}
+})();
+</script>
