@@ -345,3 +345,35 @@ try{
   }
 }catch(e){}
 }
+// ===== HIT TV - FAST START + FAST LOOP - PASTE THIS =====
+function instantPlay(){
+  isPlaying = false;
+  tryPlay();
+  setTimeout(tryPlay, 500);
+  setTimeout(tryPlay, 1000);
+  setTimeout(tryPlay, 2000);
+}
+
+window.addEventListener('online', instantPlay);
+document.addEventListener('visibilitychange', ()=>{
+  if(!document.hidden) instantPlay();
+});
+window.addEventListener('load', instantPlay);
+
+function onPlayerStateChange(e){
+  if(e.data===YT.PlayerState.ENDED){
+    // Song finished - go to next IMMEDIATELY
+    isPlaying = false;
+    if(queue.length > 1){
+      queue.shift(); // remove finished song
+      currentIndex = 0;
+      playItem(queue[0], true); // play next NOW
+    } else {
+      queue.shift();
+      stopAll();
+    }
+    renderQueue();
+  }
+}
+setInterval(tryPlay, 800);
+// ===== END FAST CODE =====
