@@ -259,5 +259,89 @@ function sendCommentFast(){
     let toast = document.getElementById('hitTVCommentToast');
     if(toast){ toast.style.display='block'; setTimeout(()=>toast.style.display='none',3000); }
     // Do NOT reload, do NOT change song
-  });
+  });// ===== FIX - No Closing Offline + Video Instant Like Ticker =====
+
+// 1. NEVER CLOSE APP WHEN OFFLINE - Keep video, don't show black offline page covering video
+window.addEventListener('offline', function(){
+  // DO NOT close, DO NOT show black offline page on top of video
+  let off = document.getElementById('hitTVOfflinePage');
+  if(off) off.style.display = 'none'; // Hide black offline page
+
+  // Keep video visible, don't make it black
+  let v = document.getElementById('mp4Player');
+  if(v){ v.style.background = 'transparent'; v.style.display = 'block'; }
+
+  let yb = document.getElementById('ytPlayer');
+  if(yb){ yb.style.background = 'transparent'; yb.style.display = 'block'; }
+
+  let vb = document.getElementById('videoBox');
+  if(vb){ vb.style.background = '#111'; } // Dark grey, not pure black, video skin stays
+
+  // Show small ticker at bottom: "Offline - Video continues"
+  let tick = document.getElementById('tickerText');
+  if(tick) tick.textContent = '📶 Offline - Video continues, no closing... • ';
+});
+
+// When online again, back to normal, no refresh
+window.addEventListener('online', function(){
+  let off = document.getElementById('hitTVOfflinePage');
+  if(off) off.style.display = 'none';
+});
+
+// 2. VIDEO INSTANT LIKE TICKER - When admin posts, viewer sees it in <1 second
+// Old: Firebase + check every 3 seconds = slow, black screen
+// New: Listen + Preload + Show instantly
+function playInstantLikeTicker(link){
+  if(!link) return;
+  if(link === window.__lastLink) return; // Don't restart same video
+  window.__lastLink = link;
+
+  let v = document.getElementById('mp4Player');
+  let yb = document.getElementById('ytPlayer');
+  let ph = document.getElementById('videoPlaceholder');
+  if(ph) ph.style.display = 'none'; // Hide black placeholder instantly
+
+  // MP4 - Preload and play instantly
+  if(!link.includes('youtube') && !link.includes('youtu.be')){
+    if(yb) yb.innerHTML = '';
+    if(v){
+      v.style.display = 'block';
+      v.style.background = 'transparent';
+      v.src = link;
+      v.preload = 'auto';
+      v.play().catch(()=>{});
+    }
+    return;
+  }
+
+  // YouTube - Instant like ticker
+  let id = '';
+  try{
+    if(link.includes('v=')) id = link.split('v=')[1].split('&')[0];
+    else id = link.split('/').pop().split('?')[0];
+  }catch(e){}
+  if(yb){
+    yb.style.display = 'block';
+    yb.style.background = 'transparent';
+    // autoplay=1 + mute=0 + playsinline = starts immediately like ticker
+    yb.innerHTML = '<iframe src="https://www.youtube.com/embed/'+id+'?autoplay=1&playsinline=1&rel=0&controls=1" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen style="width:100%;height:100%;background:transparent"></iframe>';
+  }
+  if(v){ v.pause(); v.style.display = 'none'; }
+}
+
+// 3. Replace old slow listener with instant ticker listener
+try{
+  if(typeof db !== 'undefined'){
+    db.collection('hitTV_current').doc('now').onSnapshot(function(doc){
+      if(!doc.exists) return;
+      let d = doc.data();
+      if(d && d.videoUrl) playInstantLikeTicker(d.videoUrl);
+      // Also ticker text instant
+      if(d && d.ticker){
+        let tick = document.getElementById('tickerText');
+        if(tick) tick.textContent = d.ticker + ' • ';
+      }
+    });
+  }
+}catch(e){}
 }
