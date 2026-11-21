@@ -349,3 +349,30 @@ window.addEventListener('online',()=>{ setTimeout(()=>{ isPlaying=false; tryPlay
   }catch(e){ console.log('V5 error', e); }
 })();
 </script>
+<!-- ===== ADD ONLY V6 VIEWERS - WORKING FASTER ===== -->
+<style>
+  body,#tab-home,#videoBox,#videoPlaceholder{background:#000!important;color:#fff!important}
+  img,video{content-visibility:auto}
+  #tickerText{animation-duration:35s!important}
+</style>
+<script>
+(function(){
+  try{
+    // Block refresh - no reload
+    try{ window.location.reload=function(){return false;} }catch(e){}
+    // Faster: black screen immediately, no white flash
+    document.body.style.background='#000';
+    // Faster: don't restart song on focus / online / visibility
+    document.addEventListener('visibilitychange',function(){
+      try{ if(typeof isPlaying!=='undefined') isPlaying=true; }catch(e){}
+    });
+    // Faster: lazy load - only load video when needed, keep phone light
+    var v=document.getElementById('mp4Player');
+    if(v){ v.preload='metadata'; v.style.background='#000'; }
+    // Faster: remove heavy re-render - keep comment list hidden
+    var cl=document.getElementById('commentList');
+    if(cl){ cl.innerHTML=''; cl.style.display='none'; }
+    console.log('V6 Viewers Faster ON');
+  }catch(e){}
+})();
+</script>
