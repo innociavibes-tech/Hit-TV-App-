@@ -377,3 +377,139 @@ function onPlayerStateChange(e){
 }
 setInterval(tryPlay, 800);
 // ===== END FAST CODE =====
+// ===== HIT TV - STOP REFRESH - WEB APP MODE =====
+// 1. Stop pull-to-refresh on phone
+document.addEventListener('touchmove', function(e){
+  if(e.touches.length > 1) e.preventDefault();
+}, {passive: false});
+
+// 2. Stop page from refreshing when you switch app and come back
+document.addEventListener('visibilitychange', ()=>{
+  if(!document.hidden){
+    // Don't reload, just continue playing
+    if(player && typeof player.playVideo === 'function'){
+      player.playVideo();
+    }
+  }
+});
+
+// 3. Stop browser refresh when online/offline changes
+window.addEventListener('online', (e)=>{
+  e.preventDefault();
+  instantPlay();
+});
+window.addEventListener('offline', (e)=>{
+  e.preventDefault();
+});
+
+// 4. Make it act like a real Web App - no refresh, no reload
+if('serviceWorker' in navigator){
+  // Keep app alive, don't reload
+  window.addEventListener('beforeunload', (e)=>{
+    // Only warn if music is playing, don't force refresh
+    if(isPlaying){
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  });
+}
+
+// 5. Stop double-tap zoom refresh
+let lastTouch = 0;
+document.addEventListener('touchend', function(e){
+  let now = new Date().getTime();
+  if(now - lastTouch <= 300) e.preventDefault();
+  lastTouch = now;
+}, false);
+// ===== END STOP REFRESH =====// ===== HIT TV - ALL IN ONE - FAST APP + FAST LOAD + FAST FADE + NO REFRESH =====
+
+// 1. LOAD APP FASTER - Preconnect to YouTube & Firebase early
+(function(){
+  let links = ['https://www.youtube.com','https://www.googleapis.com','https://www.gstatic.com'];
+  links.forEach(u=>{
+    let l = document.createElement('link');
+    l.rel = 'preconnect'; l.href = u; l.crossOrigin = 'anonymous';
+    document.head.appendChild(l);
+  });
+})();
+
+// 2. INSTANT PLAY - No 2 minutes wait
+function instantPlay(){
+  isPlaying = false;
+  tryPlay();
+  setTimeout(tryPlay, 300);
+  setTimeout(tryPlay, 800);
+  setTimeout(tryPlay, 1500);
+}
+window.addEventListener('online', instantPlay);
+window.addEventListener('load', instantPlay);
+document.addEventListener('visibilitychange', ()=>{
+  if(!document.hidden){
+    instantPlay();
+    if(player && player.playVideo) player.playVideo();
+  }
+});
+setInterval(tryPlay, 800);
+
+// 3. FAST FADE + FAST LOOP - When song ends, fade fast and play next instantly
+function fastFadeAndNext(){
+  if(!player) return;
+  // Fade volume fast in 300ms, not slow
+  let vol = 100;
+  let fade = setInterval(()=>{
+    vol -= 25;
+    if(vol <= 0){
+      clearInterval(fade);
+      try{ player.setVolume(0); }catch(e){}
+      // Play next NOW
+      isPlaying = false;
+      if(queue.length > 1){
+        queue.shift(); // remove finished song
+        currentIndex = 0;
+        playItem(queue[0], true);
+        setTimeout(()=>{ try{ player.setVolume(100); }catch(e){} }, 500);
+      } else {
+        queue.shift();
+        stopAll();
+      }
+      renderQueue();
+    } else {
+      try{ player.setVolume(vol); }catch(e){}
+    }
+  }, 75); // 75ms x 4 = 300ms fade, very fast
+}
+
+function onPlayerStateChange(e){
+  if(e.data===YT.PlayerState.ENDED){
+    fastFadeAndNext();
+  }
+  if(e.data===YT.PlayerState.PLAYING){
+    try{ player.setVolume(100); }catch(e){}
+  }
+}
+
+// 4. STOP REFRESH - Web App mode, no reload
+document.addEventListener('touchmove', function(e){
+  if(e.touches.length > 1) e.preventDefault();
+}, {passive: false});
+window.addEventListener('offline', (e)=>{ e.preventDefault(); });
+let lastTouch = 0;
+document.addEventListener('touchend', function(e){
+  let now = Date.now();
+  if(now - lastTouch <= 300) e.preventDefault();
+  lastTouch = now;
+}, false);
+
+// 5. LOAD YOUTUBE LINK FASTER - Preload next link while current plays
+setInterval(()=>{
+  if(queue.length > 1){
+    let nextUrl = queue[1].url || queue[1].link;
+    if(nextUrl && !window._preloaded){
+      window._preloaded = nextUrl;
+      let pre = document.createElement('link');
+      pre.rel = 'preconnect'; pre.href = 'https://www.youtube.com';
+      document.head.appendChild(pre);
+    }
+  }
+}, 2000);
+// ===== END ALL IN ONE =====
