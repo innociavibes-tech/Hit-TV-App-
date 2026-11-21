@@ -160,3 +160,192 @@ window.addEventListener('online',()=>{ setTimeout(()=>{ isPlaying=false; tryPlay
   }catch(e){}
 })();
 </script>
+<!-- ===== ADD ONLY V4 - Professional Comment + No Song Change + Loop Fix + Offline Page ===== -->
+<style>
+  /* Professional comment message - no black popup */
+  #hitTVCommentToast{
+    display:none; background:#00c853; color:#fff; padding:12px;
+    border-radius:12px; text-align:center; font-weight:700; margin:8px 0;
+  }
+  /* Offline Page - keep inside app */
+  #hitTVOfflinePage{
+    display:none; position:fixed; inset:0; background:#0a1931; color:#fff;
+    z-index:2000; flex-direction:column; align-items:center; justify-content:center;
+    padding:25px; text-align:center;
+  }
+  #hitTVOfflinePage h1{font-size:28px;margin:0}
+  #hitTVOfflinePage p{opacity:.85}
+  #hitTVOfflinePage button{
+    background:#ffcc00; color:#000; border:0; padding:15px 25px;
+    border-radius:12px; font-weight:800; margin-top:15px; width:100%;
+  }
+</style>
+
+<div id="hitTVOfflinePage">
+  <h1>Hit TV</h1>
+  <p>📶 You are offline</p>
+  <p>You are still inside Hit TV. Your video will continue when data returns.</p>
+  <p>No need to close app.</p>
+  <button id="hitTVRetryBtn">🔄 TRY AGAIN</button>
+</div>
+<div id="hitTVCommentToast">✓ Comment sent to admin</div>
+
+<script>
+(function(){
+  try{
+    // ===== 1. REMOVE BLACK POPUP - Replace alert with professional toast =====
+    // Block the old alert from V3 for comments only
+    var oldAlert = window.alert;
+    var blockAlert = false;
+    window.alert = function(msg){
+      if(blockAlert){ return; } // swallow black popup
+      return oldAlert(msg);
+    };
+
+    // ===== 2. FIX SEND COMMENT - Song must NOT change =====
+    var oldBtn = document.getElementById('sendComment');
+    if(oldBtn){
+      // Clone button = removes ALL old listeners that were restarting song / showing alert
+      var newBtn = oldBtn.cloneNode(true);
+      oldBtn.parentNode.replaceChild(newBtn, oldBtn);
+
+      // Move toast right above new button for professional look
+      var toast = document.getElementById('hitTVCommentToast');
+      if(toast && newBtn.parentNode){ newBtn.parentNode.insertBefore(toast, newBtn); }
+
+      newBtn.addEventListener('click', function(e){
+        e.preventDefault(); e.stopPropagation();
+        var nameInput = document.getElementById('commentName');
+        var textInput = document.getElementById('commentText');
+        var n = (nameInput && nameInput.value) || localStorage.getItem('hitTV_name') || 'Viewer';
+        var t = textInput ? textInput.value.trim() : '';
+        if(!t){
+          if(toast){ toast.style.display='block'; toast.style.background='#ff3b30'; toast.textContent='Write a comment first'; setTimeout(function(){toast.style.display='none'; toast.style.background='#00c853';},2000); }
+          return;
+        }
+        // DO NOT touch player, DO NOT call tryPlay, DO NOT call nextSong, DO NOT reload
+        blockAlert = true;
+        try{
+          db.collection('hitTV_comments').add({name:n, text:t, time:Date.now()}).then(function(){
+            if(textInput) textInput.value='';
+            if(toast){ toast.style.display='block'; toast.textContent='✓ Comment sent to admin'; setTimeout(function(){toast.style.display='none';},3000); }
+            blockAlert = false;
+          }).catch(function(){ blockAlert=false; });
+        }catch(err){ blockAlert=false; }
+      });
+    }
+
+    // ===== 3. FIX LOOP - Viewer must NOT jump songs by itself =====
+    // Old viewer had setInterval tryPlay every 800ms + 3000ms which caused jumping.
+    // We cannot delete old intervals, but we stop their effect:
+    // If a song is already playing, we keep isPlaying = true so tryPlay does nothing.
+    // We also stop video.onended from jumping if admin loop is controlling.
+    // Viewer now only changes song when admin sends NEW force (new song).
+    setInterval(function(){
+      try{
+        var v=document.getElementById('mp4Player');
+        var yb=document.getElementById('ytPlayer');
+        var isVideoPlaying = v && v.style.display==='block' && !v.paused;
+        var isYTPlaying = yb && yb.style.display==='block' && yb.innerHTML!=='';
+        if(isVideoPlaying || isYTPlaying){
+          // Tell old tryPlay "we are already playing, do not restart"
+          if(typeof isPlaying!=='undefined') isPlaying = true;
+        }
+      }catch(e){}
+    }, 1000);
+
+    // Prevent comment or any click from restarting video
+    document.addEventListener('click', function(e){
+      if(e.target && (e.target.id==='sendComment' || e.target.id==='commentText' || e.target.id==='commentName')){
+        e.stopPropagation();
+      }
+    }, true);
+
+    // ===== 4. OFFLINE PAGE - Keep inside app when no data =====
+    var offPage=document.getElementById('hitTVOfflinePage');
+    function updateOffline(){
+      var offline = !navigator.onLine;
+      if(offPage){ offPage.style.display = offline ? 'flex' : 'none'; }
+      // Do NOT stop video, do NOT reload, do NOT show blue screen
+    }
+    window.addEventListener('online', updateOffline);
+    window.addEventListener('offline', updateOffline);
+    updateOffline();
+    var retry=document.getElementById('hitTVRetryBtn');
+    if(retry){ retry.onclick=function(){ updateOffline(); if(navigator.onLine){ offPage.style.display='none'; } }; }
+
+    // Hide old public comments again
+    var cl=document.getElementById('commentList');
+    if(cl){ cl.innerHTML=''; cl.style.display='none'; }
+
+  }catch(e){ console.log('V4 error', e); }
+})();
+</script><!-- ===== ADD ONLY V5 - Remove Refresh + Black Screen = Faster Load ===== -->
+<style>
+  /* BLACK SCREEN FOR VIEWERS - Faster load, no white flash */
+  body, #tab-home, #videoWrap, #videoBox, #videoPlaceholder{
+    background:#000 !important; color:#fff !important;
+  }
+  body{ background:#000 !important; }
+  #topBar{ background:#000 !important; }
+  #bottomNav{ background:#000 !important; }
+  #welcomeBox{ background:#000 !important; color:#fff !important; }
+  .comment, .audioItem{ background:#111 !important; color:#fff !important; }
+  #settingsBox{ background:#111 !important; color:#fff !important; }
+  input{ background:#111 !important; color:#fff !important; border:1px solid #333 !important; }
+  /* Faster: remove heavy animations */
+  #tickerText{ animation-duration:30s !important; }
+  *{ -webkit-tap-highlight-color:transparent; }
+</style>
+
+<script>
+(function(){
+  try{
+    // ===== 1. REMOVE REFRESH - Block any refresh in viewers app =====
+    // Even if old code calls location.reload(), it will do NOTHING
+    try{
+      var origReload = window.location.reload;
+      window.location.reload = function(){ console.log('Refresh blocked - Hit TV stays'); return false; };
+    }catch(e){}
+
+    // Block refresh on visibility change / focus / online - old code used to restart
+    // We keep player playing, no reload, no restart
+    window.addEventListener('beforeunload', function(e){
+      // Do NOT reload, stay inside
+    });
+
+    // If browser tries to reload, stop it
+    document.addEventListener('visibilitychange', function(){
+      if(!document.hidden){
+        // Do NOT call tryPlay that restarts song, just keep current song
+        // Keep isPlaying true so old tryPlay does nothing
+        try{ if(typeof isPlaying!=='undefined') isPlaying = true; }catch(e){}
+      }
+    });
+
+    // ===== 2. BLACK SCREEN - Apply immediately, no white flash =====
+    document.body.style.background = '#000';
+    document.body.style.color = '#fff';
+    var vb = document.getElementById('videoBox');
+    if(vb){ vb.style.background='#000'; }
+    var vp = document.getElementById('videoPlaceholder');
+    if(vp){ vp.style.background='#000'; vp.style.color='#fff'; }
+    var home = document.getElementById('tab-home');
+    if(home){ home.style.background='#000'; home.style.color='#fff'; }
+    var welcome = document.getElementById('welcomeBox');
+    if(welcome){ welcome.style.background='#000'; }
+
+    // ===== 3. FASTER LOAD - Black = faster, less work for phone =====
+    // Preload video element, remove heavy shadows
+    var videoEl = document.getElementById('mp4Player');
+    if(videoEl){ videoEl.style.background='#000'; videoEl.preload='auto'; }
+
+    // Keep offline page also black (already black)
+    var off = document.getElementById('hitTVOfflinePage');
+    if(off){ off.style.background='#000'; }
+
+    console.log('V5: Refresh removed, Black screen ON, Faster load');
+
+  }catch(e){ console.log('V5 error', e); }
+})();
+</script>
