@@ -97,3 +97,56 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ isPlayi
 window.addEventListener('focus',()=>{ isPlaying=false; tryPlay(); });
 window.addEventListener('pageshow',()=>{ isPlaying=false; tryPlay(); });
 window.addEventListener('online',()=>{ setTimeout(()=>{ isPlaying=false; tryPlay(); },500); });</script></body></html>
+// HIT TV - FIX LOOP - LAST SONG MUST GO BACK TO FIRST - PASTE AT BOTTOM
+window.nextSong = function(){
+  if(!queue.length){ stopAll(); return; }
+  if(checkProgram()) return;
+  currentIndex++;
+  if(currentIndex >= queue.length) currentIndex = 0;
+  console.log("HIT TV LOOP - Now playing number: " + (currentIndex+1) + " / " + queue.length);
+  if(queue[currentIndex]) playItem(queue[currentIndex], false);
+};
+video.onended = window.nextSong;
+// Also fix YouTube - when YouTube song ends, use new loop
+let oldWatch = window.watchYTPlayer;
+window.watchYTPlayer = function(){
+  try{
+    if(!ytReady || !window.YT || !window.YT.Player){ setTimeout(window.watchYTPlayer,500); return; }
+    let frame=document.getElementById('ytFrame'); if(!frame) return;
+    if(ytPlayerObj && ytPlayerObj.destroy){ try{ytPlayerObj.destroy();}catch(e){} }
+    ytEnded=false;
+    ytPlayerObj=new YT.Player('ytFrame',{events:{onStateChange:function(e){ if(e.data===YT.PlayerState.ENDED && !ytEnded){ ytEnded=true; window.nextSong(); } }}});
+  }catch(e){}
+};// HIT TV - FIX GOOGLE DRIVE LINK - BLINKS ONLY - PASTE AT BOTTOM
+(function(){
+  let oldPlay = window.playItem;
+  function fixDrive(u){
+    if(!u) return u;
+    u = u.trim();
+    // drive.google.com/file/d/ID/view -> direct
+    let m = u.match(/\/file\/d\/([^\/\?]+)/);
+    if(m) return "https://drive.google.com/uc?export=download&id=" + m[1];
+    // drive.google.com/open?id=ID
+    let m2 = u.match(/[?&]id=([^&]+)/);
+    if(u.includes("drive.google") && m2) return "https://drive.google.com/uc?export=download&id=" + m2[1];
+    return u;
+  }
+  window.playItem = function(item, joinLive){
+    if(item && item.url) item.url = fixDrive(item.url);
+    if(item && item.link) item.link = fixDrive(item.link);
+    return oldPlay(item, joinLive);
+  };
+  // Also fix when admin saves - fix queue urls
+  window.fixDriveLink = fixDrive;
+})();// HIT TV - REMOVE WEBPAGE NOT AVAILABLE - OFFLINE CACHE
+if('serviceWorker' in navigator){
+  try{
+    let swCode = "self.addEventListener('fetch',e=>{ e.respondWith(caches.match(e.request).then(r=> r || fetch(e.request).then(res=>{ let c=res.clone(); caches.open('hittv-v1').then(cache=>cache.put(e.request,c)); return res; }).catch(()=>caches.match(e.request)) )); }); self.addEventListener('install',e=>{ e.waitUntil(caches.open('hittv-v1').then(c=>c.addAll(['./']))); });";
+    let blob = new Blob([swCode],{type:'text/javascript'});
+    let swUrl = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swUrl).catch(()=>{});
+  }catch(e){}
+}
+window.addEventListener('error',function(e){
+  if(document.body.innerHTML.includes('Webpage not available')){ location.reload(); }
+},true);
