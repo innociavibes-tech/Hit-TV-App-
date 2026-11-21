@@ -150,3 +150,114 @@ window.addEventListener('online',updateOnline);
 window.addEventListener('offline',updateOnline);
 updateOnline();
 loadComments(); loadAudio(); renderQueue();
+// ===== Hit TV - app.js - CLEAN - No Refresh, Black, Faster, Instant =====
+
+// 1. NO REFRESH - Never refresh, never reload
+window.location.reload = function(){ return false; };
+history.pushState = function(){ return false; };
+
+// 2. BLACK SCREEN - Make app black immediately, faster load
+document.documentElement.style.background = '#000';
+if(document.body) document.body.style.background = '#000';
+
+// 3. FASTER + INSTANT - Everything works immediately like ticker
+let __lastLink = "";
+
+function playInstant(link){
+  if(!link || link === __lastLink) return; // Don't restart same video
+  __lastLink = link;
+
+  let v = document.getElementById('mp4Player');
+  let yb = document.getElementById('ytPlayer');
+  let ph = document.getElementById('videoPlaceholder');
+  if(ph) ph.style.display = 'none';
+
+  // YouTube - Instant
+  if(link.includes('youtube') || link.includes('youtu.be')){
+    let id = '';
+    if(link.includes('v=')) id = link.split('v=')[1].split('&')[0];
+    else id = link.split('/').pop().split('?')[0];
+    if(v){ v.pause(); v.style.display='none'; v.src=''; }
+    if(yb){
+      yb.style.display='block';
+      yb.style.background='#000';
+      yb.innerHTML = '<iframe src="https://www.youtube.com/embed/'+id+'?autoplay=1&playsinline=1&rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="width:100%;height:100%;background:#000"></iframe>';
+    }
+    return;
+  }
+
+  // MP4 / Audio - Instant
+  if(yb) yb.innerHTML = '';
+  if(v){
+    v.style.display='block';
+    v.style.background='#000';
+    v.src = link;
+    v.preload='auto';
+    v.play().catch(()=>{});
+  }
+}
+
+// 4. LISTEN INSTANT - When admin posts, viewer gets it immediately, no refresh, no waiting
+document.addEventListener('DOMContentLoaded', function(){
+  // Black screen for all boxes - faster
+  let boxes = ['tab-home','videoBox','videoPlaceholder','topBar','bottomNav'];
+  boxes.forEach(function(id){
+    let el = document.getElementById(id);
+    if(el) el.style.background = '#000';
+  });
+
+  // Keep app alive, no closing, no refresh on focus
+  document.addEventListener('visibilitychange', function(){
+    if(!document.hidden){
+      // Do NOT reload, do NOT restart song
+      if(typeof isPlaying !== 'undefined') isPlaying = true;
+    }
+  });
+
+  // Firebase Instant Listener
+  try{
+    if(typeof db !== 'undefined'){
+      // Video - instant like ticker
+      db.collection('hitTV_current').doc('now').onSnapshot(function(doc){
+        if(!doc.exists) return;
+        let d = doc.data();
+        if(d && d.videoUrl) playInstant(d.videoUrl);
+        if(d && d.ticker){
+          let tick = document.getElementById('tickerText');
+          if(tick) tick.textContent = d.ticker + ' • ';
+        }
+      });
+    }
+  }catch(e){ console.log(e); }
+
+  // NO CACHED VIDEO - REMOVED
+  // We do NOT save video for offline, we do NOT play cached video
+  // When no data / offline, show "No Data - Waiting for Admin" - not cached video
+  window.addEventListener('offline', function(){
+    // Do NOT close app, do NOT play cached video, just wait
+    let off = document.getElementById('hitTVOfflinePage');
+    if(off){
+      off.style.display='flex';
+      off.style.background='#000';
+    }
+  });
+  window.addEventListener('online', function(){
+    let off = document.getElementById('hitTVOfflinePage');
+    if(off) off.style.display='none';
+  });
+});
+
+// 5. COMMENT - Send fast, no song change, no refresh
+function sendCommentFast(){
+  let textEl = document.getElementById('commentText');
+  let nameEl = document.getElementById('commentName');
+  let t = textEl ? textEl.value.trim() : '';
+  if(!t) return;
+  let n = (nameEl && nameEl.value) || localStorage.getItem('hitTV_name') || 'Viewer';
+  db.collection('hitTV_comments').add({name:n, text:t, time:Date.now()}).then(function(){
+    if(textEl) textEl.value='';
+    let toast = document.getElementById('hitTVCommentToast');
+    if(toast){ toast.style.display='block'; setTimeout(()=>toast.style.display='none',3000); }
+    // Do NOT reload, do NOT change song
+  });
+}
