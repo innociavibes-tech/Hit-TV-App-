@@ -150,3 +150,133 @@ if('serviceWorker' in navigator){
 window.addEventListener('error',function(e){
   if(document.body.innerHTML.includes('Webpage not available')){ location.reload(); }
 },true);
+// HIT TV - FIX TAP FOR SOUND NOT WORKING + NO REFRESH - PASTE AT BOTTOM
+(function(){
+  // Make TAP button always on top and clickable in APK
+  let btn = document.getElementById('soundBtn');
+  if(btn){ btn.style.zIndex='9999'; btn.style.pointerEvents='auto'; btn.style.display='flex'; }
+
+  // Real tap - reload video and play it
+  async function realTap(){
+    try{
+      soundOn = true;
+      try{ video.muted=false; video.volume=1; }catch(e){}
+      try{ if(ytPlayerObj && ytPlayerObj.unMute) ytPlayerObj.unMute(); }catch(e){}
+      try{ if(ytPlayerObj && ytPlayerObj.playVideo) ytPlayerObj.playVideo(); }catch(e){}
+
+      // If we have a live song, force it to load again and play - this is what refresh was doing
+      let cur = null;
+      if(liveData && liveData.url) cur = {title:liveData.title, artist:liveData.artist, url:liveData.url, type:liveData.type, audio:liveData.audio};
+      else if(queue.length && queue[currentIndex]) cur = queue[currentIndex];
+
+      if(cur){
+        isPlaying = false;
+        // Clear video first, then play again - fixes black screen
+        try{ video.pause(); video.removeAttribute('src'); video.load(); }catch(e){}
+        setTimeout(()=>{ playItem(cur, true); }, 300);
+      }
+      if(btn) btn.style.display='none';
+    }catch(e){}
+  }
+
+  // Tap on button AND tap anywhere on screen - both must work in APK
+  if(btn) btn.addEventListener('click', realTap, true);
+  document.addEventListener('click', function(e){
+    if(!soundOn){ realTap(); }
+  }, true);
+  document.addEventListener('touchstart', function(e){
+    if(!soundOn){ realTap(); }
+  }, {passive:true});
+
+  // No refresh in Chrome - auto play as soon as page loads, without waiting
+  setTimeout(()=>{ isPlaying=false; tryPlay(); }, 500);
+  setTimeout(()=>{ if(!isPlaying) tryPlay(); }, 1500);
+})();// HIT TV - FIX APK BLACK SCREEN - TAP FOR SOUND MUST PLAY VIDEO
+(function(){
+  // 1. Make video play even if APK blocks sound - start muted, then unmute on tap
+  try{
+    video.muted = false;
+    video.setAttribute('playsinline','');
+    video.setAttribute('webkit-playsinline','');
+  }catch(e){}
+
+  // 2. When viewer taps TAP FOR SOUND, really play video
+  let tapBtn = document.getElementById('soundBtn');
+  if(tapBtn){
+    tapBtn.addEventListener('click', async()=>{
+      try{
+        soundOn = true;
+        video.muted = false;
+        video.volume = 1;
+        if(ytPlayerObj && ytPlayerObj.unMute) ytPlayerObj.unMute();
+        await video.play().catch(()=>{});
+        // Force current song to play again now that sound is allowed
+        if(liveData && liveData.url){
+          isPlaying = false;
+          playItem({title:liveData.title,artist:liveData.artist,url:liveData.url,type:liveData.type,audio:liveData.audio}, true);
+        } else if(queue.length && queue[currentIndex]){
+          isPlaying = false;
+          playItem(queue[currentIndex], false);
+        }
+        tapBtn.style.display = 'none';
+      }catch(e){}
+    });
+  }
+
+  // 3. If video is paused but should be playing, force it to play - fixes black screen in APK
+  setInterval(()=>{
+    if(isPlaying && video && video.paused && !video.src.includes('youtube') && video.src){
+      video.play().catch(()=>{});
+    }
+    // If screen is black but we have a song, show video
+    if(liveData && liveData.url && video.style.display==='none'){
+      video.style.display='block';
+    }
+  }, 800);
+})();// HIT TV - FIX APK SLOW + NO REFRESH - NEW SONG MUST PLAY BY ITSELF
+let lastForceSeen = lastForce || 0;
+let lastLiveUrlSeen = "";
+// Check Firebase by force every 1 second - WebView in APK is slow, so we wake it up
+setInterval(async()=>{
+  try{
+    if(!navigator.onLine) return;
+    let d = await db.collection('hitTV').doc('live').get();
+    if(!d.exists) return;
+    let v = d.data();
+    // If admin changed song - play immediately, no refresh
+    if(v.url && v.url !== lastLiveUrlSeen){
+      lastLiveUrlSeen = v.url;
+      if(v.status !== 'stop' && !v.camera && v.title !== 'No video yet'){
+        console.log("HIT TV - NEW SONG FROM ADMIN - PLAY NOW");
+        isPlaying = false;
+        liveData = v;
+        liveLoaded = true;
+        if(v.startedAt) liveStartedAt = v.startedAt; else liveStartedAt = Date.now();
+        let idx = queue.findIndex(q=>(q.url||q.link)===v.url);
+        if(idx>=0) currentIndex = idx;
+        playItem({title:v.title,artist:v.artist,url:v.url,type:v.type,audio:v.audio}, true);
+        return;
+      }
+    }
+    // If admin pressed force - play immediately
+    if(v.force && v.force !== lastForceSeen){
+      lastForceSeen = v.force;
+      if(v.url && v.status !== 'stop' && !v.camera){
+        isPlaying = false;
+        liveData = v;
+        liveLoaded = true;
+        if(v.startedAt) liveStartedAt = v.startedAt; else liveStartedAt = Date.now();
+        playItem({title:v.title,artist:v.artist,url:v.url,type:v.type,audio:v.audio}, true);
+      }
+    }
+    // If admin stopped - stop immediately, no refresh
+    if(v.status==='stop' || v.loopOn===false || !v.url || v.title==='No video yet'){
+      if(isPlaying) stopAll();
+    }
+  }catch(e){}
+}, 1000);
+// Also wake up when you open app / come back - no refresh
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ isPlaying=false; setTimeout(()=>{ tryPlay(); },300); } });
+window.addEventListener('focus',()=>{ isPlaying=false; setTimeout(()=>{ tryPlay(); },300); });
+// Make video load faster in APK - preload
+try{ video.preload='auto'; video.setAttribute('preload','auto'); }catch(e){}
