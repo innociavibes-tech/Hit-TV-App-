@@ -136,102 +136,25 @@ window.getYTId=(url)=>{let m=(url||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/
 window.getPlaylistId=(url)=>{let m=(url||'').match(/[?&]list=([A-Za-z0-9_-]+)/); return m?m[1]:null;}
 let ytPlayer=null, currentUrl="", isMuted=localStorage.getItem('hitv_sound')!=='on', currentMode="manual", currentQueueIndex=-1, lineupCache={}, lineupKeys=[], programCache={}, programPlayingKey="", programEndAt=0, lastLiveKey="";
 let lastAdvanceAt=0;
-setInterval(()=>{
-  get(ref(db,'live')).then(s=>{
-    let d=s.val(); if(!d||!d.url) return;
-    if(d.url!==currentUrl || (d.mode==='queue' && typeof d.queueIndex==='number' && d.queueIndex!==currentQueueIndex)){
-      lastLiveKey=""; renderLive(d);
-    }
-  }).catch(()=>{});
-},5000);
-document.addEventListener('visibilitychange',()=>{
-  if(!document.hidden){
-    lastLiveKey="";
-    get(ref(db,'live')).then(s=>{ let d=s.val(); if(d) renderLive(d); }).catch(()=>{});
-  }
-});
-window.addEventListener('focus',()=>{
-  lastLiveKey="";
-  get(ref(db,'live')).then(s=>{ let d=s.val(); if(d) renderLive(d); }).catch(()=>{});
-});
+setInterval(()=>{ get(ref(db,'live')).then(s=>{ let d=s.val(); if(!d||!d.url) return; if(d.url!==currentUrl || (d.mode==='queue' && typeof d.queueIndex==='number' && d.queueIndex!==currentQueueIndex)){ lastLiveKey=""; renderLive(d); } }).catch(()=>{}); },5000);
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ lastLiveKey=""; get(ref(db,'live')).then(s=>{ let d=s.val(); if(d) renderLive(d); }).catch(()=>{}); } });
+window.addEventListener('focus',()=>{ lastLiveKey=""; get(ref(db,'live')).then(s=>{ let d=s.val(); if(d) renderLive(d); }).catch(()=>{}); });
 function getEAT(){ let d=new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Kampala'})); let hh=String(d.getHours()).padStart(2,'0'); let mm=String(d.getMinutes()).padStart(2,'0'); return {hhmm:hh+':'+mm, date:d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}; }
-function checkPrograms(){
-  let eat=getEAT(); let found=null, foundKey="";
-  Object.entries(programCache).forEach(([k,p])=>{ if(p.time===eat.hhmm && p.lastPlayedDate!==eat.date){ found=p; foundKey=k; } });
-  if(found){ programPlayingKey=foundKey; let mins=parseInt(found.duration||30); programEndAt=Date.now()+mins*60000; update(ref(db,'programs/'+foundKey),{lastPlayedDate:eat.date}); set(ref(db,'live'),{url:found.url,title:found.title||found.name,detail:found.detail||found.name,mode:'program',startedAt:Date.now(),programKey:foundKey}); }
-  if(programPlayingKey && Date.now()>programEndAt){ programPlayingKey=""; }
-}
+function checkPrograms(){ let eat=getEAT(); let found=null, foundKey=""; Object.entries(programCache).forEach(([k,p])=>{ if(p.time===eat.hhmm && p.lastPlayedDate!==eat.date){ found=p; foundKey=k; } }); if(found){ programPlayingKey=foundKey; let mins=parseInt(found.duration||30); programEndAt=Date.now()+mins*60000; update(ref(db,'programs/'+foundKey),{lastPlayedDate:eat.date}); set(ref(db,'live'),{url:found.url,title:found.title||found.name,detail:found.detail||found.name,mode:'program',startedAt:Date.now(),programKey:foundKey}); } if(programPlayingKey && Date.now()>programEndAt){ programPlayingKey=""; } }
 setInterval(checkPrograms,10000);
-function startQueueAt(idx){
-  if(!lineupKeys.length) return;
-  let i=((idx%lineupKeys.length)+lineupKeys.length)%lineupKeys.length;
-  let item=lineupCache[lineupKeys[i]];
-  currentMode='queue'; currentQueueIndex=i;
-  lastLiveKey="";
-  if(ytPlayer){ try{ytPlayer.destroy();}catch(e){} ytPlayer=null; }
-  set(ref(db,'queueState'),{playing:true,index:i,startedAt:Date.now()});
-  set(ref(db,'live'),{url:item.url,title:item.title,detail:item.detail,mode:'queue',startedAt:Date.now(),queueIndex:i});
-}
-function playNextImmediate(){
-  if(currentMode==='program') return;
-  if(currentMode==='playlist') return;
-  if(!lineupKeys.length) return;
-  if(Date.now()-lastAdvanceAt<5000) return;
-  lastAdvanceAt=Date.now();
-  get(ref(db,'live')).then(s=>{
-    let d=s.val()||{};
-    let cur=(typeof d.queueIndex==='number') ? d.queueIndex : currentQueueIndex;
-    let next=(cur+1)%lineupKeys.length;
-    if(next===cur && lineupKeys.length>1) next=0;
-    startQueueAt(next);
-  });
-}
-function renderLive(d){
-  if(!d||!d.url){ document.getElementById('playerBox').innerHTML='Waiting for Live...<br>No video yet.'; return; }
-  let key=d.url+'|'+(d.startedAt||0)+'|'+(d.mode||'');
-  if(key===lastLiveKey && ytPlayer) return;
-  lastLiveKey=key; currentUrl=d.url; currentMode=d.mode||'manual';
-  if(d.mode==='queue') currentQueueIndex=d.queueIndex||0;
-  document.getElementById('nowPlaying').innerText=d.title||d.url||"-"; document.getElementById('nowDetail').innerText=d.detail||"";
-  let box=document.getElementById('playerBox');
-  let seekSec=0; if(d.startedAt) seekSec=Math.floor((Date.now()-d.startedAt)/1000);
-  let yid=getYTId(d.url);
-  let plist=getPlaylistId(d.url);
-  if(plist){
-    currentMode='playlist';
-    box.innerHTML=`<div class="ytCrop"><div id="ytDiv" style="width:100%;height:100%"></div></div><div class="ytBlock"></div>`;
-    if(ytPlayer){ try{ytPlayer.destroy();}catch(e){} }
-    ytPlayer=new YT.Player('ytDiv',{playerVars:{autoplay:1,controls:0,disablekb:1,modestbranding:1,rel:0,playsinline:1,fs:0,mute:1,listType:'playlist',list:plist},events:{onReady:e=>{ if(isMuted){ e.target.mute(); } else { e.target.unMute(); e.target.setVolume(100); } e.target.playVideo(); document.getElementById('soundBtn').innerText=isMuted?'TAP FOR SOUND':'SOUND ON'; }}});
-    return;
-  }
-  if(yid){
-    box.innerHTML=`<div class="ytCrop"><div id="ytDiv" style="width:100%;height:100%"></div></div><div class="ytBlock"></div>`;
-    if(ytPlayer){ try{ytPlayer.destroy();}catch(e){} }
-    ytPlayer=new YT.Player('ytDiv',{videoId:yid,playerVars:{autoplay:1,controls:0,disablekb:1,modestbranding:1,rel:0,playsinline:1,fs:0,mute:1,iv_load_policy:3,cc_load_policy:0,showinfo:0},events:{onReady:e=>{ if(isMuted){ e.target.mute(); } else { e.target.unMute(); e.target.setVolume(100); } if(seekSec>3){ try{e.target.seekTo(seekSec,true);}catch(err){} } e.target.playVideo(); document.getElementById('soundBtn').innerText=isMuted?'TAP FOR SOUND':'SOUND ON'; },onStateChange:e=>{ if(e.data===0){ playNextImmediate(); } }}});
-  } else {
-    box.innerHTML=`<video src="${d.url}" autoplay playsinline ${isMuted?'muted':''} controlsList="nodownload nofullscreen noremoteplayback" disablePictureInPicture></video><div class="ytBlock"></div>`;
-    let v=box.querySelector('video'); if(seekSec>3){ v.currentTime=seekSec; } v.volume=isMuted?0:1; v.play().catch(()=>{}); v.onended=()=>playNextImmediate();
-  }
-}
+function startQueueAt(idx){ if(!lineupKeys.length) return; let i=((idx%lineupKeys.length)+lineupKeys.length)%lineupKeys.length; let item=lineupCache[lineupKeys[i]]; currentMode='queue'; currentQueueIndex=i; lastLiveKey=""; if(ytPlayer){ try{ytPlayer.destroy();}catch(e){} ytPlayer=null; } set(ref(db,'queueState'),{playing:true,index:i,startedAt:Date.now()}); set(ref(db,'live'),{url:item.url,title:item.title,detail:item.detail,mode:'queue',startedAt:Date.now(),queueIndex:i}); }
+function playNextImmediate(){ if(currentMode==='program') return; if(currentMode==='playlist') return; if(!lineupKeys.length) return; if(Date.now()-lastAdvanceAt<5000) return; lastAdvanceAt=Date.now(); get(ref(db,'live')).then(s=>{ let d=s.val()||{}; let cur=(typeof d.queueIndex==='number') ? d.queueIndex : currentQueueIndex; let next=(cur+1)%lineupKeys.length; if(next===cur && lineupKeys.length>1) next=0; startQueueAt(next); }); }
+function renderLive(d){ if(!d||!d.url){ document.getElementById('playerBox').innerHTML='Waiting for Live...<br>No video yet.'; return; } let key=d.url+'|'+(d.startedAt||0)+'|'+(d.mode||''); if(key===lastLiveKey && ytPlayer) return; lastLiveKey=key; currentUrl=d.url; currentMode=d.mode||'manual'; if(d.mode==='queue') currentQueueIndex=d.queueIndex||0; document.getElementById('nowPlaying').innerText=d.title||d.url||"-"; document.getElementById('nowDetail').innerText=d.detail||""; let box=document.getElementById('playerBox'); let seekSec=0; if(d.startedAt) seekSec=Math.floor((Date.now()-d.startedAt)/1000); let yid=getYTId(d.url); let plist=getPlaylistId(d.url); if(plist){ currentMode='playlist'; box.innerHTML=`<div class="ytCrop"><div id="ytDiv" style="width:100%;height:100%"></div></div><div class="ytBlock"></div>`; if(ytPlayer){ try{ytPlayer.destroy();}catch(e){} } ytPlayer=new YT.Player('ytDiv',{playerVars:{autoplay:1,controls:0,disablekb:1,modestbranding:1,rel:0,playsinline:1,fs:0,mute:1,listType:'playlist',list:plist},events:{onReady:e=>{ if(isMuted){ e.target.mute(); } else { e.target.unMute(); e.target.setVolume(100); } e.target.playVideo(); document.getElementById('soundBtn').innerText=isMuted?'TAP FOR SOUND':'SOUND ON'; }}}); return; } if(yid){ box.innerHTML=`<div class="ytCrop"><div id="ytDiv" style="width:100%;height:100%"></div></div><div class="ytBlock"></div>`; if(ytPlayer){ try{ytPlayer.destroy();}catch(e){} } ytPlayer=new YT.Player('ytDiv',{videoId:yid,playerVars:{autoplay:1,controls:0,disablekb:1,modestbranding:1,rel:0,playsinline:1,fs:0,mute:1,iv_load_policy:3,cc_load_policy:0,showinfo:0},events:{onReady:e=>{ if(isMuted){ e.target.mute(); } else { e.target.unMute(); e.target.setVolume(100); } if(seekSec>3){ try{e.target.seekTo(seekSec,true);}catch(err){} } e.target.playVideo(); document.getElementById('soundBtn').innerText=isMuted?'TAP FOR SOUND':'SOUND ON'; },onStateChange:e=>{ if(e.data===0){ playNextImmediate(); } }}}); } else { box.innerHTML=`<video src="${d.url}" autoplay playsinline ${isMuted?'muted':''} controlsList="nodownload nofullscreen noremoteplayback" disablePictureInPicture></video><div class="ytBlock"></div>`; let v=box.querySelector('video'); if(seekSec>3){ v.currentTime=seekSec; } v.volume=isMuted?0:1; v.play().catch(()=>{}); v.onended=()=>playNextImmediate(); } }
 window.tapSound=()=>{ isMuted=false; localStorage.setItem('hitv_sound','on'); let btn=document.getElementById('soundBtn'); if(ytPlayer && ytPlayer.unMute){ ytPlayer.unMute(); ytPlayer.setVolume(100); ytPlayer.playVideo(); } let v=document.querySelector('#videoWrap video'); if(v){ v.muted=false; v.volume=1; v.play().catch(()=>{}); } if(btn) btn.innerText='SOUND ON'; };
 window.toggleMute=()=>{ isMuted=!isMuted; localStorage.setItem('hitv_sound',isMuted?'off':'on'); if(ytPlayer){ isMuted?ytPlayer.mute():ytPlayer.unMute(); } let v=document.querySelector('#videoWrap video'); if(v) v.muted=isMuted; let btn=document.getElementById('soundBtn'); if(btn) btn.innerText=isMuted?'TAP FOR SOUND':'SOUND ON'; };
 window.requestPiP=()=>{let v=document.querySelector('#videoWrap video'); if(v&&document.pictureInPictureEnabled) v.requestPictureInPicture().catch(()=>alert('PiP not available for YouTube, use video file')); else alert('PiP: Keep watching while using other apps - works for MP4 videos');}
-window.downloadVideo=()=>{
-  if(!currentUrl) return alert('No video playing');
-  let yid=getYTId(currentUrl);
-  if(yid){ window.open('https://www.youtube.com/watch?v='+yid,'_blank'); setTimeout(()=>{ window.open('https://yt1s.com/en/youtube-to-mp4?q=https://www.youtube.com/watch?v='+yid,'_blank'); },400); alert('YouTube blocks direct download. We opened YouTube + Downloader for you.'); }
-  else { let a=document.createElement('a'); a.href=currentUrl; a.download='hit-tv-video.mp4'; a.target='_blank'; document.body.appendChild(a); a.click(); a.remove(); }
-};
-window.downloadAudio=()=>{
-  if(!currentUrl) return alert('No video playing');
-  let yid=getYTId(currentUrl);
-  if(yid){ window.open('https://yt1s.com/en/youtube-to-mp3?q=https://www.youtube.com/watch?v='+yid,'_blank'); alert('Downloader opened. Tap MP3 to download Audio.'); }
-  else { let a=document.createElement('a'); a.href=currentUrl; a.download='hit-tv-audio.mp3'; a.target='_blank'; document.body.appendChild(a); a.click(); a.remove(); }
-};
+window.downloadVideo=()=>{ if(!currentUrl) return alert('No video playing'); let yid=getYTId(currentUrl); if(yid){ window.open('https://www.youtube.com/watch?v='+yid,'_blank'); setTimeout(()=>{ window.open('https://yt1s.com/en/youtube-to-mp4?q=https://www.youtube.com/watch?v='+yid,'_blank'); },400); alert('YouTube blocks direct download. We opened YouTube + Downloader for you.'); } else { let a=document.createElement('a'); a.href=currentUrl; a.download='hit-tv-video.mp4'; a.target='_blank'; document.body.appendChild(a); a.click(); a.remove(); } };
+window.downloadAudio=()=>{ if(!currentUrl) return alert('No video playing'); let yid=getYTId(currentUrl); if(yid){ window.open('https://yt1s.com/en/youtube-to-mp3?q=https://www.youtube.com/watch?v='+yid,'_blank'); alert('Downloader opened. Tap MP3 to download Audio.'); } else { let a=document.createElement('a'); a.href=currentUrl; a.download='hit-tv-audio.mp3'; a.target='_blank'; document.body.appendChild(a); a.click(); a.remove(); } };
 onValue(ref(db,'live'),snap=>{let d=snap.val(); if(d) renderLive(d);});
 onValue(ref(db,'ticker'),snap=>{let t=snap.val(); if(t) document.getElementById('tickerText').innerText=t.text||t;});
 onValue(ref(db,'programs'),snap=>{ programCache=snap.val()||{}; checkPrograms(); });
 onValue(ref(db,'queueState'),snap=>{ let q=snap.val(); if(q && q.playing===false){ currentMode='manual'; } });
 onValue(ref(db,'lineup'),snap=>{ lineupCache=snap.val()||{}; lineupKeys=Object.keys(lineupCache); if(lineupKeys.length>1){ let ni=(currentQueueIndex+1)%lineupKeys.length; document.getElementById('nextPlaying').innerText=lineupCache[lineupKeys[ni]].title||'Hit Song'; } else document.getElementById('nextPlaying').innerText='-'; });
 onValue(ref(db,'comments'),snap=>{let v=snap.val()||{}; let h1=""; Object.values(v).forEach(c=>{h1+=`<div class="item"><b>${c.name}:</b> ${c.text}<div class="muted">${c.reply? 'Admin: '+c.reply : ''}</div></div>`;}); document.getElementById('viewerComments').innerHTML=h1;});
-onValue(ref(db,'notifications'),snap=>{let v=snap.val()||{}; let 
+onValue(ref(db,'notifications'),snap=>{let v=snap.val()||{}; let h=""; Object.values(v).reverse().forEach(n=>{h+=`<div class="item">${n.text}</div>`;}); document.getElementById('viewerNotifs').innerHTML=h||'No notifications';});
+onValue(ref(db,'au
