@@ -4,33 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Hit TV by Inno</title>
-<script>
-try{
-  var _n = localStorage.getItem('hitv_name');
-  if(!_n){ var _m = document.cookie.match(/(?:^|;)hitv_name=([^;]*)/); if(_m) _n = decodeURIComponent(_m[1]); }
-  if(_n){ document.documentElement.className += ' logged-in'; }
-}catch(e){}
-</script>
 <style>
-html.logged-in #nameGate{display:none !important}
-html.logged-in #viewerMain{display:block !important}
 *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif}
 body{background:#000;color:#fff;overflow-x:hidden;padding-bottom:70px}
 .topbar{background:linear-gradient(90deg,#000,#0a1a4a,#000);padding:12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;border-bottom:2px solid #1e3a8a}
-.topbar h1{font-size:18px;letter-spacing:.5px}.topbar h1 span{color:#3b82f6}
+.topbar h1{font-size:18px}.topbar h1 span{color:#3b82f6}
 .topbar button{background:#111;color:#fff;border:1px solid #333;padding:8px 12px;border-radius:20px;font-weight:700}
-#offlineBanner{display:none;background:#b91c1c;text-align:center;padding:7px;font-size:13px;font-weight:700}
-#offlineFull{display:none;position:fixed;inset:0;z-index:9999;background:#000;color:#fff;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px}
-#offlineFull h1{font-size:28px;letter-spacing:2px;margin-bottom:12px}#offlineFull h1 span{color:#3b82f6}#offlineFull p{color:#bbb;font-size:15px;line-height:1.6;max-width:420px}#offlineFull .offBadge{border:2px solid #b91c1c;color:#fff;padding:8px 18px;border-radius:30px;font-weight:800;letter-spacing:1px;margin-bottom:18px}
 .card{background:#0a0a0a;border:1px solid #222;border-radius:14px;padding:12px;margin:10px}
 input,select,textarea{width:100%;background:#111;color:#fff;border:1px solid #333;border-radius:10px;padding:11px;margin-top:7px;font-size:15px}
 .btn{width:100%;background:#1e3a8a;color:#fff;border:none;padding:13px;border-radius:12px;font-weight:800;margin-top:9px;font-size:15px;cursor:pointer}
 .btn2{background:#222}.btnRed{background:#b91c1c}
-.bottomNav{position:fixed;left:0;right:0;bottom:0;z-index:200;background:#0a0a0a;border-top:1px solid #333;display:flex;padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
-.bottomNav button{flex:1;background:transparent;border:none;color:#aaa;padding:10px 2px;font-size:12px;font-weight:700;line-height:1.2}
-.bottomNav button.active{color:#fff;background:#1e3a8a;border-radius:12px}
-.bottomNav button span{display:block;font-size:18px}
-.videoWrap{position:relative;width:100%;aspect-ratio:4/3;background:#000;overflow:hidden;border-radius:12px;border:1px solid #222;box-shadow:0 10px 30px rgba(0,0,0,.6)}
+.videoWrap{position:relative;width:100%;aspect-ratio:16/9;background:#000;overflow:hidden;border-radius:12px;border:1px solid #222}
 .videoWrap iframe,.videoWrap video{width:100%;height:100%;object-fit:cover;border:0;pointer-events:none}
 .ytCrop{position:absolute;inset:0;overflow:hidden;background:#000}
 .ytCrop iframe{position:absolute;left:50%;top:50%;width:180% !important;height:180% !important;transform:translate(-50%,-50%);pointer-events:none}
@@ -39,87 +23,63 @@ input,select,textarea{width:100%;background:#111;color:#fff;border:1px solid #33
 .ticker span{display:inline-block;padding-left:100%;animation:tick 20s linear infinite}
 @keyframes tick{from{transform:translateX(0)}to{transform:translateX(-100%)}}
 .soundBtn{position:absolute;top:8px;right:8px;z-index:6;background:#1e3a8a;color:#fff;border:none;padding:8px 12px;border-radius:20px;font-weight:800}
-.liveBadge{display:inline-flex;align-items:center;gap:6px;background:#b91c1c;color:#fff;padding:6px 10px;border-radius:20px;font-size:12px;font-weight:800;letter-spacing:1px}.liveBadge i{width:8px;height:8px;background:#fff;border-radius:50%;display:inline-block;animation:pulse 1.2s infinite}@keyframes pulse{0%{opacity:1}50%{opacity:.3}100%{opacity:1}}
+.liveBadge{display:inline-flex;align-items:center;gap:6px;background:#b91c1c;color:#fff;padding:6px 10px;border-radius:20px;font-size:12px;font-weight:800}.liveBadge i{width:8px;height:8px;background:#fff;border-radius:50%;display:inline-block}
 .nowBox{display:flex;justify-content:space-between;gap:8px;margin-top:8px}
 .nowBox div{flex:1;background:#111;border:1px solid #222;border-radius:10px;padding:9px}
 .nowBox small{color:#aaa}.pill{background:#111;border:1px solid #333;padding:6px 10px;border-radius:20px;font-size:12px}
 .row{display:flex;gap:8px}.row>*{flex:1}
 .item{background:#111;border:1px solid #222;border-radius:12px;padding:10px;margin-top:8px}
-.item b{font-size:14px;word-break:break-all}.muted{color:#aaa;font-size:13px}
-.toggle{display:flex;justify-content:space-between;align-items:center;background:#111;border:1px solid #222;border-radius:12px;padding:12px;margin-top:8px}
-.switch{width:52px;height:28px;background:#333;border-radius:20px;position:relative;cursor:pointer}
-.switch:after{content:"";position:absolute;width:22px;height:22px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.2s}
-.switch.on{background:#1e3a8a}.switch.on:after{left:27px}
-body.light{background:#fff;color:#000}.light .card,.light .item,.light .nowBox div,.light .toggle{background:#f2f2f2;border-color:#ddd;color:#000}
-.light input,.light select,.light textarea{background:#fff;color:#000;border-color:#ccc}
-.light .topbar{background:#fff;color:#000}.light .bottomNav{background:#fff;border-color:#ddd}.light .bottomNav button{color:#666}.light .bottomNav button.active{color:#fff}
+.muted{color:#aaa;font-size:13px}
 .hidden{display:none!important}
-#settingsBox{position:fixed;inset:0;z-index:300;background:#000;margin:0;border-radius:0;overflow-y:auto;padding:16px;padding-bottom:80px}
-body.light #settingsBox{background:#fff;color:#000}
-.pageHead{padding:14px 10px 4px}.pageHead h2{font-size:20px}
 </style>
 </head>
 <body>
-<div id="offlineBanner">YOU ARE OFFLINE - You stay inside app</div>
-<div id="offlineFull"><div class="offBadge">OFFLINE</div><h1>Hit TV <span>by Inno</span></h1><p>You are offline. Please check your internet connection.<br>Stay on this page. When you come back online, Hit TV App will come itself.</p></div>
-<div class="topbar"><h1>Hit TV <span>by Inno</span></h1><div><button onclick="openSettings()">Settings</button></div></div>
+<div class="topbar"><h1>Hit TV <span>by Inno</span></h1><div><span id="adminBadge" class="hidden" style="background:#b91c1c;padding:6px 10px;border-radius:20px;font-size:12px;font-weight:800">ADMIN</span></div></div>
+
+<!-- NAME GATE - VIEWERS ONLY -->
 <div id="nameGate" class="card">
   <h2>Enter Name To Watch</h2><p class="muted">Enter your name to watch Hit TV live.</p>
   <input id="viewerName" placeholder="Enter your name...">
   <button class="btn" onclick="enterWatch()">Enter To Watch</button>
 </div>
+
 <div id="viewerMain" class="hidden">
-  <div id="v-home">
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center"><b id="helloName">LIVE</b><span class="pill" id="liveStatus"><span class="liveBadge"><i></i>LIVE • 24/7</span></span></div>
-      <div class="videoWrap" id="videoWrap">
-        <div id="playerBox" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;color:#aaa">Waiting for Live...<br>No video yet.</div>
-        <button class="soundBtn" id="soundBtn" onclick="tapSound()">TAP FOR SOUND</button>
-        <div class="ticker"><span id="tickerText"> •</span></div>
-      </div>
-      <div class="nowBox"><div><small>NOW PLAYING</small><br><b id="nowPlaying">-</b><br><span class="muted" id="nowDetail"></span></div><div><small>NEXT</small><br><b id="nextPlaying">-</b></div></div>
-      <div class="row"><button class="btn btn2" onclick="downloadVideo()">Download Video</button><button class="btn btn2" onclick="downloadAudio()">Download Audio</button></div>
-      <div class="row"><button class="btn btn2" onclick="requestPiP()">Picture in Picture</button><button class="btn btn2" onclick="toggleMute()">Mute / Unmute</button></div>
-      <p class="muted" style="margin-top:8px">Real TV: No pause, no forward, no seek. You join where live is now.</p>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center"><b id="helloName">LIVE</b><span class="pill"><span class="liveBadge"><i></i>LIVE • 24/7</span></span></div>
+    <div class="videoWrap" id="videoWrap">
+      <div id="playerBox" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;color:#aaa">Waiting for Live...<br>No video yet.</div>
+      <button class="soundBtn" id="soundBtn" onclick="tapSound()">TAP FOR SOUND</button>
+      <div class="ticker"><span id="tickerText"> • Welcome to Hit TV by Inno •</span></div>
     </div>
-    <div class="card"><h3>Live Comments - To Admin</h3><input id="commentInput" placeholder="Write comment..."><button class="btn" onclick="sendComment()">Send Comment</button><div id="viewerComments"></div></div>
+    <div class="nowBox"><div><small>NOW PLAYING</small><br><b id="nowPlaying">-</b><br><span class="muted" id="nowDetail"></span></div><div><small>NEXT</small><br><b id="nextPlaying">-</b></div></div>
+    <div class="row"><button class="btn btn2" onclick="requestPiP()">Picture in Picture</button><button class="btn btn2" onclick="toggleMute()">Mute / Unmute</button></div>
+    <p class="muted" style="margin-top:8px">Real TV: No pause, no forward, no seek. You join where live is now.</p>
   </div>
-  <div id="v-notif" class="hidden">
-    <div class="pageHead"><h2>Notifications</h2><p class="muted">Messages from Admin</p></div>
-    <div class="card"><div id="viewerNotifs"></div></div>
+  <div class="card"><h3>Live Comments - To Admin</h3><input id="commentInput" placeholder="Write comment..."><button class="btn" onclick="sendComment()">Send Comment</button><div id="viewerComments"></div></div>
+</div>
+
+<!-- ADMIN PANEL - ONLY ?admin=1 -->
+<div id="adminMain" class="hidden">
+  <div class="card"><h2>Admin - Add Video</h2>
+    <input id="adminTitle" placeholder="Title e.g. Song Name">
+    <input id="adminUrl" placeholder="YouTube link e.g. https://youtu.be/dQw4w9WgXcQ">
+    <input id="adminDetail" placeholder="Artist / Detail">
+    <button class="btn" onclick="addToLineup()">Add To Lineup</button>
   </div>
-  <div id="v-audio" class="hidden">
-    <div class="pageHead"><h2>Audio Streams</h2><p class="muted">Listen to audio songs</p></div>
-    <div class="card"><div id="viewerAudio"></div></div>
+  <div class="card"><h3>Lineup</h3><div id="adminLineup"></div>
+    <div class="row"><button class="btn" onclick="startLineup()">START LINEUP</button><button class="btn btn2" onclick="playNext()">NEXT ⏭</button></div>
+    <button class="btn btnRed" onclick="stopLive()">STOP LIVE</button>
+    <p class="muted" id="adminStatus" style="margin-top:8px">Not live yet</p>
   </div>
-  <div id="v-artist" class="hidden">
-    <div class="pageHead"><h2>Artist Console</h2><p class="muted">Submit your song to Admin</p></div>
-    <div class="card"><input id="artistName" placeholder="Artist Name"><input id="artistLink" placeholder="YouTube / Drive Link"><button class="btn" onclick="submitArtist()">Submit To Admin</button></div>
-  </div>
-  <div class="bottomNav" id="bottomNav">
-    <button class="active" onclick="vTab('home',this)"><span>⌂</span>Home</button>
-    <button onclick="vTab('notif',this)"><span>◎</span>Notifications</button>
-    <button onclick="vTab('audio',this)"><span>♫</span>Audio Streams</button>
-    <button onclick="vTab('artist',this)"><span>☆</span>Artist Console</button>
+  <div class="card"><h3>Admin Preview - Same As Viewers See</h3>
+    <p class="muted">This preview uses same LIVE node as viewers. If this plays, viewers MUST play.</p>
   </div>
 </div>
-<div id="settingsBox" class="hidden">
-  <div style="display:flex;justify-content:space-between;align-items:center"><h2>Settings</h2><button class="btn2" style="background:#222;color:#fff;border:1px solid #333;padding:8px 14px;border-radius:20px;font-weight:700" onclick="openSettings()">Close X</button></div>
-  <div class="toggle"><span>Black & White Mode</span><div class="switch" id="themeSwitch" onclick="toggleTheme()"></div></div>
-  <p class="muted">Professional toggle. Black = dark, White = light.</p>
-  <div class="card" style="margin:10px 0"><h3>Send Us Feedback</h3><input id="feedbackText" placeholder="Send us feedback..."><button class="btn" onclick="sendFeedback()">Send Feedback</button></div>
-  <div class="card" style="margin:10px 0"><h3>About</h3><p class="muted">Hit TV by Inno • Live TV 24/7</p></div>
-  <button class="btn btn2" onclick="openSettings()">Close Settings</button>
-</div>
-<script>
-window.vTab=function(id,el){['home','notif','audio','artist'].forEach(function(x){var e=document.getElementById('v-'+x); if(e) e.classList.add('hidden');}); var t=document.getElementById('v-'+id); if(t) t.classList.remove('hidden'); document.querySelectorAll('#bottomNav button').forEach(function(b){b.classList.remove('active');}); if(el) el.classList.add('active'); window.scrollTo(0,0);};
-window.openSettings=function(){var s=document.getElementById('settingsBox'); if(!s) return; s.classList.toggle('hidden'); if(!s.classList.contains('hidden')) window.scrollTo(0,0);};
-window.toggleTheme=function(){document.body.classList.toggle('light'); var sw=document.getElementById('themeSwitch'); if(sw) sw.classList.toggle('on');};
-</script>
+
 <script src="https://www.youtube.com/iframe_api"></script>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {getDatabase,ref,set,push,onValue,update,get} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import {getDatabase,ref,set,push,onValue,update,get,remove} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 const firebaseConfig = {
   apiKey: "AIzaSyBT9bXCGb6WgriW1wodo6IeRKOUQ5jdCes",
   authDomain: "hit-tv-app-40fb9.firebaseapp.com",
@@ -130,112 +90,100 @@ const firebaseConfig = {
   appId: "1:740828744097:web:49104b3522d02de64ce3e0"
 };
 const app=initializeApp(firebaseConfig); const db=getDatabase(app);
-function getSavedName(){ try{let n=localStorage.getItem('hitv_name'); if(n) return n;}catch(e){} try{let m=document.cookie.match(/(?:^|;)hitv_name=([^;]*)/); if(m) return decodeURIComponent(m[1]);}catch(e){} return ""; }
+const isAdmin = new URLSearchParams(location.search).get('admin')==='1';
+
+// --- NAME ---
+function getSavedName(){ try{return localStorage.getItem('hitv_name')||"";}catch(e){return "";} }
 function saveName(n){ try{localStorage.setItem('hitv_name',n);}catch(e){} try{document.cookie="hitv_name="+encodeURIComponent(n)+";max-age=31536000;path=/";}catch(e){} }
 let myName=getSavedName();
-function goInside(){ document.getElementById('nameGate').classList.add('hidden'); document.getElementById('viewerMain').classList.remove('hidden'); document.getElementById('helloName').innerText='Hi '+myName+' • LIVE'; try{set(ref(db,'users/'+myName),{name:myName,online:true,lastSeen:Date.now()});}catch(e){} setInterval(()=>{try{update(ref(db,'users/'+myName),{online:true,lastSeen:Date.now()});}catch(e){}},15000); }
-if(myName){ document.getElementById('viewerName').value=myName; goInside(); }
-let offlineSince=0, offlineTimer=null;
-function checkOnline(){
-  let online=navigator.onLine;
-  document.getElementById('offlineBanner').style.display=online?'none':'block';
-  let full=document.getElementById('offlineFull');
-  if(online){ offlineSince=0; if(full) full.style.display='none'; if(offlineTimer){clearInterval(offlineTimer); offlineTimer=null;} }
-  else{
-    if(!offlineSince){ offlineSince=Date.now(); if(!offlineTimer){ offlineTimer=setInterval(()=>{ if(!navigator.onLine && Date.now()-offlineSince>=300000){ if(full) full.style.display='flex'; } },1000); } }
-  }
+function goInside(){
+  document.getElementById('nameGate').classList.add('hidden');
+  document.getElementById('viewerMain').classList.remove('hidden');
+  document.getElementById('helloName').innerText='Hi '+myName+' • LIVE';
+  try{set(ref(db,'users/'+myName),{name:myName,online:true,lastSeen:Date.now()});}catch(e){}
 }
-window.addEventListener('online',()=>{checkOnline(); doResync();}); window.addEventListener('offline',checkOnline); checkOnline();
-document.addEventListener('visibilitychange',()=>{ if(!document.hidden) doResync(); });
 window.enterWatch=()=>{let n=document.getElementById('viewerName').value.trim(); if(!n) return alert('Enter your name'); myName=n; saveName(n); goInside();};
+
+if(isAdmin){
+  document.getElementById('nameGate').classList.add('hidden');
+  document.getElementById('viewerMain').classList.remove('hidden');
+  document.getElementById('adminMain').classList.remove('hidden');
+  document.getElementById('adminBadge').classList.remove('hidden');
+  document.getElementById('helloName').innerText='Hi Admin • LIVE';
+  myName='Admin';
+} else {
+  if(myName){ document.getElementById('viewerName').value=myName; goInside(); }
+}
+
 window.getYTId=(url)=>{let m=(url||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/); return m?m[1]:null;}
-let ytPlayer=null, currentUrl="", isMuted=true, currentMode="manual", currentQueueIndex=-1, lineupCache={}, lineupKeys=[], programCache={}, programPlayingKey="", programEndAt=0;
-let lastLiveKey="", lastLiveData=null, soundSaved=false;
-try{ soundSaved=localStorage.getItem('hitv_sound')==='1'; if(soundSaved) isMuted=false; }catch(e){}
-function applySoundState(){ let btn=document.getElementById('soundBtn'); if(!btn) return; btn.innerText=(!isMuted)?'SOUND ON':'TAP FOR SOUND'; if(!isMuted){ if(ytPlayer&&ytPlayer.unMute){ ytPlayer.unMute(); ytPlayer.setVolume(100); } let v=document.querySelector('#videoWrap video'); if(v){ v.muted=false; v.volume=1; } } }
-function getEAT(){ let d=new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Kampala'})); let hh=String(d.getHours()).padStart(2,'0'); let mm=String(d.getMinutes()).padStart(2,'0'); return {hhmm:hh+':'+mm, date:d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}; }
-function checkPrograms(){
-  let eat=getEAT(); let found=null, foundKey="";
-  Object.entries(programCache).forEach(([k,p])=>{
-    if(p.time===eat.hhmm && p.lastPlayedDate!==eat.date){ found=p; foundKey=k; }
-    if(p.time===eat.hhmm && programPlayingKey===k && Date.now()>programEndAt){ programPlayingKey=""; }
-  });
-  if(found){
-    programPlayingKey=foundKey; let mins=parseInt(found.duration||30); programEndAt=Date.now()+mins*60000;
-    update(ref(db,'programs/'+foundKey),{lastPlayedDate:eat.date});
-    set(ref(db,'live'),{url:found.url,title:found.title||found.name,detail:found.detail||found.name,mode:'program',startedAt:Date.now(),programKey:foundKey});
-  }
-  if(programPlayingKey && Date.now()>programEndAt){ programPlayingKey=""; get(ref(db,'queueState')).then(s=>{ let q=s.val(); if(q && q.playing) startQueueAt(q.index||0); }); }
+let ytPlayer=null, currentUrl="", isMuted=true, currentMode="manual", currentQueueIndex=-1, lineupCache={}, lineupKeys=[];
+let lastLiveKey="";
+
+function applySoundState(){ let btn=document.getElementById('soundBtn'); if(!btn) return; btn.innerText=(!isMuted)?'SOUND ON':'TAP FOR SOUND'; if(!isMuted && ytPlayer && ytPlayer.unMute){ ytPlayer.unMute(); ytPlayer.setVolume(100); } }
+function updateNextLabel(){ if(!lineupKeys.length) return; let ni = currentMode==='queue' ? (currentQueueIndex+1)%lineupKeys.length : 0; document.getElementById('nextPlaying').innerText=lineupCache[lineupKeys[ni]].title||lineupCache[lineupKeys[ni]].url; }
+
+// --- FIX: renderLive accepts BOTH old and new format ---
+function normalizeLive(d){
+  if(!d) return null;
+  if(d.url) return d; // NEW CORRECT FORMAT
+  if(d.current && d.current.url) return {...d.current, startedAt:d.startedAt||d.current.startedAt, mode:d.mode||d.current.mode}; // OLD FORMAT - backward compat
+  return null;
 }
-setInterval(checkPrograms,10000);
-function startQueueAt(idx){
-  if(!lineupKeys.length) return;
-  let i=((idx%lineupKeys.length)+lineupKeys.length)%lineupKeys.length;
-  let item=lineupCache[lineupKeys[i]];
-  currentMode='queue'; currentQueueIndex=i;
-  set(ref(db,'queueState'),{playing:true,index:i,startedAt:Date.now()});
-  set(ref(db,'live'),{url:item.url,title:item.title,detail:item.detail,mode:'queue',startedAt:Date.now(),queueIndex:i});
-}
-let nextTimer=null;
-function playNextImmediate(){
-  if(currentMode==='program') return;
-  if(nextTimer) return; nextTimer=setTimeout(()=>{ nextTimer=null; if(currentMode==='queue' && lineupKeys.length){ startQueueAt(currentQueueIndex+1); return; } if(lineupKeys.length){ startQueueAt(0); } },2000);
-}
-function renderLive(d, force){
+function renderLive(raw, force){
+  let d=normalizeLive(raw);
   if(!d||!d.url){ document.getElementById('playerBox').innerHTML='Waiting for Live...<br>No video yet.'; return; }
   let key=d.url+'|'+(d.startedAt||0)+'|'+(d.mode||'');
   if(key===lastLiveKey && ytPlayer && !force) return;
-  lastLiveKey=key; lastLiveData=d; currentUrl=d.url; currentMode=d.mode||'manual';
+  lastLiveKey=key; currentUrl=d.url; currentMode=d.mode||'manual';
   if(d.mode==='queue') currentQueueIndex=d.queueIndex||0;
   document.getElementById('nowPlaying').innerText=d.title||d.url||"-"; document.getElementById('nowDetail').innerText=d.detail||"";
   let box=document.getElementById('playerBox');
-  let seekSec=0;
-  if(d.startedAt) seekSec=Math.floor((Date.now()-d.startedAt)/1000);
+  let seekSec=0; if(d.startedAt) seekSec=Math.floor((Date.now()-d.startedAt)/1000);
   let yid=window.getYTId(d.url);
   if(yid){
-    if(!window.YT || !window.YT.Player){ setTimeout(()=>renderLive(d,true),800); return; }
+    if(!window.YT || !window.YT.Player){ setTimeout(()=>renderLive(raw,true),800); return; }
     box.innerHTML='<div class="ytCrop"><div id="ytDiv" style="width:100%;height:100%"></div></div><div class="ytBlock"></div>';
     if(ytPlayer){ try{ytPlayer.destroy();}catch(e){} ytPlayer=null; }
-    ytPlayer=new YT.Player('ytDiv',{videoId:yid,playerVars:{autoplay:1,controls:0,disablekb:1,modestbranding:1,rel:0,playsinline:1,fs:0,mute:1,iv_load_policy:3,cc_load_policy:0,showinfo:0},events:{onReady:e=>{ if(!isMuted){ e.target.unMute(); e.target.setVolume(100); } else e.target.mute(); if(seekSec>3){ try{e.target.seekTo(seekSec,true);}catch(err){} } e.target.playVideo(); applySoundState(); },onStateChange:e=>{ if(e.data===0){ playNextImmediate(); } }}});
+    ytPlayer=new YT.Player('ytDiv',{videoId:yid,playerVars:{autoplay:1,controls:0,disablekb:1,modestbranding:1,rel:0,playsinline:1,fs:0,mute:1},events:{onReady:e=>{ if(!isMuted){e.target.unMute(); e.target.setVolume(100);} else e.target.mute(); if(seekSec>3){try{e.target.seekTo(seekSec,true);}catch(err){}} e.target.playVideo(); applySoundState(); },onStateChange:e=>{ if(e.data===0){ if(isAdmin) playNextImmediate(); } }}});
   } else {
-    box.innerHTML='<video src="'+d.url+'" autoplay playsinline muted controlsList="nodownload nofullscreen noremoteplayback" disablePictureInPicture></video><div class="ytBlock"></div>';
-    let v=box.querySelector('video'); if(!isMuted){ v.muted=false; v.volume=1; } if(seekSec>3){ try{v.currentTime=seekSec;}catch(e){} } v.play().catch(()=>{}); v.onended=()=>playNextImmediate(); applySoundState();
+    box.innerHTML='<video src="'+d.url+'" autoplay playsinline muted></video><div class="ytBlock"></div>';
+    let v=box.querySelector('video'); if(seekSec>3){try{v.currentTime=seekSec;}catch(e){}} v.play().catch(()=>{});
   }
   updateNextLabel();
 }
-function updateNextLabel(){ if(!lineupKeys.length) return; if(currentMode==='queue'){ let ni=(currentQueueIndex+1)%lineupKeys.length; document.getElementById('nextPlaying').innerText=lineupCache[lineupKeys[ni]].title||lineupCache[lineupKeys[ni]].url; } else if(lineupKeys.length){ document.getElementById('nextPlaying').innerText=lineupCache[lineupKeys[0]].title||lineupCache[lineupKeys[0]].url; } }
+function playNextImmediate(){ if(currentMode==='queue' && lineupKeys.length){ startQueueAt(currentQueueIndex+1); } }
+function startQueueAt(idx){
+  if(!lineupKeys.length) return;
+  let i=((idx%lineupKeys.length)+lineupKeys.length)%lineupKeys.length;
+  let item=lineupCache[lineupKeys[i]]; currentMode='queue'; currentQueueIndex=i;
+  // RIGHT FORMAT - SAME AS VIEWER EXPECTS
+  set(ref(db,'queueState'),{playing:true,index:i,startedAt:Date.now()});
+  set(ref(db,'live'),{url:item.url,title:item.title,detail:item.detail||"",mode:'queue',startedAt:Date.now(),queueIndex:i});
+}
 function doResync(){
-  if(!navigator.onLine) return;
-  get(ref(db,'live')).then(s=>{ let d=s.val(); if(!d) return; let key=d.url+'|'+(d.startedAt||0)+'|'+(d.mode||''); if(key!==lastLiveKey){ renderLive(d,true); return; } let expected=0; if(d.startedAt){ expected=Math.floor((Date.now()-d.startedAt)/1000); if(ytPlayer && ytPlayer.getCurrentTime){ try{ let cur=ytPlayer.getCurrentTime(); if(Math.abs(cur-expected)>6){ ytPlayer.seekTo(expected,true); } }catch(e){} } } let v=document.querySelector('#videoWrap video'); if(v && expected>0 && Math.abs(v.currentTime-expected)>6){ try{v.currentTime=expected;}catch(e){} } }).catch(()=>{});
+  get(ref(db,'live')).then(s=>{ let d=s.val(); if(!d) return; let nd=normalizeLive(d); if(!nd) return; let key=nd.url+'|'+(nd.startedAt||0); if(key!==lastLiveKey){ renderLive(d,true); return; } if(nd.startedAt && ytPlayer && ytPlayer.getCurrentTime){ let expected=Math.floor((Date.now()-nd.startedAt)/1000); try{let cur=ytPlayer.getCurrentTime(); if(Math.abs(cur-expected)>6) ytPlayer.seekTo(expected,true);}catch(e){} } }).catch(()=>{});
 }
 setInterval(doResync,5000);
-window.tapSound=()=>{ isMuted=false; try{localStorage.setItem('hitv_sound','1');}catch(e){} let btn=document.getElementById('soundBtn'); if(ytPlayer && ytPlayer.unMute){ ytPlayer.unMute(); ytPlayer.setVolume(100); ytPlayer.playVideo(); } let v=document.querySelector('#videoWrap video'); if(v){ v.muted=false; v.volume=1; v.play().catch(()=>{}); } if(btn) btn.innerText='SOUND ON'; };
-window.toggleMute=()=>{ isMuted=!isMuted; try{localStorage.setItem('hitv_sound',isMuted?'0':'1');}catch(e){} if(ytPlayer){ isMuted?ytPlayer.mute():ytPlayer.unMute(); } let v=document.querySelector('#videoWrap video'); if(v) v.muted=isMuted; let btn=document.getElementById('soundBtn'); if(btn) btn.innerText=isMuted?'TAP FOR SOUND':'SOUND ON'; };
-window.requestPiP=async()=>{ try{ let v=document.querySelector('#videoWrap video'); if(v && document.pictureInPictureEnabled){ if(document.pictureInPictureElement) await document.exitPictureInPicture(); else await v.requestPictureInPicture(); return; } if(window.documentPictur
-window.requestPiP=async()=>{ try{ let v=document.querySelector('#videoWrap video'); if(v && document.pictureInPictureEnabled){ if(document.pictureInPictureElement) await document.exitPictureInPicture(); else await v.requestPictureInPicture(); return; } if(window.documentPictureInPicture){ let pipWin=await documentPictureInPicture.requestWindow({width:640,height:480}); let box=document.getElementById('playerBox'); if(box){ pipWin.document.body.innerHTML=''; let clone=box.cloneNode(true); clone.style.width='100%'; clone.style.height='100%'; pipWin.document.body.appendChild(clone); let yid=window.getYTId(currentUrl); if(yid){ clone.innerHTML='<iframe src="https://www.youtube.com/embed/'+yid+'?autoplay=1&controls=0&modestbranding=1&rel=0" style="width:100%;height:100%;border:0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>'; } } return; } alert('Picture in Picture is not supported on this device. Keep Hit TV open to keep watching.'); }catch(e){ alert('Picture in Picture could not open. Try again.'); } };
-window.downloadVideo=()=>{
-  if(!currentUrl) return alert('No video playing');
-  let yid=window.getYTId(currentUrl);
-  if(yid){ window.open('https://www.youtube.com/watch?v='+yid,'_blank'); setTimeout(()=>{ window.open('https://yt1s.com/en/youtube-to-mp4?q=https://www.youtube.com/watch?v='+yid,'_blank'); },400); alert('YouTube blocks direct download. We opened YouTube + Downloader for you. Paste link there to download Video.'); }
-  else { let a=document.createElement('a'); a.href=currentUrl; a.download='hit-tv-video.mp4'; a.target='_blank'; document.body.appendChild(a); a.click(); a.remove(); }
-};
-window.downloadAudio=()=>{
-  if(!currentUrl) return alert('No video playing');
-  let yid=window.getYTId(currentUrl);
-  if(yid){ window.open('https://yt1s.com/en/youtube-to-mp3?q=https://www.youtube.com/watch?v='+yid,'_blank'); alert('Downloader opened. Tap MP3 to download Audio.'); }
-  else { let a=document.createElement('a'); a.href=currentUrl; a.download='hit-tv-audio.mp3'; a.target='_blank'; document.body.appendChild(a); a.click(); a.remove(); }
-};
+
+// --- LISTENERS - SAME FOR ADMIN + VIEWERS ---
 onValue(ref(db,'live'),snap=>{let d=snap.val(); if(d) renderLive(d);});
 onValue(ref(db,'ticker'),snap=>{let t=snap.val(); if(t) document.getElementById('tickerText').innerText=t.text||t;});
-onValue(ref(db,'programs'),snap=>{ programCache=snap.val()||{}; checkPrograms(); });
-onValue(ref(db,'queueState'),snap=>{ let q=snap.val(); if(q && q.playing===false){ currentMode='manual'; } });
-onValue(ref(db,'lineup'),snap=>{ lineupCache=snap.val()||{}; lineupKeys=Object.keys(lineupCache); updateNextLabel(); });
-onValue(ref(db,'comments'),snap=>{let v=snap.val()||{}; let h1=""; Object.values(v).forEach(c=>{h1+='<div class="item"><b>'+c.name+':</b> '+c.text+'<div class="muted">'+(c.reply? 'Admin: '+c.reply : '')+'</div></div>';}); document.getElementById('viewerComments').innerHTML=h1;});
-onValue(ref(db,'notifications'),snap=>{let v=snap.val()||{}; let h=""; Object.values(v).reverse().forEach(n=>{h+='<div class="item">'+n.text+'</div>';}); document.getElementById('viewerNotifs').innerHTML=h||'No notifications';});
-onValue(ref(db,'audioStreams'),snap=>{let v=snap.val()||{}; let h1=""; Object.values(v).forEach(a=>{h1+='<div class="item"><b>'+a.title+'</b><br><audio controls src="'+a.url+'" style="width:100%"></audio></div>';}); document.getElementById('viewerAudio').innerHTML=h1||'No audio yet';});
+onValue(ref(db,'lineup'),snap=>{ lineupCache=snap.val()||{}; lineupKeys=Object.keys(lineupCache); updateNextLabel(); renderAdminLineup(); });
+onValue(ref(db,'comments'),snap=>{let v=snap.val()||{}; let h=""; Object.values(v).forEach(c=>{h+='<div class="item"><b>'+c.name+':</b> '+c.text+'</div>';}); document.getElementById('viewerComments').innerHTML=h;});
+
+// --- ADMIN ACTIONS - RIGHT FORMAT ---
+window.addToLineup=()=>{ let t=document.getElementById('adminTitle').value.trim(), u=document.getElementById('adminUrl').value.trim(), det=document.getElementById('adminDetail').value.trim(); if(!u) return alert('Enter YouTube link'); push(ref(db,'lineup'),{title:t||u,url:u,detail:det}); document.getElementById('adminTitle').value=''; document.getElementById('adminUrl').value=''; document.getElementById('adminDetail').value=''; alert('Added to lineup'); };
+function renderAdminLineup(){ if(!isAdmin) return; let h=""; lineupKeys.forEach((k,i)=>{ let it=lineupCache[k]; h+='<div class="item"><b>'+(i+1)+'. '+it.title+'</b><br><span class="muted">'+it.url+'</span><br><button class="btn btn2" onclick="deleteLineup(\''+k+'\')">Delete</button></div>'; }); document.getElementById('adminLineup').innerHTML=h||'No videos yet'; }
+window.deleteLineup=(k)=>{ remove(ref(db,'lineup/'+k)); };
+window.startLineup=()=>{ if(!lineupKeys.length) return alert('Add video first'); startQueueAt(0); document.getElementById('adminStatus').innerText='LIVE Started - Viewers will see same video'; };
+window.playNext=()=>{ if(!lineupKeys.length) return; startQueueAt(currentQueueIndex+1); };
+window.stopLive=()=>{ set(ref(db,'live'),{url:"",title:"",mode:'stopped',startedAt:Date.now()}); set(ref(db,'queueState'),{playing:false,index:0}); document.getElementById('playerBox').innerHTML='Waiting for Live...<br>No video yet.'; lastLiveKey=""; };
+
+// --- VIEWER ACTIONS ---
 window.sendComment=()=>{let t=document.getElementById('commentInput').value.trim(); if(!t) return; push(ref(db,'comments'),{name:myName||'Viewer',text:t,reply:"",time:Date.now()}); document.getElementById('commentInput').value=''; alert('Comment sent to Admin');};
-window.submitArtist=()=>{let a=document.getElementById('artistName').value, l=document.getElementById('artistLink').value; if(!a||!l) return alert('Fill all'); push(ref(db,'artistSubmissions'),{artist:a,link:l}); alert('Submitted to Admin');};
-window.sendFeedback=()=>{let t=document.getElementById('feedbackText').value; if(!t) return; push(ref(db,'feedback'),{name:myName,text:t,time:Date.now()}); alert('Feedback sent. Thank you!');};
+window.tapSound=()=>{ isMuted=false; if(ytPlayer && ytPlayer.unMute){ ytPlayer.unMute(); ytPlayer.setVolume(100); ytPlayer.playVideo(); } document.getElementById('soundBtn').innerText='SOUND ON'; };
+window.toggleMute=()=>{ isMuted=!isMuted; if(ytPlayer){ isMuted?ytPlayer.mute():ytPlayer.unMute(); } document.getElementById('soundBtn').innerText=isMuted?'TAP FOR SOUND':'SOUND ON'; };
+window.requestPiP=async()=>{ try{ let v=document.querySelector('#videoWrap video'); if(v && document.pictureInPictureEnabled){ if(document.pictureInPictureElement) await document.exitPictureInPicture(); else await v.requestPictureInPicture(); return; } alert('PiP not supported for YouTube on this device. Keep Hit TV open.'); }catch(e){ alert('PiP could not open.'); } };
 </script>
 </body>
 </html>
