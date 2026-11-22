@@ -141,7 +141,7 @@ function saveName(n){
   try{ localStorage.setItem('hitv_name', n); }catch(e){}
   try{ document.cookie = "hitv_name=" + encodeURIComponent(n) + ";max-age=31536000;path=/"; }catch(e){}
 }
-let myName = getSavedName();
+myName = n; saveName(n);
 let ytPlayer = null, currentUrl = "", isMuted = true;
 
 function autoLogin() {
