@@ -36,7 +36,7 @@ input,select,textarea{width:100%;background:#111;color:#fff;border:1px solid #33
 .ticker{position:absolute;left:0;right:0;bottom:0;background:#1e3a8a;color:#fff;overflow:hidden;white-space:nowrap;padding:7px 0;font-weight:700;font-size:14px;z-index:5}
 .ticker span{display:inline-block;padding-left:100%;animation:tick 20s linear infinite}
 @keyframes tick{from{transform:translateX(0)}to{transform:translateX(-100%)}}
-.soundBtn{position:absolute;top:8px;right:8px;z-index:6;background:#1e3a8a;color:#fff;border:none;padding:8px 12px;border-radius:20px;font-weight:800}
+.soundBtn{background:#1e3a8a;color:#fff;border:none;padding:8px 12px;border-radius:20px;font-weight:800;font-size:12px;white-space:nowrap}
 .nowBox{display:flex;justify-content:space-between;gap:8px;margin-top:8px}
 .nowBox div{flex:1;background:#111;border:1px solid #222;border-radius:10px;padding:9px}
 .nowBox small{color:#aaa}.pill{background:#111;border:1px solid #333;padding:6px 10px;border-radius:20px;font-size:12px}
@@ -67,17 +67,15 @@ body.light #settingsBox{background:#fff;color:#000}
 <div id="viewerMain" class="hidden">
   <div id="v-home">
     <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center"><b id="helloName">LIVE</b><span class="pill" id="liveStatus">● LIVE • 24/7</span></div>
-      <div class="videoWrap" id="videoWrap">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b id="helloName">LIVE</b><span style="display:flex;gap:6px;align-items:center"><span class="pill" id="liveStatus">● LIVE • 24/7</span><button class="soundBtn" id="soundBtn" onclick="tapSound()">TAP FOR SOUND</button></span></div>
+      <div class="videoWrap" id="videoWrap" style="margin-top:10px">
         <div id="playerBox" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;color:#aaa">Waiting for Live...<br>No video yet.</div>
-        <button class="soundBtn" id="soundBtn" onclick="tapSound()">TAP FOR SOUND</button>
         <div class="ticker"><span id="tickerText">Welcome to Hit TV by Inno • Stay Tuned •</span></div>
       </div>
       <div class="nowBox"><div><small>NOW PLAYING</small><br><b id="nowPlaying">-</b><br><span class="muted" id="nowDetail"></span></div><div><small>NEXT</small><br><b id="nextPlaying">-</b></div></div>
-      <p style="text-align:center;margin-top:8px;font-size:12px;font-weight:800;color:#3b82f6">🔁 LOOP ALL • REPEAT FOREVER • NONSTOP</p>
       <div class="row"><button class="btn btn2" onclick="downloadVideo()">Download Video</button><button class="btn btn2" onclick="downloadAudio()">Download Audio</button></div>
       <div class="row"><button class="btn btn2" onclick="requestPiP()">Picture in Picture</button><button class="btn btn2" onclick="toggleMute()">Mute / Unmute</button></div>
-      <p class="muted" style="margin-top:8px">Real TV: No pause, no forward, no seek. You join where live is now. Loop All Forever.</p>
+      <p class="muted" style="margin-top:8px">Real TV: No pause, no forward, no seek. You join where live is now.</p>
     </div>
     <div class="card"><h3>Live Comments - To Admin</h3><input id="commentInput" placeholder="Write comment..."><button class="btn" onclick="sendComment()">Send Comment</button><div id="viewerComments"></div></div>
   </div>
@@ -105,7 +103,7 @@ body.light #settingsBox{background:#fff;color:#000}
   <div class="toggle"><span>Black & White Mode</span><div class="switch" id="themeSwitch" onclick="toggleTheme()"></div></div>
   <p class="muted">Professional toggle. Black = dark, White = light.</p>
   <div class="card" style="margin:10px 0"><h3>Send Us Feedback</h3><input id="feedbackText" placeholder="Send us feedback..."><button class="btn" onclick="sendFeedback()">Send Feedback</button></div>
-  <div class="card" style="margin:10px 0"><h3>About</h3><p class="muted">Hit TV by Inno • Live TV 24/7 • Loop All Forever</p></div>
+  <div class="card" style="margin:10px 0"><h3>About</h3><p class="muted">Hit TV by Inno • Live TV 24/7</p></div>
   <button class="btn btn2" onclick="openSettings()">Close Settings</button>
 </div>
 <script src="https://www.youtube.com/iframe_api"></script>
@@ -134,8 +132,13 @@ window.openSettings=()=>{ let s=document.getElementById('settingsBox'); s.classL
 window.toggleTheme=()=>{document.body.classList.toggle('light');document.getElementById('themeSwitch').classList.toggle('on');}
 window.enterWatch=()=>{let n=document.getElementById('viewerName').value.trim(); if(!n) return alert('Enter your name'); myName=n; saveName(n); goInside();};
 window.getYTId=(url)=>{let m=(url||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/); return m?m[1]:null;}
-let ytPlayer=null, currentUrl="", isMuted=true, currentMode="manual", currentQueueIndex=-1, lineupCache={}, lineupKeys=[], programCache={}, programPlayingKey="", programEndAt=0;
+// SOUND MEMORY - if user already tapped sound before, keep it ON forever
+let savedSound="0"; try{savedSound=localStorage.getItem('hitv_sound_on')||"0";}catch(e){}
+let ytPlayer=null, currentUrl="", isMuted=(savedSound!=="1"), currentMode="manual", currentQueueIndex=-1, lineupCache={}, lineupKeys=[], programCache={}, programPlayingKey="", programEndAt=0;
 let lastLiveKey="";
+function saveSound(){ try{localStorage.setItem('hitv_sound_on', isMuted?"0":"1");}catch(e){} }
+function updateSoundBtn(){ let b=document.getElementById('soundBtn'); if(b) b.innerText=isMuted?'TAP FOR SOUND':'SOUND ON'; }
+setTimeout(updateSoundBtn,500);
 function getEAT(){ let d=new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Kampala'})); let hh=String(d.getHours()).padStart(2,'0'); let mm=String(d.getMinutes()).padStart(2,'0'); return {hhmm:hh+':'+mm, date:d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}; }
 function checkPrograms(){
   let eat=getEAT(); let found=null, foundKey="";
@@ -159,13 +162,10 @@ function startQueueAt(idx){
   set(ref(db,'queueState'),{playing:true,index:i,startedAt:Date.now()});
   set(ref(db,'live'),{url:item.url,title:item.title,detail:item.detail,mode:'queue',startedAt:Date.now(),queueIndex:i});
 }
-// LOOP ALL FOREVER - when video ends, go to next, when last ends go to first, forever
 function playNextImmediate(){
   if(currentMode==='program') return;
   if(!lineupKeys.length) return;
-  // If only 1 song, replay same song forever
   if(lineupKeys.length===1){ startQueueAt(0); return; }
-  // Next index, wraps to 0 automatically in startQueueAt = LOOP ALL
   startQueueAt(currentQueueIndex+1);
 }
 function renderLive(d){
@@ -182,14 +182,14 @@ function renderLive(d){
   if(yid){
     box.innerHTML=`<div class="ytCrop"><div id="ytDiv" style="width:100%;height:100%"></div></div><div class="ytBlock"></div>`;
     if(ytPlayer){ try{ytPlayer.destroy();}catch(e){} }
-    ytPlayer=new YT.Player('ytDiv',{videoId:yid,playerVars:{autoplay:1,controls:0,disablekb:1,modestbranding:1,rel:0,playsinline:1,fs:0,mute:1,iv_load_policy:3,cc_load_policy:0,showinfo:0},events:{onReady:e=>{ e.target.mute(); if(seekSec>3){ try{e.target.seekTo(seekSec,true);}catch(err){} } e.target.playVideo(); document.getElementById('soundBtn').innerText='TAP FOR SOUND'; },onStateChange:e=>{ if(e.data===0){ playNextImmediate(); } }}});
+    ytPlayer=new YT.Player('ytDiv',{videoId:yid,playerVars:{autoplay:1,controls:0,disablekb:1,modestbranding:1,rel:0,playsinline:1,fs:0,mute:1,iv_load_policy:3,cc_load_policy:0,showinfo:0},events:{onReady:e=>{ if(!isMuted){ e.target.unMute(); e.target.setVolume(100); } else { e.target.mute(); } if(seekSec>3){ try{e.target.seekTo(seekSec,true);}catch(err){} } e.target.playVideo(); updateSoundBtn(); },onStateChange:e=>{ if(e.data===0){ playNextImmediate(); } }}});
   } else {
     box.innerHTML=`<video src="${d.url}" autoplay playsinline muted controlsList="nodownload nofullscreen noremoteplayback" disablePictureInPicture></video><div class="ytBlock"></div>`;
-    let v=box.querySelector('video'); if(seekSec>3){ v.currentTime=seekSec; } v.play().catch(()=>{}); v.onended=()=>playNextImmediate();
+    let v=box.querySelector('video'); v.muted=isMuted; if(!isMuted) v.volume=1; if(seekSec>3){ v.currentTime=seekSec; } v.play().catch(()=>{}); v.onended=()=>playNextImmediate();
   }
 }
-window.tapSound=()=>{ isMuted=false; let btn=document.getElementById('soundBtn'); if(ytPlayer && ytPlayer.unMute){ ytPlayer.unMute(); ytPlayer.setVolume(100); ytPlayer.playVideo(); } let v=document.querySelector('#videoWrap video'); if(v){ v.muted=false; v.volume=1; v.play().catch(()=>{}); } if(btn) btn.innerText='SOUND ON'; };
-window.toggleMute=()=>{ isMuted=!isMuted; if(ytPlayer){ isMuted?ytPlayer.mute():ytPlayer.unMute(); } let v=document.querySelector('#videoWrap video'); if(v) v.muted=isMuted; let btn=document.getElementById('soundBtn'); if(btn) btn.innerText=isMuted?'TAP FOR SOUND':'SOUND ON'; };
+window.tapSound=()=>{ isMuted=false; saveSound(); let btn=document.getElementById('soundBtn'); if(ytPlayer && ytPlayer.unMute){ ytPlayer.unMute(); ytPlayer.setVolume(100); ytPlayer.playVideo(); } let v=document.querySelector('#videoWrap video'); if(v){ v.muted=false; v.volume=1; v.play().catch(()=>{}); } if(btn) btn.innerText='SOUND ON'; };
+window.toggleMute=()=>{ isMuted=!isMuted; saveSound(); if(ytPlayer){ isMuted?ytPlayer.mute():ytPlayer.unMute(); } let v=document.querySelector('#videoWrap video'); if(v) v.muted=isMuted; updateSoundBtn(); };
 window.requestPiP=()=>{let v=document.querySelector('#videoWrap video'); if(v&&document.pictureInPictureEnabled) v.requestPictureInPicture().catch(()=>alert('PiP not available for YouTube, use video file')); else alert('PiP: Keep watching while using other apps - works for MP4 videos');}
 window.downloadVideo=()=>{
   if(!currentUrl) return alert('No video playing');
@@ -213,7 +213,4 @@ onValue(ref(db,'notifications'),snap=>{let v=snap.val()||{}; let h=""; Object.va
 onValue(ref(db,'audioStreams'),snap=>{let v=snap.val()||{}; let h1=""; Object.values(v).forEach(a=>{h1+=`<div class="item"><b>${a.title}</b><br><audio controls src="${a.url}" style="width:100%"></audio></div>`;}); document.getElementById('viewerAudio').innerHTML=h1||'No audio yet';});
 window.sendComment=()=>{let t=document.getElementById('commentInput').value.trim(); if(!t) return; push(ref(db,'comments'),{name:myName||'Viewer',text:t,reply:"",time:Date.now()}); document.getElementById('commentInput').value=''; alert('Comment sent to Admin');}
 window.submitArtist=()=>{let a=document.getElementById('artistName').value, l=document.getElementById('artistLink').value; if(!a||!l) return alert('Fill all'); push(ref(db,'artistSubmissions'),{artist:a,link:l}); alert('Submitted to Admin');}
-window.sendFeedback=()=>{let t=document.getElementById('feedbackText').value; if(!t) return; push(ref(db,'feedback'),{name:myName,text:t,time:Date.now()}); alert('Feedback sent. Thank you!');}
-</script>
-</body>
-                                                                         </html>
+window.sendFeedback=()=>{let t=document.getElementById('feedbackText').value; if(!t) return; push(ref(db,'feedback'),{name:myName,text:t,time:Date.now()}); alert('Feedback sent. Thank y
