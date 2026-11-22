@@ -133,6 +133,7 @@ window.openSettings=()=>{ let s=document.getElementById('settingsBox'); s.classL
 window.toggleTheme=()=>{document.body.classList.toggle('light');document.getElementById('themeSwitch').classList.toggle('on');}
 window.enterWatch=()=>{let n=document.getElementById('viewerName').value.trim(); if(!n) return alert('Enter your name'); myName=n; saveName(n); goInside();};
 window.getYTId=(url)=>{let m=(url||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/); return m?m[1]:null;}
+window.getPlaylistId=(url)=>{let m=(url||'').match(/[?&]list=([A-Za-z0-9_-]+)/); return m?m[1]:null;}
 let ytPlayer=null, currentUrl="", isMuted=localStorage.getItem('hitv_sound')!=='on', currentMode="manual", currentQueueIndex=-1, lineupCache={}, lineupKeys=[], programCache={}, programPlayingKey="", programEndAt=0, lastLiveKey="";
 let lastAdvanceAt=0;
 setInterval(()=>{
@@ -173,6 +174,7 @@ function startQueueAt(idx){
 }
 function playNextImmediate(){
   if(currentMode==='program') return;
+  if(currentMode==='playlist') return;
   if(!lineupKeys.length) return;
   if(Date.now()-lastAdvanceAt<5000) return;
   lastAdvanceAt=Date.now();
@@ -194,6 +196,14 @@ function renderLive(d){
   let box=document.getElementById('playerBox');
   let seekSec=0; if(d.startedAt) seekSec=Math.floor((Date.now()-d.startedAt)/1000);
   let yid=getYTId(d.url);
+  let plist=getPlaylistId(d.url);
+  if(plist){
+    currentMode='playlist';
+    box.innerHTML=`<div class="ytCrop"><div id="ytDiv" style="width:100%;height:100%"></div></div><div class="ytBlock"></div>`;
+    if(ytPlayer){ try{ytPlayer.destroy();}catch(e){} }
+    ytPlayer=new YT.Player('ytDiv',{playerVars:{autoplay:1,controls:0,disablekb:1,modestbranding:1,rel:0,playsinline:1,fs:0,mute:1,listType:'playlist',list:plist},events:{onReady:e=>{ if(isMuted){ e.target.mute(); } else { e.target.unMute(); e.target.setVolume(100); } e.target.playVideo(); document.getElementById('soundBtn').innerText=isMuted?'TAP FOR SOUND':'SOUND ON'; }}});
+    return;
+  }
   if(yid){
     box.innerHTML=`<div class="ytCrop"><div id="ytDiv" style="width:100%;height:100%"></div></div><div class="ytBlock"></div>`;
     if(ytPlayer){ try{ytPlayer.destroy();}catch(e){} }
@@ -224,7 +234,4 @@ onValue(ref(db,'programs'),snap=>{ programCache=snap.val()||{}; checkPrograms();
 onValue(ref(db,'queueState'),snap=>{ let q=snap.val(); if(q && q.playing===false){ currentMode='manual'; } });
 onValue(ref(db,'lineup'),snap=>{ lineupCache=snap.val()||{}; lineupKeys=Object.keys(lineupCache); if(lineupKeys.length>1){ let ni=(currentQueueIndex+1)%lineupKeys.length; document.getElementById('nextPlaying').innerText=lineupCache[lineupKeys[ni]].title||'Hit Song'; } else document.getElementById('nextPlaying').innerText='-'; });
 onValue(ref(db,'comments'),snap=>{let v=snap.val()||{}; let h1=""; Object.values(v).forEach(c=>{h1+=`<div class="item"><b>${c.name}:</b> ${c.text}<div class="muted">${c.reply? 'Admin: '+c.reply : ''}</div></div>`;}); document.getElementById('viewerComments').innerHTML=h1;});
-onValue(ref(db,'notifications'),snap=>{let v=snap.val()||{}; let h=""; Object.values(v).reverse().forEach(n=>{h+=`<div class="item">${n.text}</div>`;}); document.getElementById('viewerNotifs').innerHTML=h||'No notifications';});
-onValue(ref(db,'audioStreams'),snap=>{let v=snap.val()||{}; let h1=""; Object.values(v).forEach(a=>{h1+=`<div class="item"><b>${a.title}</b><br><audio controls src="${a.url}" style="width:100%"></audio></div>`;}); document.getElementById('viewerAudio').innerHTML=h1||'No audio yet';});
-window.sendComment=()=>{let t=document.getElementById('commentInput').value.trim(); if(!t) return; push(ref(db,'comments'),{name:myName||'Viewer',text:t,reply:"",time:Date.now()}); document.getElementById('commentInput').value=''; alert('Comment sent to Admin');}
-window.submitArtist=()=>{let a=document.getElementById('artistName').value, l=do
+onValue(ref(db,'notifications'),snap=>{let v=snap.val()||{}; let 
