@@ -14,6 +14,10 @@ body{background:#000;color:#fff;overflow-x:hidden;padding-bottom:70px}
 input,select,textarea{width:100%;background:#111;color:#fff;border:1px solid #333;border-radius:10px;padding:11px;margin-top:7px;font-size:15px}
 .btn{width:100%;background:#1e3a8a;color:#fff;border:none;padding:13px;border-radius:12px;font-weight:800;margin-top:9px;font-size:15px;cursor:pointer}
 .btn2{background:#222}.btnRed{background:#b91c1c}
+.bottomNav{position:fixed;left:0;right:0;bottom:0;z-index:200;background:#0a0a0a;border-top:1px solid #333;display:flex;padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+.bottomNav button{flex:1;background:transparent;border:none;color:#aaa;padding:10px 2px;font-size:12px;font-weight:700;line-height:1.2}
+.bottomNav button.active{color:#fff;background:#1e3a8a;border-radius:12px}
+.bottomNav button span{display:block;font-size:18px}
 .videoWrap{position:relative;width:100%;aspect-ratio:16/9;background:#000;overflow:hidden;border-radius:12px;border:1px solid #222}
 .videoWrap iframe,.videoWrap video{width:100%;height:100%;object-fit:cover;border:0;pointer-events:none}
 .ytCrop{position:absolute;inset:0;overflow:hidden;background:#000}
@@ -31,12 +35,21 @@ input,select,textarea{width:100%;background:#111;color:#fff;border:1px solid #33
 .item{background:#111;border:1px solid #222;border-radius:12px;padding:10px;margin-top:8px}
 .muted{color:#aaa;font-size:13px}
 .hidden{display:none!important}
+.toggle{display:flex;justify-content:space-between;align-items:center;background:#111;border:1px solid #222;border-radius:12px;padding:12px;margin-top:8px}
+.switch{width:52px;height:28px;background:#333;border-radius:20px;position:relative;cursor:pointer}
+.switch:after{content:"";position:absolute;width:22px;height:22px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.2s}
+.switch.on{background:#1e3a8a}.switch.on:after{left:27px}
+body.light{background:#fff;color:#000}.light .card,.light .item,.light .nowBox div,.light .toggle{background:#f2f2f2;border-color:#ddd;color:#000}
+.light input,.light select,.light textarea{background:#fff;color:#000;border-color:#ccc}
+.light .topbar{background:#fff;color:#000}.light .bottomNav{background:#fff;border-color:#ddd}.light .bottomNav button{color:#666}.light .bottomNav button.active{color:#fff}
+#settingsBox{position:fixed;inset:0;z-index:300;background:#000;margin:0;border-radius:0;overflow-y:auto;padding:16px;padding-bottom:80px}
+body.light #settingsBox{background:#fff;color:#000}
+.pageHead{padding:14px 10px 4px}.pageHead h2{font-size:20px}
 </style>
 </head>
 <body>
-<div class="topbar"><h1>Hit TV <span>by Inno</span></h1><div><span id="adminBadge" class="hidden" style="background:#b91c1c;padding:6px 10px;border-radius:20px;font-size:12px;font-weight:800">ADMIN</span></div></div>
+<div class="topbar"><h1>Hit TV <span>by Inno</span></h1><div><span id="adminBadge" class="hidden" style="background:#b91c1c;padding:6px 10px;border-radius:20px;font-size:12px;font-weight:800">ADMIN</span> <button onclick="openSettings()">Settings</button></div></div>
 
-<!-- NAME GATE - VIEWERS ONLY -->
 <div id="nameGate" class="card">
   <h2>Enter Name To Watch</h2><p class="muted">Enter your name to watch Hit TV live.</p>
   <input id="viewerName" placeholder="Enter your name...">
@@ -44,38 +57,72 @@ input,select,textarea{width:100%;background:#111;color:#fff;border:1px solid #33
 </div>
 
 <div id="viewerMain" class="hidden">
-  <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center"><b id="helloName">LIVE</b><span class="pill"><span class="liveBadge"><i></i>LIVE • 24/7</span></span></div>
-    <div class="videoWrap" id="videoWrap">
-      <div id="playerBox" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;color:#aaa">Waiting for Live...<br>No video yet.</div>
-      <button class="soundBtn" id="soundBtn" onclick="tapSound()">TAP FOR SOUND</button>
-      <div class="ticker"><span id="tickerText"> • Welcome to Hit TV by Inno •</span></div>
+  <div id="v-home">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center"><b id="helloName">LIVE</b><span class="pill"><span class="liveBadge"><i></i>LIVE • 24/7</span></span></div>
+      <div class="videoWrap" id="videoWrap">
+        <div id="playerBox" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;color:#aaa">Waiting for Live...<br>No video yet.</div>
+        <button class="soundBtn" id="soundBtn" onclick="tapSound()">TAP FOR SOUND</button>
+        <div class="ticker"><span id="tickerText"> • Welcome to Hit TV by Inno •</span></div>
+      </div>
+      <div class="nowBox"><div><small>NOW PLAYING</small><br><b id="nowPlaying">-</b><br><span class="muted" id="nowDetail"></span></div><div><small>NEXT</small><br><b id="nextPlaying">-</b></div></div>
+      <div class="row"><button class="btn btn2" onclick="downloadVideo()">Download Video</button><button class="btn btn2" onclick="downloadAudio()">Download Audio</button></div>
+      <div class="row"><button class="btn btn2" onclick="requestPiP()">Picture in Picture</button><button class="btn btn2" onclick="toggleMute()">Mute / Unmute</button></div>
+      <p class="muted" style="margin-top:8px">Real TV: No pause, no forward, no seek. You join where live is now.</p>
     </div>
-    <div class="nowBox"><div><small>NOW PLAYING</small><br><b id="nowPlaying">-</b><br><span class="muted" id="nowDetail"></span></div><div><small>NEXT</small><br><b id="nextPlaying">-</b></div></div>
-    <div class="row"><button class="btn btn2" onclick="requestPiP()">Picture in Picture</button><button class="btn btn2" onclick="toggleMute()">Mute / Unmute</button></div>
-    <p class="muted" style="margin-top:8px">Real TV: No pause, no forward, no seek. You join where live is now.</p>
+    <div class="card"><h3>Live Comments - To Admin</h3><input id="commentInput" placeholder="Write comment..."><button class="btn" onclick="sendComment()">Send Comment</button><div id="viewerComments"></div></div>
   </div>
-  <div class="card"><h3>Live Comments - To Admin</h3><input id="commentInput" placeholder="Write comment..."><button class="btn" onclick="sendComment()">Send Comment</button><div id="viewerComments"></div></div>
+  <div id="v-notif" class="hidden"><div class="pageHead"><h2>Notifications</h2><p class="muted">Messages from Admin</p></div><div class="card"><div id="viewerNotifs">No notifications</div></div></div>
+  <div id="v-audio" class="hidden"><div class="pageHead"><h2>Audio Streams</h2><p class="muted">Listen to audio songs</p></div><div class="card"><div id="viewerAudio">No audio yet</div></div></div>
+  <div id="v-artist" class="hidden"><div class="pageHead"><h2>Artist Console</h2><p class="muted">Submit your song to Admin</p></div><div class="card"><input id="artistName" placeholder="Artist Name"><input id="artistLink" placeholder="YouTube / Drive Link"><button class="btn" onclick="submitArtist()">Submit To Admin</button></div></div>
+
+  <!-- ADMIN PANEL INSIDE VIEWER MAIN SO ADMIN ALSO HAS TABS -->
+  <div id="adminMain" class="hidden">
+    <div class="card"><h2>Admin - Add Video</h2>
+      <input id="adminTitle" placeholder="Title e.g. Song Name">
+      <input id="adminUrl" placeholder="YouTube link e.g. https://youtu.be/dQw4w9WgXcQ">
+      <input id="adminDetail" placeholder="Artist / Detail">
+      <button class="btn" onclick="addToLineup()">Add To Lineup</button>
+    </div>
+    <div class="card"><h3>Lineup</h3><div id="adminLineup"></div>
+      <div class="row"><button class="btn" onclick="startLineup()">START LINEUP</button><button class="btn btn2" onclick="playNext()">NEXT ⏭</button></div>
+      <button class="btn btnRed" onclick="stopLive()">STOP LIVE</button>
+      <p class="muted" id="adminStatus" style="margin-top:8px">Not live yet</p>
+    </div>
+    <div class="card"><h3>Ticker</h3><input id="tickerInput" placeholder="Type ticker..."><button class="btn" onclick="setTicker()">Set Ticker</button></div>
+    <div class="card"><h3>Notifications</h3><input id="notifInput" placeholder="Type notification..."><button class="btn" onclick="sendNotif()">Send Notification</button></div>
+  </div>
+
+  <div class="bottomNav" id="bottomNav">
+    <button class="active" onclick="vTab('home',this)"><span>⌂</span>Home</button>
+    <button onclick="vTab('notif',this)"><span>◎</span>Notifications</button>
+    <button onclick="vTab('audio',this)"><span>♫</span>Audio Streams</button>
+    <button onclick="vTab('artist',this)"><span>☆</span>Artist Console</button>
+    <button id="adminTabBtn" class="hidden" onclick="vTab('admin',this)"><span>★</span>Admin</button>
+  </div>
 </div>
 
-<!-- ADMIN PANEL - ONLY ?admin=1 -->
-<div id="adminMain" class="hidden">
-  <div class="card"><h2>Admin - Add Video</h2>
-    <input id="adminTitle" placeholder="Title e.g. Song Name">
-    <input id="adminUrl" placeholder="YouTube link e.g. https://youtu.be/dQw4w9WgXcQ">
-    <input id="adminDetail" placeholder="Artist / Detail">
-    <button class="btn" onclick="addToLineup()">Add To Lineup</button>
-  </div>
-  <div class="card"><h3>Lineup</h3><div id="adminLineup"></div>
-    <div class="row"><button class="btn" onclick="startLineup()">START LINEUP</button><button class="btn btn2" onclick="playNext()">NEXT ⏭</button></div>
-    <button class="btn btnRed" onclick="stopLive()">STOP LIVE</button>
-    <p class="muted" id="adminStatus" style="margin-top:8px">Not live yet</p>
-  </div>
-  <div class="card"><h3>Admin Preview - Same As Viewers See</h3>
-    <p class="muted">This preview uses same LIVE node as viewers. If this plays, viewers MUST play.</p>
-  </div>
+<div id="settingsBox" class="hidden">
+  <div style="display:flex;justify-content:space-between;align-items:center"><h2>Settings</h2><button class="btn2" style="background:#222;color:#fff;border:1px solid #333;padding:8px 14px;border-radius:20px;font-weight:700" onclick="openSettings()">Close X</button></div>
+  <div class="toggle"><span>Black & White Mode</span><div class="switch" id="themeSwitch" onclick="toggleTheme()"></div></div>
+  <p class="muted">Professional toggle. Black = dark, White = light.</p>
+  <div class="card" style="margin:10px 0"><h3>Send Us Feedback</h3><input id="feedbackText" placeholder="Send us feedback..."><button class="btn" onclick="sendFeedback()">Send Feedback</button></div>
+  <div class="card" style="margin:10px 0"><h3>About</h3><p class="muted">Hit TV by Inno • Live TV 24/7</p></div>
+  <button class="btn btn2" onclick="openSettings()">Close Settings</button>
 </div>
 
+<script>
+window.vTab=function(id,el){
+  ['home','notif','audio','artist'].forEach(function(x){var e=document.getElementById('v-'+x); if(e) e.classList.add('hidden');});
+  var a=document.getElementById('adminMain'); if(a) a.classList.add('hidden');
+  if(id==='admin'){ if(a) a.classList.remove('hidden'); }
+  else { var t=document.getElementById('v-'+id); if(t) t.classList.remove('hidden'); }
+  document.querySelectorAll('#bottomNav button').forEach(function(b){b.classList.remove('active');});
+  if(el) el.classList.add('active'); window.scrollTo(0,0);
+};
+window.openSettings=function(){var s=document.getElementById('settingsBox'); if(!s) return; s.classList.toggle('hidden'); if(!s.classList.contains('hidden')) window.scrollTo(0,0);};
+window.toggleTheme=function(){document.body.classList.toggle('light'); var sw=document.getElementById('themeSwitch'); if(sw) sw.classList.toggle('on');};
+</script>
 <script src="https://www.youtube.com/iframe_api"></script>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -91,10 +138,8 @@ const firebaseConfig = {
 };
 const app=initializeApp(firebaseConfig); const db=getDatabase(app);
 const isAdmin = new URLSearchParams(location.search).get('admin')==='1';
-
-// --- NAME ---
 function getSavedName(){ try{return localStorage.getItem('hitv_name')||"";}catch(e){return "";} }
-function saveName(n){ try{localStorage.setItem('hitv_name',n);}catch(e){} try{document.cookie="hitv_name="+encodeURIComponent(n)+";max-age=31536000;path=/";}catch(e){} }
+function saveName(n){ try{localStorage.setItem('hitv_name',n);}catch(e){} }
 let myName=getSavedName();
 function goInside(){
   document.getElementById('nameGate').classList.add('hidden');
@@ -103,35 +148,29 @@ function goInside(){
   try{set(ref(db,'users/'+myName),{name:myName,online:true,lastSeen:Date.now()});}catch(e){}
 }
 window.enterWatch=()=>{let n=document.getElementById('viewerName').value.trim(); if(!n) return alert('Enter your name'); myName=n; saveName(n); goInside();};
-
 if(isAdmin){
   document.getElementById('nameGate').classList.add('hidden');
   document.getElementById('viewerMain').classList.remove('hidden');
-  document.getElementById('adminMain').classList.remove('hidden');
   document.getElementById('adminBadge').classList.remove('hidden');
+  document.getElementById('adminTabBtn').classList.remove('hidden');
   document.getElementById('helloName').innerText='Hi Admin • LIVE';
   myName='Admin';
-} else {
-  if(myName){ document.getElementById('viewerName').value=myName; goInside(); }
-}
-
+} else { if(myName){ document.getElementById('viewerName').value=myName; goInside(); } }
 window.getYTId=(url)=>{let m=(url||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/); return m?m[1]:null;}
 let ytPlayer=null, currentUrl="", isMuted=true, currentMode="manual", currentQueueIndex=-1, lineupCache={}, lineupKeys=[];
 let lastLiveKey="";
-
 function applySoundState(){ let btn=document.getElementById('soundBtn'); if(!btn) return; btn.innerText=(!isMuted)?'SOUND ON':'TAP FOR SOUND'; if(!isMuted && ytPlayer && ytPlayer.unMute){ ytPlayer.unMute(); ytPlayer.setVolume(100); } }
 function updateNextLabel(){ if(!lineupKeys.length) return; let ni = currentMode==='queue' ? (currentQueueIndex+1)%lineupKeys.length : 0; document.getElementById('nextPlaying').innerText=lineupCache[lineupKeys[ni]].title||lineupCache[lineupKeys[ni]].url; }
-
-// --- FIX: renderLive accepts BOTH old and new format ---
-function normalizeLive(d){
-  if(!d) return null;
-  if(d.url) return d; // NEW CORRECT FORMAT
-  if(d.current && d.current.url) return {...d.current, startedAt:d.startedAt||d.current.startedAt, mode:d.mode||d.current.mode}; // OLD FORMAT - backward compat
-  return null;
+function normalizeLive(d){ if(!d) return null; if(d.url) return d; if(d.current && d.current.url) return {...d.current, startedAt:d.startedAt||d.current.startedAt, mode:d.mode||d.current.mode}; return null; }
+function stopPlayerNow(){
+  if(ytPlayer){ try{ytPlayer.stopVideo();}catch(e){} try{ytPlayer.destroy();}catch(e){} ytPlayer=null; }
+  let box=document.getElementById('playerBox'); if(box) box.innerHTML='Waiting for Live...<br>No video yet.';
+  let v=document.querySelector('#videoWrap video'); if(v){ try{v.pause(); v.src=""; v.remove();}catch(e){} }
+  lastLiveKey="STOPPED"; currentUrl=""; currentMode="stopped";
 }
 function renderLive(raw, force){
   let d=normalizeLive(raw);
-  if(!d||!d.url){ document.getElementById('playerBox').innerHTML='Waiting for Live...<br>No video yet.'; return; }
+  if(!d||!d.url || d.mode==='stopped'){ stopPlayerNow(); document.getElementById('nowPlaying').innerText='-'; return; }
   let key=d.url+'|'+(d.startedAt||0)+'|'+(d.mode||'');
   if(key===lastLiveKey && ytPlayer && !force) return;
   lastLiveKey=key; currentUrl=d.url; currentMode=d.mode||'manual';
@@ -156,34 +195,36 @@ function startQueueAt(idx){
   if(!lineupKeys.length) return;
   let i=((idx%lineupKeys.length)+lineupKeys.length)%lineupKeys.length;
   let item=lineupCache[lineupKeys[i]]; currentMode='queue'; currentQueueIndex=i;
-  // RIGHT FORMAT - SAME AS VIEWER EXPECTS
   set(ref(db,'queueState'),{playing:true,index:i,startedAt:Date.now()});
   set(ref(db,'live'),{url:item.url,title:item.title,detail:item.detail||"",mode:'queue',startedAt:Date.now(),queueIndex:i});
 }
 function doResync(){
-  get(ref(db,'live')).then(s=>{ let d=s.val(); if(!d) return; let nd=normalizeLive(d); if(!nd) return; let key=nd.url+'|'+(nd.startedAt||0); if(key!==lastLiveKey){ renderLive(d,true); return; } if(nd.startedAt && ytPlayer && ytPlayer.getCurrentTime){ let expected=Math.floor((Date.now()-nd.startedAt)/1000); try{let cur=ytPlayer.getCurrentTime(); if(Math.abs(cur-expected)>6) ytPlayer.seekTo(expected,true);}catch(e){} } }).catch(()=>{});
+  if(lastLiveKey==="STOPPED") return;
+  get(ref(db,'live')).then(s=>{ let d=s.val(); if(!d) return; let nd=normalizeLive(d); if(!nd || nd.mode==='stopped'){ stopPlayerNow(); return; } let key=nd.url+'|'+(nd.startedAt||0); if(key!==lastLiveKey){ renderLive(d,true); return; } if(nd.startedAt && ytPlayer && ytPlayer.getCurrentTime){ let expected=Math.floor((Date.now()-nd.startedAt)/1000); try{let cur=ytPlayer.getCurrentTime(); if(Math.abs(cur-expected)>6) ytPlayer.seekTo(expected,true);}catch(e){} } }).catch(()=>{});
 }
 setInterval(doResync,5000);
-
-// --- LISTENERS - SAME FOR ADMIN + VIEWERS ---
-onValue(ref(db,'live'),snap=>{let d=snap.val(); if(d) renderLive(d);});
+onValue(ref(db,'live'),snap=>{let d=snap.val(); if(d) renderLive(d); else stopPlayerNow();});
 onValue(ref(db,'ticker'),snap=>{let t=snap.val(); if(t) document.getElementById('tickerText').innerText=t.text||t;});
 onValue(ref(db,'lineup'),snap=>{ lineupCache=snap.val()||{}; lineupKeys=Object.keys(lineupCache); updateNextLabel(); renderAdminLineup(); });
 onValue(ref(db,'comments'),snap=>{let v=snap.val()||{}; let h=""; Object.values(v).forEach(c=>{h+='<div class="item"><b>'+c.name+':</b> '+c.text+'</div>';}); document.getElementById('viewerComments').innerHTML=h;});
-
-// --- ADMIN ACTIONS - RIGHT FORMAT ---
+onValue(ref(db,'notifications'),snap=>{let v=snap.val()||{}; let h=""; Object.values(v).reverse().forEach(n=>{h+='<div class="item">'+n.text+'</div>';}); document.getElementById('viewerNotifs').innerHTML=h||'No notifications';});
+onValue(ref(db,'audioStreams'),snap=>{let v=snap.val()||{}; let h1=""; Object.values(v).forEach(a=>{h1+='<div class="item"><b>'+a.title+'</b><br><audio controls src="'+a.url+'" style="width:100%"></audio></div>';}); document.getElementById('viewerAudio').innerHTML=h1||'No audio yet';});
 window.addToLineup=()=>{ let t=document.getElementById('adminTitle').value.trim(), u=document.getElementById('adminUrl').value.trim(), det=document.getElementById('adminDetail').value.trim(); if(!u) return alert('Enter YouTube link'); push(ref(db,'lineup'),{title:t||u,url:u,detail:det}); document.getElementById('adminTitle').value=''; document.getElementById('adminUrl').value=''; document.getElementById('adminDetail').value=''; alert('Added to lineup'); };
 function renderAdminLineup(){ if(!isAdmin) return; let h=""; lineupKeys.forEach((k,i)=>{ let it=lineupCache[k]; h+='<div class="item"><b>'+(i+1)+'. '+it.title+'</b><br><span class="muted">'+it.url+'</span><br><button class="btn btn2" onclick="deleteLineup(\''+k+'\')">Delete</button></div>'; }); document.getElementById('adminLineup').innerHTML=h||'No videos yet'; }
 window.deleteLineup=(k)=>{ remove(ref(db,'lineup/'+k)); };
-window.startLineup=()=>{ if(!lineupKeys.length) return alert('Add video first'); startQueueAt(0); document.getElementById('adminStatus').innerText='LIVE Started - Viewers will see same video'; };
+window.startLineup=()=>{ if(!lineupKeys.length) return alert('Add video first'); lastLiveKey=""; startQueueAt(0); document.getElementById('adminStatus').innerText='LIVE Started - Viewers will see same video'; };
 window.playNext=()=>{ if(!lineupKeys.length) return; startQueueAt(currentQueueIndex+1); };
-window.stopLive=()=>{ set(ref(db,'live'),{url:"",title:"",mode:'stopped',startedAt:Date.now()}); set(ref(db,'queueState'),{playing:false,index:0}); document.getElementById('playerBox').innerHTML='Waiting for Live...<br>No video yet.'; lastLiveKey=""; };
+// FIXED STOP - DESTROYS PLAYER SO SONG STOPS EVERYWHERE
+window.stopLive=()=>{ stopPlayerNow(); set(ref(db,'live'),{url:"",title:"",mode:'stopped',startedAt:Date.now()}); set(ref(db,'queueState'),{playing:false,index:0}); document.getElementById('nowPlaying').innerText='-'; if(isAdmin) document.getElementById('adminStatus').innerText='STOPPED - Song stopped for everyone'; };
+window.setTicker=()=>{ let t=document.getElementById('tickerInput').value; set(ref(db,'ticker'),{text:t}); alert('Ticker set'); };
+window.sendNotif=()=>{ let t=document.getElementById('notifInput').value; if(!t) return; push(ref(db,'notifications'),{text:t,time:Date.now()}); alert('Notification sent'); };
+window.sendComment=()=>{let t=document.getEwindow.stopLive=()=>{ stopPlayerNow(); set(ref(db,'live'),{url:"",title:"",mode:'stopped',startedAt:Date.now()}); set(ref(db,'queueState'),{playing:false,index:0}); document.getElementById('nowPlaying').innerText='-'; };
 
-// --- VIEWER ACTIONS ---
-window.sendComment=()=>{let t=document.getElementById('commentInput').value.trim(); if(!t) return; push(ref(db,'comments'),{name:myName||'Viewer',text:t,reply:"",time:Date.now()}); document.getElementById('commentInput').value=''; alert('Comment sent to Admin');};
 window.tapSound=()=>{ isMuted=false; if(ytPlayer && ytPlayer.unMute){ ytPlayer.unMute(); ytPlayer.setVolume(100); ytPlayer.playVideo(); } document.getElementById('soundBtn').innerText='SOUND ON'; };
+
 window.toggleMute=()=>{ isMuted=!isMuted; if(ytPlayer){ isMuted?ytPlayer.mute():ytPlayer.unMute(); } document.getElementById('soundBtn').innerText=isMuted?'TAP FOR SOUND':'SOUND ON'; };
-window.requestPiP=async()=>{ try{ let v=document.querySelector('#videoWrap video'); if(v && document.pictureInPictureEnabled){ if(document.pictureInPictureElement) await document.exitPictureInPicture(); else await v.requestPictureInPicture(); return; } alert('PiP not supported for YouTube on this device. Keep Hit TV open.'); }catch(e){ alert('PiP could not open.'); } };
+
+window.requestPiP=async()=>{ try{ let v=document.querySelector('#videoWrap video'); if(v && document.pictureInPictureEnabled){ if(document.pictureInPictureElement) await document.exitPictureInPicture(); else await v.requestPictureInPicture(); return; } alert('PiP not supported for YouTube.'); }catch(e){ alert('PiP could not open.'); } };
 </script>
 </body>
 </html>
