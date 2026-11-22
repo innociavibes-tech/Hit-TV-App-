@@ -134,6 +134,25 @@ window.toggleTheme=()=>{document.body.classList.toggle('light');document.getElem
 window.enterWatch=()=>{let n=document.getElementById('viewerName').value.trim(); if(!n) return alert('Enter your name'); myName=n; saveName(n); goInside();};
 window.getYTId=(url)=>{let m=(url||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/); return m?m[1]:null;}
 let ytPlayer=null, currentUrl="", isMuted=localStorage.getItem('hitv_sound')!=='on', currentMode="manual", currentQueueIndex=-1, lineupCache={}, lineupKeys=[], programCache={}, programPlayingKey="", programEndAt=0, lastLiveKey="";
+let lastAdvanceAt=0;
+setInterval(()=>{
+  get(ref(db,'live')).then(s=>{
+    let d=s.val(); if(!d||!d.url) return;
+    if(d.url!==currentUrl || (d.mode==='queue' && typeof d.queueIndex==='number' && d.queueIndex!==currentQueueIndex)){
+      lastLiveKey=""; renderLive(d);
+    }
+  }).catch(()=>{});
+},5000);
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden){
+    lastLiveKey="";
+    get(ref(db,'live')).then(s=>{ let d=s.val(); if(d) renderLive(d); }).catch(()=>{});
+  }
+});
+window.addEventListener('focus',()=>{
+  lastLiveKey="";
+  get(ref(db,'live')).then(s=>{ let d=s.val(); if(d) renderLive(d); }).catch(()=>{});
+});
 function getEAT(){ let d=new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Kampala'})); let hh=String(d.getHours()).padStart(2,'0'); let mm=String(d.getMinutes()).padStart(2,'0'); return {hhmm:hh+':'+mm, date:d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}; }
 function checkPrograms(){
   let eat=getEAT(); let found=null, foundKey="";
@@ -155,6 +174,8 @@ function startQueueAt(idx){
 function playNextImmediate(){
   if(currentMode==='program') return;
   if(!lineupKeys.length) return;
+  if(Date.now()-lastAdvanceAt<5000) return;
+  lastAdvanceAt=Date.now();
   get(ref(db,'live')).then(s=>{
     let d=s.val()||{};
     let cur=(typeof d.queueIndex==='number') ? d.queueIndex : currentQueueIndex;
@@ -206,8 +227,4 @@ onValue(ref(db,'comments'),snap=>{let v=snap.val()||{}; let h1=""; Object.values
 onValue(ref(db,'notifications'),snap=>{let v=snap.val()||{}; let h=""; Object.values(v).reverse().forEach(n=>{h+=`<div class="item">${n.text}</div>`;}); document.getElementById('viewerNotifs').innerHTML=h||'No notifications';});
 onValue(ref(db,'audioStreams'),snap=>{let v=snap.val()||{}; let h1=""; Object.values(v).forEach(a=>{h1+=`<div class="item"><b>${a.title}</b><br><audio controls src="${a.url}" style="width:100%"></audio></div>`;}); document.getElementById('viewerAudio').innerHTML=h1||'No audio yet';});
 window.sendComment=()=>{let t=document.getElementById('commentInput').value.trim(); if(!t) return; push(ref(db,'comments'),{name:myName||'Viewer',text:t,reply:"",time:Date.now()}); document.getElementById('commentInput').value=''; alert('Comment sent to Admin');}
-window.submitArtist=()=>{let a=document.getElementById('artistName').value, l=document.getElementById('artistLink').value; if(!a||!l) return alert('Fill all'); push(ref(db,'artistSubmissions'),{artist:a,link:l}); alert('Submitted to Admin');}
-window.sendFeedback=()=>{let t=document.getElementById('feedbackText').value; if(!t) return; push(ref(db,'feedback'),{name:myName,text:t,time:Date.now()}); alert('Feedback sent. Thank you!');}
-</script>
-</body>
-</html>
+window.submitArtist=()=>{let a=document.getElementById('artistName').value, l=do
