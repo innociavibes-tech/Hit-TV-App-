@@ -28,11 +28,10 @@ input,select,textarea{width:100%;background:#111;color:#fff;border:1px solid #33
 .bottomNav button{flex:1;background:transparent;border:none;color:#aaa;padding:10px 2px;font-size:12px;font-weight:700;line-height:1.2}
 .bottomNav button.active{color:#fff;background:#1e3a8a;border-radius:12px}
 .bottomNav button span{display:block;font-size:18px}
-.videoWrap{position:relative;width:100%;aspect-ratio:16/9;background:#000;overflow:hidden;border-radius:12px;border:1px solid #222}
+.videoWrap{position:relative;width:100%;aspect-ratio:4/3;background:#000;overflow:hidden;border-radius:12px;border:1px solid #222}
 .videoWrap iframe,.videoWrap video{width:100%;height:100%;object-fit:cover;border:0;pointer-events:none}
-/* FULL VIDEO FIX: zoom crop to hide YouTube title / captions / controls */
 .ytCrop{position:absolute;inset:0;overflow:hidden;background:#000}
-.ytCrop iframe{position:absolute;left:50%;top:50%;width:160% !important;height:160% !important;transform:translate(-50%,-50%);pointer-events:none}
+.ytCrop iframe{position:absolute;left:50%;top:50%;width:180% !important;height:180% !important;transform:translate(-50%,-50%);pointer-events:none}
 .ytBlock{position:absolute;inset:0;z-index:4;background:transparent}
 .ticker{position:absolute;left:0;right:0;bottom:0;background:#1e3a8a;color:#fff;overflow:hidden;white-space:nowrap;padding:7px 0;font-weight:700;font-size:14px;z-index:5}
 .ticker span{display:inline-block;padding-left:100%;animation:tick 20s linear infinite}
@@ -113,7 +112,15 @@ body.light #settingsBox{background:#fff;color:#000}
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getDatabase,ref,set,push,onValue,update,get} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-const firebaseConfig={apiKey:"AIzaSyBT9bXCGb6WgriW1wodo6IeRKOUQ5jdCes",authDomain:"hit-tv-app-40fb9.firebaseapp.com",databaseURL:"https://hit-tv-app-40fb9-default-rtdb.firebaseio.com",projectId:"hit-tv-app-40fb9",storageBucket:"hit-tv-app-40fb9.firebasestorage.app",messagingSenderId:"740828744097",appId:"1:740828744097:web:49104b3522d02de64ce3e0"};
+const firebaseConfig = {
+  apiKey: "AIzaSyBT9bXCGb6WgriW1wodo6IeRKOUQ5jdCes",
+  authDomain: "hit-tv-app-40fb9.firebaseapp.com",
+  databaseURL: "https://hit-tv-app-40fb9-default-rtdb.firebaseio.com",
+  projectId: "hit-tv-app-40fb9",
+  storageBucket: "hit-tv-app-40fb9.firebasestorage.app",
+  messagingSenderId: "740828744097",
+  appId: "1:740828744097:web:49104b3522d02de64ce3e0"
+};
 const app=initializeApp(firebaseConfig); const db=getDatabase(app);
 function getSavedName(){ try{let n=localStorage.getItem('hitv_name'); if(n) return n;}catch(e){} try{let m=document.cookie.match(/(?:^|;)hitv_name=([^;]*)/); if(m) return decodeURIComponent(m[1]);}catch(e){} return ""; }
 function saveName(n){ try{localStorage.setItem('hitv_name',n);}catch(e){} try{document.cookie="hitv_name="+encodeURIComponent(n)+";max-age=31536000;path=/";}catch(e){} }
@@ -130,7 +137,6 @@ window.getYTId=(url)=>{let m=(url||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/
 let ytPlayer=null, currentUrl="", isMuted=true, currentMode="manual", currentQueueIndex=-1, lineupCache={}, lineupKeys=[], programCache={}, programPlayingKey="", programEndAt=0;
 let lastLiveKey="";
 function getEAT(){ let d=new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Kampala'})); let hh=String(d.getHours()).padStart(2,'0'); let mm=String(d.getMinutes()).padStart(2,'0'); return {hhmm:hh+':'+mm, date:d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}; }
-// PROGRAM CHECK - every 10s, works even if admin offline
 function checkPrograms(){
   let eat=getEAT(); let found=null, foundKey="";
   Object.entries(programCache).forEach(([k,p])=>{
@@ -140,11 +146,8 @@ function checkPrograms(){
   if(found){
     programPlayingKey=foundKey; let mins=parseInt(found.duration||30); programEndAt=Date.now()+mins*60000;
     update(ref(db,'programs/'+foundKey),{lastPlayedDate:eat.date});
-    // play program now, interrupt queue/manual
-    let key=found.url+'|'+Date.now();
     set(ref(db,'live'),{url:found.url,title:found.title||found.name,detail:found.detail||found.name,mode:'program',startedAt:Date.now(),programKey:foundKey});
   }
-  // if program finished, go back to queue
   if(programPlayingKey && Date.now()>programEndAt){ programPlayingKey=""; get(ref(db,'queueState')).then(s=>{ let q=s.val(); if(q && q.playing) startQueueAt(q.index||0); }); }
 }
 setInterval(checkPrograms,10000);
@@ -159,20 +162,18 @@ function startQueueAt(idx){
 function playNextImmediate(){
   if(currentMode==='program') return;
   if(currentMode==='queue' && lineupKeys.length){ startQueueAt(currentQueueIndex+1); return; }
-  // manual live ended -> if queue is playing, go next, else if lineup exists, auto start queue loop
   if(lineupKeys.length){ startQueueAt(0); }
 }
 function renderLive(d){
   if(!d||!d.url){ document.getElementById('playerBox').innerHTML='Waiting for Live...<br>No video yet.'; return; }
   let key=d.url+'|'+(d.startedAt||0)+'|'+(d.mode||'');
-  if(key===lastLiveKey && ytPlayer) return; // don't restart on re-fire
+  if(key===lastLiveKey && ytPlayer) return;
   lastLiveKey=key; currentUrl=d.url; currentMode=d.mode||'manual';
   if(d.mode==='queue') currentQueueIndex=d.queueIndex||0;
   document.getElementById('nowPlaying').innerText=d.title||d.url||"-"; document.getElementById('nowDetail').innerText=d.detail||"";
   let box=document.getElementById('playerBox');
   let seekSec=0;
   if(d.startedAt) seekSec=Math.floor((Date.now()-d.startedAt)/1000);
-  // For queue loop, if seek is too big (video likely ended) viewer will get next via onEnded quickly - but we still join mid
   let yid=getYTId(d.url);
   if(yid){
     box.innerHTML=`<div class="ytCrop"><div id="ytDiv" style="width:100%;height:100%"></div></div><div class="ytBlock"></div>`;
@@ -207,4 +208,8 @@ onValue(ref(db,'comments'),snap=>{let v=snap.val()||{}; let h1=""; Object.values
 onValue(ref(db,'notifications'),snap=>{let v=snap.val()||{}; let h=""; Object.values(v).reverse().forEach(n=>{h+=`<div class="item">${n.text}</div>`;}); document.getElementById('viewerNotifs').innerHTML=h||'No notifications';});
 onValue(ref(db,'audioStreams'),snap=>{let v=snap.val()||{}; let h1=""; Object.values(v).forEach(a=>{h1+=`<div class="item"><b>${a.title}</b><br><audio controls src="${a.url}" style="width:100%"></audio></div>`;}); document.getElementById('viewerAudio').innerHTML=h1||'No audio yet';});
 window.sendComment=()=>{let t=document.getElementById('commentInput').value.trim(); if(!t) return; push(ref(db,'comments'),{name:myName||'Viewer',text:t,reply:"",time:Date.now()}); document.getElementById('commentInput').value=''; alert('Comment sent to Admin');}
-window.submitArtist=()=>{let a=document.getElementById('artistName').value, l=document.getElementById('artistLink').value; if(!a||!l) return alert('Fill all'); push(ref(db,'artistSubmissions'),{artist:a,link:l}); alert('S
+window.submitArtist=()=>{let a=document.getElementById('artistName').value, l=document.getElementById('artistLink').value; if(!a||!l) return alert('Fill all'); push(ref(db,'artistSubmissions'),{artist:a,link:l}); alert('Submitted to Admin');}
+window.sendFeedback=()=>{let t=document.getElementById('feedbackText').value; if(!t) return; push(ref(db,'feedback'),{name:myName,text:t,time:Date.now()}); alert('Feedback sent. Thank you!');}
+</script>
+</body>
+  </html>
