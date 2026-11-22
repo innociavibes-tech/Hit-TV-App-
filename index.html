@@ -1,1 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Hit TV by Inno</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif}
+body{background:#000;color:#fff;overflow-x:hidden}
+.topbar{background:#000;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;border-bottom:1px solid #222}
+.topbar h1{font-size:18px;letter-spacing:.5px}.topbar h1 span{color:#1e3a8a}
+.topbar button{background:#111;color:#fff;border:1px solid #333;padding:8px 10px;border-radius:20px;font-weight:700}
+#offlineBanner{display:none;background:#b91c1c;text-align:center;padding:7px;font-size:13px;font-weight:700}
+.switchWrap{display:flex;gap:6px}
+.switchWrap button{border-radius:20px;padding:8px 12px;border:1px solid #333;background:#111;color:#fff;cursor:pointer}
+.switchWrap button.active{background:#1e3a8a;border-color:#1e3a8a}
+.card{background:#0a0a0a;border:1px solid #222;border-radius:14px;padding:12px;margin:10px}
+input,select,textarea{width:100%;background:#111;color:#fff;border:1px solid #333;border-radius:10px;padding:11px;margin-top:7px;font-size:15px}
+.btn{width:100%;background:#1e3a8a;color:#fff;border:none;padding:13px;border-radius:12px;font-weight:800;margin-top:9px;font-size:15px;cursor:pointer}
+.btn2{background:#222}.btnRed{background:#b91c1c}.btnGreen{background:#15803d}
+.tabs{display:flex;gap:8px;padding:10px}
+.tabs button{flex:1;padding:11px;border-radius:12px;border:1px solid #333;background:#111;color:#fff;font-weight:700}
+.tabs button.active{background:#fff;color:#000}
+.videoWrap{position:relative;width:100%;aspect-ratio:4/3;background:#000;overflow:hidden;border-radius:12px;border:1px solid #222}
+.videoWrap iframe,.videoWrap video,.videoWrap img{width:100%;height:100%;object-fit:cover;border:0;pointer-events:none}
+.ticker{position:absolute;left:0;right:0;bottom:0;background:#1e3a8a;color:#fff;overflow:hidden;white-space:nowrap;padding:7px 0;font-weight:700;font-size:14px;z-index:5}
+.ticker span{display:inline-block;padding-left:100%;animation:tick 20s linear infinite}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+.soundBtn{position:absolute;top:8px;right:8px;z-index:6;background:#1e3a8a;color:#fff;border:none;padding:8px 12px;border-radius:20px;font-weight:800}
+.nowBox{display:flex;justify-content:space-between;gap:8px;margin-top:8px}
+.nowBox div{flex:1;background:#111;border:1px solid #222;border-radius:10px;padding:9px}
+.nowBox small{color:#aaa}.pill{background:#111;border:1px solid #333;padding:6px 10px;border-radius:20px;font-size:12px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.item{background:#111;border:1px solid #222;border-radius:12px;padding:10px;margin-top:8px}
+.item b{font-size:14px;word-break:break-all}.muted{color:#aaa;font-size:13px}
+.toggle{display:flex;justify-content:space-between;align-items:center;background:#111;border:1px solid #222;border-radius:12px;padding:12px;margin-top:8px}
+.switch{width:52px;height:28px;background:#333;border-radius:20px;position:relative;cursor:pointer}
+.switch:after{content:"";position:absolute;width:22px;height:22px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.2s}
+.switch.on{background:#1e3a8a}.switch.on:after{left:27px}
+body.light{background:#fff;color:#000}.light .card,.light .item,.light .nowBox div,.light .toggle{background:#f2f2f2;border-color:#ddd;color:#000}
+.light input,.light select,.light textarea{background:#fff;color:#000;border-color:#ccc}
+.light .topbar{background:#fff;color:#000}.light .tabs button{background:#eee;color:#000}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div id="offlineBanner">YOU ARE OFFLINE - You stay inside app</div>
+<div class="topbar"><h1>Hit TV <span>by Inno</span></h1><div><button onclick="openSettings()">⚙ Settings</button></div></div>
 
+<div class="switchWrap" style="padding:8px 10px">
+<button id="btnViewer" class="active" onclick="showApp('viewer')">VIEWERS APP</button>
+<button id="btnAdmin" onclick="showApp('admin')">ADMIN APP</button>
+</div>
+
+<!-- VIEWER -->
+<div id="viewerApp">
+  <div id="nameGate" class="card">
+    <h2>Enter Name To Watch</h2><p class="muted">Enter your name to watch Hit TV live.</p>
+    <input id="viewerName" placeholder="Enter your name...">
+    <button class="btn" onclick="enterWatch()">Enter To Watch</button>
+  </div>
+
+  <div id="viewerMain" class="hidden">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center"><b id="helloName">LIVE</b><span class="pill" id="liveStatus">● LIVE • 24/7</span></div>
+      <div class="videoWrap" id="videoWrap">
+        <div id="playerBox" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;color:#aaa">Waiting for Live...<br>No video yet. Admin will add real link.</div>
+        <button class="soundBtn" onclick="tapSound()">TAP FOR SOUND</button>
+        <div class="ticker"><span id="tickerText">Welcome to Hit TV by Inno • Stay Tuned •</span></div>
+      </div>
+      <div class="nowBox"><div><small>NOW PLAYING</small><br><b id="nowPlaying">-</b><br><span class="muted" id="nowDetail"></span></div><div><small>NEXT</small><br><b id="nextPlaying">-</b></div></div>
+      <div class="row"><button class="btn btn2" onclick="downloadVideo()">⬇ Download Video</button><button class="btn btn2" onclick="downloadAudio()">⬇ Download Audio</button></div>
+      <div class="row"><button class="btn btn2" onclick="requestPiP()">Picture in Picture</button><button class="btn btn2" onclick="toggleMute()">Mute / Unmute</button></div>
+      <p class="muted" style="margin-top:8px">Real TV: No pause, no forward, no seek. You join where live is now.</p>
+    </div>
+
+    <div class="tabs"><button class="active" onclick="vTab('home',this)">Home</button><button onclick="vTab('notif',this)">Notifications</button><button onclick="vTab('audio',this)">Audio Streams</button><button onclick="vTab('artist',this)">Artist Console</button></div>
+
+    <div id="v-home">
+      <div class="card"><h3>Queue List - Waiting To Play</h3><div id="viewerQueue"></div></div>
+      <div class="card"><h3>Live Comments - To Admin</h3><input id="commentInput" placeholder="Write comment..."><button class="btn" onclick="sendComment()">Send Comment</button><div id="viewerComments"></div></div>
+    </div>
+    <div id="v-notif" class="hidden"><div class="card"><h3>Notifications</h3><div id="viewerNotifs"></div></div></div>
+    <div id="v-audio" class="hidden"><div class="card"><h3>Audio Streams</h3><div id="viewerAudio"></div></div></div>
+    <div id="v-artist" class="hidden"><div class="card"><h3>Artist Console - Submit Song</h3><input id="artistName" placeholder="Artist Name"><input id="artistLink" placeholder="YouTube / Drive Link"><button class="btn" onclick="submitArtist()">Submit To Admin</button></div></div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="adminApp" class="hidden">
+  <div class="tabs"><button class="active" onclick="aTab('main',this)">Main Tab</button><button onclick="aTab('others',this)">Others Tab</button></div>
+  <div id="a-main">
+    <div class="card"><h3>Live Control</h3><div class="row"><button class="btn btnGreen" onclick="adminPlay()">▶ PLAY</button><button class="btn btnRed" onclick="adminStop()">■ STOP</button></div><p class="muted">Play / Stop what's playing. Stop removes from lineup if you choose delete.</p></div>
+    <div class="card"><h3>Add To Line Up - YouTube / MP4 / Drive</h3><input id="aLink" placeholder="Paste YouTube link or MP4 / Google Drive link"><input id="aTitle" placeholder="Title / Details of video playing on live"><button class="btn" onclick="addToLineup()">Add To Line Up</button><div id="adminQueue"></div></div>
+    <div class="card"><h3>Ticker Words On Live Screen</h3><input id="aTicker" placeholder="Type ticker words..."><button class="btn" onclick="saveTicker()">Save Ticker</button></div>
+    <div class="card"><h3>Set Program On Time - EAT</h3><input id="pLink" placeholder="YouTube link for program"><input id="pTime" type="time"><input id="pTitle" placeholder="Program Title"><button class="btn" onclick="addProgram()">Save Program For EAT Time</button><div id="programList"></div><p class="muted">At that EAT time, it will remove anything playing and play. After it ends, it waits for same time tomorrow.</p></div>
+    <div class="card"><h3>Front Camera - Live</h3><video id="camPreview" autoplay muted playsinline style="width:100%;border-radius:10px;background:#000;display:none"></video><button class="btn" onclick="startCamera()">Start Front Camera To Live</button><button class="btn btnRed" onclick="stopCamera()">Stop Camera</button></div>
+    <div class="card"><h3>Viewers Online</h3><div id="usersList"></div></div>
+    <div class="card"><h3>Live Comments - Reply</h3><div id="adminComments"></div></div>
+  </div>
+  <div id="a-others" class="hidden">
+    <div class="card"><h3>Audio Streams - Upload From Phone</h3><input type="file" id="audioFile" accept="audio/*"><input id="audioTitle" placeholder="Audio Title"><button class="btn" onclick="uploadAudio()">Upload Audio To Audio Streams</button><div id="adminAudio"></div></div>
+    <div class="card"><h3>Artist Submissions</h3><div id="adminArtist"></div></div>
+    <div class="card"><h3>Send Notification To Viewers</h3><input id="notifText" placeholder="Message for notifications..."><button class="btn" onclick="sendNotif()">Send Notification</button></div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div id="settingsBox" class="card hidden"><h3>Settings</h3>
+  <div class="toggle"><span>Black & White Mode</span><div class="switch" id="themeSwitch" onclick="toggleTheme()"></div></div>
+  <p class="muted">Professional toggle. Black = dark, White = light.</p>
+  <input id="feedbackText" placeholder="Send us feedback..."><button class="btn" onclick="sendFeedback()">Send Feedback</button>
+  <button class="btn btn2" onclick="openSettings()">Close Settings</button>
+</div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getDatabase,ref,set,push,onValue,remove,update,get} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+const firebaseConfig={apiKey:"AIzaSyBT9bXCGb6WgriW1wodo6IeRKOUQ5jdCes",authDomain:"hit-tv-app-40fb9.firebaseapp.com",databaseURL:"https://hit-tv-app-40fb9-default-rtdb.firebaseio.com",projectId:"hit-tv-app-40fb9",storageBucket:"hit-tv-app-40fb9.firebasestorage.app",messagingSenderId:"740828744097",appId:"1:740828744097:web:49104b3522d02de64ce3e0"};
+const app=initializeApp(firebaseConfig); const db=getDatabase(app);
+window.db=db; window.fb={ref,set,push,onValue,remove,update,get};
+let myName=localStorage.getItem('hitv_name')||""; if(myName){document.getElementById('viewerName').value=myName;}
+// Offline banner
+function checkOnline(){document.getElementById('offlineBanner').style.display=navigator.onLine?'none':'block';}
+window.addEventListener('online',checkOnline); window.addEventListener('offline',checkOnline); checkOnline();
+// Tabs
+window.showApp=(t)=>{document.getElementById('viewerApp').classList.toggle('hidden',t!=='viewer');document.getElementById('adminApp').classList.toggle('hidden',t!=='admin');document.getElementById('btnViewer').classList.toggle('active',t==='viewer');document.getElementById('btnAdmin').classList.toggle('active',t==='admin');}
+window.vTab=(id,el)=>{['home','notif','audio','artist'].forEach(x=>document.getElementById('v-'+x).classList.add('hidden'));document.getElementById('v-'+id).classList.remove('hidden');el.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('active'));el.classList.add('active');}
+window.aTab=(id,el)=>{document.getElementById('a-main').classList.toggle('hidden',id!=='main');document.getElementById('a-others').classList.toggle('hidden',id!=='others');el.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('active'));el.classList.add('active');}
+window.openSettings=()=>document.getElementById('settingsBox').classList.toggle('hidden');
+window.toggleTheme=()=>{document.body.classList.toggle('light');document.getElementById('themeSwitch').classList.toggle('on');}
+window.enterWatch=()=>{let n=document.getElementById('viewerName').value.trim(); if(!n) return alert('Enter your name'); myName=n; localStorage.setItem('hitv_name',n); document.getElementById('nameGate').classList.add('hidden'); document.getElementById('viewerMain').classList.remove('hidden'); document.getElementById('helloName').innerText='Hi '+n+' • LIVE'; set(ref(db,'users/'+n),{name:n,online:true,lastSeen:Date.now()}); setInterval(()=>update(ref(db,'users/'+n),{online:true,lastSeen:Date.now()}),15000);}
+// YouTube helpers
+window.getYTId=(url)=>{let m=url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/); return m?m[1]:null;}
+let ytPlayer=null, currentUrl="", isMuted=false;
+window.onYouTubeIframeAPIReady=()=>{};
+function renderLive(url,title,detail){
+  currentUrl=url||""; let box=document.getElementById('playerBox'); document.getElementById('nowPlaying').innerText=title||url||"-"; document.getElementById('nowDetail').innerText=detail||"";
+  if(!url){box.innerHTML='Waiting for Live...<br>No video yet. Admin will add real link.'; return;}
+  let yid=getYTId(url);
+  if(yid){ box.innerHTML=`<div id="ytDiv" style="width:100%;height:100%"></div>`; ytPlayer=new YT.Player('ytDiv',{videoId:yid,playerVars:{autoplay:1,controls:0,disablekb:1,modestbranding:1,rel:0,playsinline:1,fs:0},events:{onReady:e=>{e.target.playVideo(); if(isMuted) e.target.mute();},onStateChange:e=>{if(e.data===0){playNextAuto();}}}}); }
+  else{ box.innerHTML=`<video src="${url}" autoplay playsinline controlsList="nodownload nofullscreen noremoteplayback" disablePictureInPicture></video>`; let v=box.querySelector('video'); v.play().catch(()=>{}); v.onended=()=>playNextAuto(); }
+}
+window.tapSound=()=>{ if(ytPlayer&&ytPlayer.unMute) ytPlayer.unMute(); isMuted=false; document.querySelector('#videoWrap video')?.play(); }
+window.toggleMute=()=>{isMuted=!isMuted; if(ytPlayer){isMuted?ytPlayer.mute():ytPlayer.unMute();}}
+window.requestPiP=()=>{let v=document.querySelector('#videoWrap video'); if(v&&document.pictureInPictureEnabled) v.requestPictureInPicture().catch(()=>alert('PiP not available for YouTube, use video file')); else alert('PiP: Keep watching while using other apps - works for MP4 videos');}
+window.downloadVideo=()=>{if(!currentUrl) return alert('No video playing'); let a=document.createElement('a'); a.href=currentUrl; a.download='hit-tv-video'; a.target='_blank'; a.click();}
+window.downloadAudio=()=>{if(!currentUrl) return alert('No video playing'); alert('Audio download: Opening audio link - it will save to phone files'); window.open(currentUrl,'_blank');}
+function playNextAuto(){ get(ref(db,'lineup')).then(s=>{let v=s.val()||{}; let keys=Object.keys(v); if(keys.length>1){ let first=keys[0]; remove(ref(db,'lineup/'+first)); } else if(keys.length===1){ /* loop forever - replay same */ let item=v[keys[0]]; renderLive(item.url,item.title,item.detail); } }); }
+// Listen live state
+onValue(ref(db,'live'),snap=>{let d=snap.val(); if(d) renderLive(d.url,d.title,d.detail);});
+onValue(ref(db,'ticker'),snap=>{let t=snap.val(); if(t) document.getElementById('tickerText').innerText=t.text||t;});
+onValue(ref(db,'lineup'),snap=>{let v=snap.val()||{}; let keys=Object.keys(v); let html=""; keys.forEach((k,i)=>{html+=`<div class="item"><b>${v[k].title||v[k].url}</b><div class="muted">${v[k].url}</div><div class="row"><button class="btn btn2" onclick="playThis('${k}')">Play Now</button><button class="btn btnRed" onclick="deleteLine('${k}')">Delete</button></div></div>`;}); document.getElementById('viewerQueue').innerHTML=html||'No songs in queue'; document.getElementById('adminQueue').innerHTML=html||'Line up empty'; document.getElementById('nextPlaying').innerText=keys.length>1?(v[keys[1]].title||v[keys[1]].url):'-';});
+onValue(ref(db,'comments'),snap=>{let v=snap.val()||{}; let h1="",h2=""; Object.entries(v).forEach(([k,c])=>{h1+=`<div class="item"><b>${c.name}:</b> ${c.text}<div class="muted">${c.reply? 'Admin: '+c.reply : ''}</div></div>`; h2+=`<div class="item"><b>${c.name}:</b> ${c.text}<br><input id="rep-${k}" placeholder="Reply..."><button class="btn" onclick="replyComment('${k}')">Reply</button></div>`;}); document.getElementById('viewerComments').innerHTML=h1; document.getElementById('adminComments').innerHTML=h2;});
+onValue(ref(db,'users'),snap=>{let v=snap.val()||{}; let h=""; Object.values(v).forEach(u=>{h+=`<div class="item"><b>${u.name}</b> - ${u.online?'Online Now':'Last seen '+new Date(u.lastSeen).toLocaleString()}</div>`;}); document.getElementById('usersList').innerHTML=h||'No users yet';});
+onValue(ref(db,'notifications'),snap=>{let v=snap.val()||{}; let h=""; Object.values(v).reverse().forEach(n=>{h+=`<div class="item">${n.text}</div>`;}); document.getElementById('viewerNotifs').innerHTML=h||'No notifications';});
+onValue(ref(db,'audioStreams'),snap=>{let v=snap.val()||{}; let h1="",h2=""; Object.values(v).forEach(a=>{h1+=`<div class="item"><b>${a.title}</b><br><audio controls src="${a.url}" style="width:100%"></audio></div>`; h2+=`<div class="item"><b>${a.title}</b></div>`;}); document.getElementById('viewerAudio').innerHTML=h1||'No audio yet'; document.getElementById('adminAudio').innerHTML=h2||'';});
+onValue(ref(db,'artistSubmissions'),snap=>{let v=snap.val()||{}; let h=""; Object.entries(v).forEach(([k,a])=>{h+=`<div class="item"><b>${a.artist}</b><br>${a.link}<br><button class="btn" onclick="approveArtist('${k}','${a.link}','${a.artist}')">Add To Line Up</button></div>`;}); document.getElementById('adminArtist').innerHTML=h||'No submissions';});
+onValue(ref(db,'programs'),snap=>{let v=snap.val()||{}; let h=""; Object.entries(v).forEach(([k,p])=>{h+=`<div class="item"><b>${p.title}</b> - ${p.time} EAT - ${p.url}<br><button class="btn btnRed" onclick="deleteProgram('${k}')">Delete Program</button></div>`;}); document.getElementById('programList').innerHTML=h||'';});
+// Viewer actions
+window.sendComment=()=>{let t=document.getElementById('commentInput').value.trim(); if(!t) return; push(ref(db,'comments'),{name:myName||'Viewer',text:t,reply:"",time:Date.now()}); document.getElementById('commentInput').value=''; alert('Comment sent to Admin');}
+window.submitArtist=()=>{let a=document.getElementById('artistName').value, l=document.getElementById('artistLink').value; if(!a||!l) return alert('Fill all'); push(ref(db,'artistSubmissions'),{artist:a,link:l}); alert('Submitted to Admin');}
+window.sendFeedback=()=>{let t=document.getElementById('feedbackText').value; if(!t) return; push(ref(db,'feedback'),{name:myName,text:t,time:Date.now()}); alert('Feedback sent. Thank you!');}
+// Admin actions
+window.addToLineup=()=>{let url=document.getElementById('aLink').value.trim(), title=document.getElementById('aTitle').value.trim(); if(!url) return alert('Paste YouTube or MP4 link'); push(ref(db,'lineup'),{url,title: title||url,detail:title,time:Date.now()}); document.getElementById('aLink').value=''; alert('Added to Line Up - Viewers will play it');}
+window.playThis=(k)=>{get(ref(db,'lineup/'+k)).then(s=>{let d=s.val(); if(d) set(ref(db,'live'),{url:d.url,title:d.title,detail:d.detail});});}
+window.deleteLine=(k)=>remove(ref(db,'lineup/'+k));
+window.adminPlay=()=>{get(ref(db,'lineup')).then(s=>{let v=s.val()||{}; let k=Object.keys(v)[0]; if(k) set(ref(db,'live'),{url:v[k].url,title:v[k].title,detail:v[k].detail});});}
+window.adminStop=()=>{set(ref(db,'live'),{url:"",title:"Stopped",detail:""}); if(ytPlayer) ytPlayer.stopVideo();}
+window.saveTicker=()=>{let t=document.getElementById('aTicker').value; set(ref(db,'ticker'),{text:t}); alert('Ticker saved');}
+window.addProgram=()=>{let url=document.getElemen
