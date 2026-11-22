@@ -5,15 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Hit TV by Inno</title>
 <script>
-try{
-  var _n = localStorage.getItem('hitv_name');
-  if(!_n){ var _m = document.cookie.match(/(?:^|;)hitv_name=([^;]*)/); if(_m) _n = decodeURIComponent(_m[1]); }
-  if(_n){ document.documentElement.className += ' logged-in'; }
-}catch(e){}
+try{var _n=localStorage.getItem('hitv_name');if(!_n){var _m=document.cookie.match(/(?:^|;)hitv_name=([^;]*)/);if(_m)_n=decodeURIComponent(_m[1]);}if(_n){document.documentElement.className+=' logged-in';}}catch(e){}
 </script>
 <style>
-html.logged-in #nameGate{display:none !important}
-html.logged-in #viewerMain{display:block !important}
+html.logged-in #nameGate{display:none!important}
+html.logged-in #viewerMain{display:block!important}
 *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif}
 body{background:#000;color:#fff;overflow-x:hidden;padding-bottom:70px}
 .topbar{background:#000;padding:12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;border-bottom:1px solid #222}
@@ -31,7 +27,7 @@ input,select,textarea{width:100%;background:#111;color:#fff;border:1px solid #33
 .videoWrap{position:relative;width:100%;aspect-ratio:4/3;background:#000;overflow:hidden;border-radius:12px;border:1px solid #222}
 .videoWrap iframe,.videoWrap video{width:100%;height:100%;object-fit:cover;border:0;pointer-events:none}
 .ytCrop{position:absolute;inset:0;overflow:hidden;background:#000}
-.ytCrop iframe{position:absolute;left:50%;top:50%;width:180% !important;height:180% !important;transform:translate(-50%,-50%);pointer-events:none}
+.ytCrop iframe{position:absolute;left:50%;top:50%;width:180%!important;height:180%!important;transform:translate(-50%,-50%);pointer-events:none}
 .ytBlock{position:absolute;inset:0;z-index:4;background:transparent}
 .ticker{position:absolute;left:0;right:0;bottom:0;background:#1e3a8a;color:#fff;overflow:hidden;white-space:nowrap;padding:7px 0;font-weight:700;font-size:14px;z-index:5}
 .ticker span{display:inline-block;padding-left:100%;animation:tick 20s linear infinite}
@@ -60,157 +56,97 @@ body.light #settingsBox{background:#fff;color:#000}
 <div id="offlineBanner">YOU ARE OFFLINE - You stay inside app</div>
 <div class="topbar"><h1>Hit TV <span>by Inno</span></h1><div><button onclick="openSettings()">Settings</button></div></div>
 <div id="nameGate" class="card">
-  <h2>Enter Name To Watch</h2><p class="muted">Enter your name to watch Hit TV live.</p>
-  <input id="viewerName" placeholder="Enter your name...">
-  <button class="btn" onclick="enterWatch()">Enter To Watch</button>
+<h2>Enter Name To Watch</h2><p class="muted">Enter your name to watch Hit TV live.</p>
+<input id="viewerName" placeholder="Enter your name...">
+<button class="btn" onclick="enterWatch()">Enter To Watch</button>
 </div>
 <div id="viewerMain" class="hidden">
-  <div id="v-home">
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b id="helloName">LIVE</b><span style="display:flex;gap:6px;align-items:center"><span class="pill" id="liveStatus">● LIVE • 24/7</span><button class="soundBtn" id="soundBtn" onclick="tapSound()">TAP FOR SOUND</button></span></div>
-      <div class="videoWrap" id="videoWrap" style="margin-top:10px">
-        <div id="playerBox" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;color:#aaa">Waiting for Live...<br>No video yet.</div>
-        <div class="ticker"><span id="tickerText">Welcome to Hit TV by Inno • Stay Tuned •</span></div>
-      </div>
-      <div class="nowBox"><div><small>NOW PLAYING</small><br><b id="nowPlaying">-</b><br><span class="muted" id="nowDetail"></span></div><div><small>NEXT</small><br><b id="nextPlaying">-</b></div></div>
-      <div class="row"><button class="btn btn2" onclick="downloadVideo()">Download Video</button><button class="btn btn2" onclick="downloadAudio()">Download Audio</button></div>
-      <div class="row"><button class="btn btn2" onclick="requestPiP()">Picture in Picture</button><button class="btn btn2" onclick="toggleMute()">Mute / Unmute</button></div>
-      <p class="muted" style="margin-top:8px">Real TV: No pause, no forward, no seek. You join where live is now.</p>
-    </div>
-    <div class="card"><h3>Live Comments - To Admin</h3><input id="commentInput" placeholder="Write comment..."><button class="btn" onclick="sendComment()">Send Comment</button><div id="viewerComments"></div></div>
-  </div>
-  <div id="v-notif" class="hidden">
-    <div class="pageHead"><h2>Notifications</h2><p class="muted">Messages from Admin</p></div>
-    <div class="card"><div id="viewerNotifs"></div></div>
-  </div>
-  <div id="v-audio" class="hidden">
-    <div class="pageHead"><h2>Audio Streams</h2><p class="muted">Listen to audio songs</p></div>
-    <div class="card"><div id="viewerAudio"></div></div>
-  </div>
-  <div id="v-artist" class="hidden">
-    <div class="pageHead"><h2>Artist Console</h2><p class="muted">Submit your song to Admin</p></div>
-    <div class="card"><input id="artistName" placeholder="Artist Name"><input id="artistLink" placeholder="YouTube / Drive Link"><button class="btn" onclick="submitArtist()">Submit To Admin</button></div>
-  </div>
-  <div class="bottomNav" id="bottomNav">
-    <button class="active" onclick="vTab('home',this)"><span>⌂</span>Home</button>
-    <button onclick="vTab('notif',this)"><span>◎</span>Notifications</button>
-    <button onclick="vTab('audio',this)"><span>♫</span>Audio Streams</button>
-    <button onclick="vTab('artist',this)"><span>☆</span>Artist Console</button>
-  </div>
+<div id="v-home">
+<div class="card">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b id="helloName">LIVE</b><span style="display:flex;gap:6px;align-items:center"><span class="pill" id="liveStatus">● LIVE • 24/7</span><button class="soundBtn" id="soundBtn" onclick="tapSound()">TAP FOR SOUND</button></span></div>
+<div class="videoWrap" id="videoWrap" style="margin-top:10px">
+<div id="playerBox" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;color:#aaa">Waiting for Live...<br>No video yet.</div>
+<div class="ticker"><span id="tickerText">Welcome to Hit TV by Inno • Stay Tuned •</span></div>
+</div>
+<div class="nowBox"><div><small>NOW PLAYING</small><br><b id="nowPlaying">-</b><br><span class="muted" id="nowDetail"></span></div><div><small>NEXT</small><br><b id="nextPlaying">-</b></div></div>
+<div class="row"><button class="btn btn2" onclick="downloadVideo()">Download Video</button><button class="btn btn2" onclick="downloadAudio()">Download Audio</button></div>
+<div class="row"><button class="btn btn2" onclick="requestPiP()">Picture in Picture</button><button class="btn btn2" onclick="toggleMute()">Mute / Unmute</button></div>
+<p class="muted" style="margin-top:8px">Real TV: No pause, no forward, no seek. You join where live is now.</p>
+</div>
+<div class="card"><h3>Live Comments - To Admin</h3><input id="commentInput" placeholder="Write comment..."><button class="btn" onclick="sendComment()">Send Comment</button><div id="viewerComments"></div></div>
+</div>
+<div id="v-notif" class="hidden">
+<div class="pageHead"><h2>Notifications</h2><p class="muted">Messages from Admin</p></div>
+<div class="card"><div id="viewerNotifs"></div></div>
+</div>
+<div id="v-audio" class="hidden">
+<div class="pageHead"><h2>Audio Streams</h2><p class="muted">Listen to audio songs</p></div>
+<div class="card"><div id="viewerAudio"></div></div>
+</div>
+<div id="v-artist" class="hidden">
+<div class="pageHead"><h2>Artist Console</h2><p class="muted">Submit your song to Admin</p></div>
+<div class="card"><input id="artistName" placeholder="Artist Name"><input id="artistLink" placeholder="YouTube / Drive Link"><button class="btn" onclick="submitArtist()">Submit To Admin</button></div>
+</div>
+<div class="bottomNav" id="bottomNav">
+<button class="active" onclick="vTab('home',this)"><span>⌂</span>Home</button>
+<button onclick="vTab('notif',this)"><span>◎</span>Notifications</button>
+<button onclick="vTab('audio',this)"><span>♫</span>Audio Streams</button>
+<button onclick="vTab('artist',this)"><span>☆</span>Artist Console</button>
+</div>
 </div>
 <div id="settingsBox" class="hidden">
-  <div style="display:flex;justify-content:space-between;align-items:center"><h2>Settings</h2><button class="btn2" style="background:#222;color:#fff;border:1px solid #333;padding:8px 14px;border-radius:20px;font-weight:700" onclick="openSettings()">Close X</button></div>
-  <div class="toggle"><span>Black & White Mode</span><div class="switch" id="themeSwitch" onclick="toggleTheme()"></div></div>
-  <p class="muted">Professional toggle. Black = dark, White = light.</p>
-  <div class="card" style="margin:10px 0"><h3>Send Us Feedback</h3><input id="feedbackText" placeholder="Send us feedback..."><button class="btn" onclick="sendFeedback()">Send Feedback</button></div>
-  <div class="card" style="margin:10px 0"><h3>About</h3><p class="muted">Hit TV by Inno • Live TV 24/7</p></div>
-  <button class="btn btn2" onclick="openSettings()">Close Settings</button>
-</div>
-<script src="https://www.youtube.com/iframe_api"></script>
+<div style="display:flex;justify-content:space-between;align-items:center"><h2>Settings</h2><button class="btn2" style="background:#222;color:#fff;border:1px solid #333;padding:8px 14px;border-radius:20px;font-weight:700" onclick="openSettings()">Close X</button></div>
+<div class="toggle"><span>Black & White Mode</span><div class="switch" id="themeSwitch" onclick="toggleTheme()"></div></div>
+<p class="muted">Professional toggle. Black = dark, White = light.</p>
+<div class="card" style="margin:10px 0"><h3>Send Us Feedback</h3><input id="feedbackText" placeholder="Send us feedback..."><button class="btn" onclick="sendFeedback()">Send Feedback</button></div>
+<div class="card" style="margin:10px 0"><h3>About</h3><p class="muted">Hit TV by Inno • Live TV 24/7</p></div>
+<button class="btn btn2" onclick="openSettings()">Close Settings</button>
+  </div><script src="https://www.youtube.com/iframe_api"></script>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getDatabase,ref,set,push,onValue,update,get} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-const firebaseConfig = {
-  apiKey: "AIzaSyBT9bXCGb6WgriW1wodo6IeRKOUQ5jdCes",
-  authDomain: "hit-tv-app-40fb9.firebaseapp.com",
-  databaseURL: "https://hit-tv-app-40fb9-default-rtdb.firebaseio.com",
-  projectId: "hit-tv-app-40fb9",
-  storageBucket: "hit-tv-app-40fb9.firebasestorage.app",
-  messagingSenderId: "740828744097",
-  appId: "1:740828744097:web:49104b3522d02de64ce3e0"
-};
-const app=initializeApp(firebaseConfig); const db=getDatabase(app);
-function getSavedName(){ try{let n=localStorage.getItem('hitv_name'); if(n) return n;}catch(e){} try{let m=document.cookie.match(/(?:^|;)hitv_name=([^;]*)/); if(m) return decodeURIComponent(m[1]);}catch(e){} return ""; }
-function saveName(n){ try{localStorage.setItem('hitv_name',n);}catch(e){} try{document.cookie="hitv_name="+encodeURIComponent(n)+";max-age=31536000;path=/";}catch(e){} }
+const firebaseConfig={apiKey:"AIzaSyBT9bXCGb6WgriW1wodo6IeRKOUQ5jdCes",authDomain:"hit-tv-app-40fb9.firebaseapp.com",databaseURL:"https://hit-tv-app-40fb9-default-rtdb.firebaseio.com",projectId:"hit-tv-app-40fb9",storageBucket:"hit-tv-app-40fb9.firebasestorage.app",messagingSenderId:"740828744097",appId:"1:740828744097:web:49104b3522d02de64ce3e0"};
+const app=initializeApp(firebaseConfig);const db=getDatabase(app);
+function getSavedName(){try{let n=localStorage.getItem('hitv_name');if(n)return n;}catch(e){}try{let m=document.cookie.match(/(?:^|;)hitv_name=([^;]*)/);if(m)return decodeURIComponent(m[1]);}catch(e){}return "";}
+function saveName(n){try{localStorage.setItem('hitv_name',n);}catch(e){}try{document.cookie="hitv_name="+encodeURIComponent(n)+";max-age=31536000;path=/";}catch(e){}}
 let myName=getSavedName();
-function goInside(){ document.getElementById('nameGate').classList.add('hidden'); document.getElementById('viewerMain').classList.remove('hidden'); document.getElementById('helloName').innerText='Hi '+myName+' • LIVE'; try{set(ref(db,'users/'+myName),{name:myName,online:true,lastSeen:Date.now()});}catch(e){} setInterval(()=>{try{update(ref(db,'users/'+myName),{online:true,lastSeen:Date.now()});}catch(e){}},15000); }
-if(myName){ document.getElementById('viewerName').value=myName; goInside(); }
+function goInside(){document.getElementById('nameGate').classList.add('hidden');document.getElementById('viewerMain').classList.remove('hidden');document.getElementById('helloName').innerText='Hi '+myName+' • LIVE';try{set(ref(db,'users/'+myName),{name:myName,online:true,lastSeen:Date.now()});}catch(e){}setInterval(()=>{try{update(ref(db,'users/'+myName),{online:true,lastSeen:Date.now()});}catch(e){}},15000);}
+if(myName){document.getElementById('viewerName').value=myName;goInside();}
 function checkOnline(){document.getElementById('offlineBanner').style.display=navigator.onLine?'none':'block';}
-window.addEventListener('online',checkOnline); window.addEventListener('offline',checkOnline); checkOnline();
-window.vTab=(id,el)=>{ ['home','notif','audio','artist'].forEach(x=>document.getElementById('v-'+x).classList.add('hidden')); document.getElementById('v-'+id).classList.remove('hidden'); document.querySelectorAll('#bottomNav button').forEach(b=>b.classList.remove('active')); if(el) el.classList.add('active'); window.scrollTo(0,0); };
-window.openSettings=()=>{ let s=document.getElementById('settingsBox'); s.classList.toggle('hidden'); if(!s.classList.contains('hidden')) window.scrollTo(0,0); };
+window.addEventListener('online',checkOnline);window.addEventListener('offline',checkOnline);checkOnline();
+window.vTab=(id,el)=>{['home','notif','audio','artist'].forEach(x=>document.getElementById('v-'+x).classList.add('hidden'));document.getElementById('v-'+id).classList.remove('hidden');document.querySelectorAll('#bottomNav button').forEach(b=>b.classList.remove('active'));if(el)el.classList.add('active');window.scrollTo(0,0);};
+window.openSettings=()=>{let s=document.getElementById('settingsBox');s.classList.toggle('hidden');if(!s.classList.contains('hidden'))window.scrollTo(0,0);};
 window.toggleTheme=()=>{document.body.classList.toggle('light');document.getElementById('themeSwitch').classList.toggle('on');}
-window.enterWatch=()=>{let n=document.getElementById('viewerName').value.trim(); if(!n) return alert('Enter your name'); myName=n; saveName(n); goInside();};
-window.getYTId=(url)=>{let m=(url||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/); return m?m[1]:null;}
-// SOUND MEMORY - if user already tapped sound before, keep it ON forever
-let savedSound="0"; try{savedSound=localStorage.getItem('hitv_sound_on')||"0";}catch(e){}
-let ytPlayer=null, currentUrl="", isMuted=(savedSound!=="1"), currentMode="manual", currentQueueIndex=-1, lineupCache={}, lineupKeys=[], programCache={}, programPlayingKey="", programEndAt=0;
+window.enterWatch=()=>{let n=document.getElementById('viewerName').value.trim();if(!n)return alert('Enter your name');myName=n;saveName(n);goInside();};
+window.getYTId=(url)=>{let m=(url||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/);return m?m[1]:null;}
+let savedSound="0";try{savedSound=localStorage.getItem('hitv_sound_on')||"0";}catch(e){}
+let ytPlayer=null,currentUrl="",isMuted=(savedSound!=="1"),currentMode="manual",currentQueueIndex=-1,lineupCache={},lineupKeys=[],programCache={},programPlayingKey="",programEndAt=0;
 let lastLiveKey="";
-function saveSound(){ try{localStorage.setItem('hitv_sound_on', isMuted?"0":"1");}catch(e){} }
-function updateSoundBtn(){ let b=document.getElementById('soundBtn'); if(b) b.innerText=isMuted?'TAP FOR SOUND':'SOUND ON'; }
+function saveSound(){try{localStorage.setItem('hitv_sound_on',isMuted?"0":"1");}catch(e){}}
+function updateSoundBtn(){let b=document.getElementById('soundBtn');if(b)b.innerText=isMuted?'TAP FOR SOUND':'SOUND ON';}
 setTimeout(updateSoundBtn,500);
-function getEAT(){ let d=new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Kampala'})); let hh=String(d.getHours()).padStart(2,'0'); let mm=String(d.getMinutes()).padStart(2,'0'); return {hhmm:hh+':'+mm, date:d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}; }
-function checkPrograms(){
-  let eat=getEAT(); let found=null, foundKey="";
-  Object.entries(programCache).forEach(([k,p])=>{
-    if(p.time===eat.hhmm && p.lastPlayedDate!==eat.date){ found=p; foundKey=k; }
-    if(p.time===eat.hhmm && programPlayingKey===k && Date.now()>programEndAt){ programPlayingKey=""; }
-  });
-  if(found){
-    programPlayingKey=foundKey; let mins=parseInt(found.duration||30); programEndAt=Date.now()+mins*60000;
-    update(ref(db,'programs/'+foundKey),{lastPlayedDate:eat.date});
-    set(ref(db,'live'),{url:found.url,title:found.title||found.name,detail:found.detail||found.name,mode:'program',startedAt:Date.now(),programKey:foundKey});
-  }
-  if(programPlayingKey && Date.now()>programEndAt){ programPlayingKey=""; get(ref(db,'queueState')).then(s=>{ let q=s.val(); if(q && q.playing) startQueueAt(q.index||0); }); }
-}
+function getEAT(){let d=new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Kampala'}));let hh=String(d.getHours()).padStart(2,'0');let mm=String(d.getMinutes()).padStart(2,'0');return{hhmm:hh+':'+mm,date:d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};}
+function checkPrograms(){let eat=getEAT();let found=null,foundKey="";Object.entries(programCache).forEach(([k,p])=>{if(p.time===eat.hhmm&&p.lastPlayedDate!==eat.date){found=p;foundKey=k;}if(p.time===eat.hhmm&&programPlayingKey===k&&Date.now()>programEndAt){programPlayingKey="";}});if(found){programPlayingKey=foundKey;let mins=parseInt(found.duration||30);programEndAt=Date.now()+mins*60000;update(ref(db,'programs/'+foundKey),{lastPlayedDate:eat.date});set(ref(db,'live'),{url:found.url,title:found.title||found.name,detail:found.detail||found.name,mode:'program',startedAt:Date.now(),programKey:foundKey});}if(programPlayingKey&&Date.now()>programEndAt){programPlayingKey="";get(ref(db,'queueState')).then(s=>{let q=s.val();if(q&&q.playing)startQueueAt(q.index||0);});}}
 setInterval(checkPrograms,10000);
-function startQueueAt(idx){
-  if(!lineupKeys.length) return;
-  let i=((idx%lineupKeys.length)+lineupKeys.length)%lineupKeys.length;
-  let item=lineupCache[lineupKeys[i]];
-  currentMode='queue'; currentQueueIndex=i;
-  set(ref(db,'queueState'),{playing:true,index:i,startedAt:Date.now()});
-  set(ref(db,'live'),{url:item.url,title:item.title,detail:item.detail,mode:'queue',startedAt:Date.now(),queueIndex:i});
-}
-function playNextImmediate(){
-  if(currentMode==='program') return;
-  if(!lineupKeys.length) return;
-  if(lineupKeys.length===1){ startQueueAt(0); return; }
-  startQueueAt(currentQueueIndex+1);
-}
-function renderLive(d){
-  if(!d||!d.url){ document.getElementById('playerBox').innerHTML='Waiting for Live...<br>No video yet.'; return; }
-  let key=d.url+'|'+(d.startedAt||0)+'|'+(d.mode||'');
-  if(key===lastLiveKey && ytPlayer) return;
-  lastLiveKey=key; currentUrl=d.url; currentMode=d.mode||'manual';
-  if(d.mode==='queue') currentQueueIndex=d.queueIndex||0;
-  document.getElementById('nowPlaying').innerText=d.title||d.url||"-"; document.getElementById('nowDetail').innerText=d.detail||"";
-  let box=document.getElementById('playerBox');
-  let seekSec=0;
-  if(d.startedAt) seekSec=Math.floor((Date.now()-d.startedAt)/1000);
-  let yid=getYTId(d.url);
-  if(yid){
-    box.innerHTML=`<div class="ytCrop"><div id="ytDiv" style="width:100%;height:100%"></div></div><div class="ytBlock"></div>`;
-    if(ytPlayer){ try{ytPlayer.destroy();}catch(e){} }
-    ytPlayer=new YT.Player('ytDiv',{videoId:yid,playerVars:{autoplay:1,controls:0,disablekb:1,modestbranding:1,rel:0,playsinline:1,fs:0,mute:1,iv_load_policy:3,cc_load_policy:0,showinfo:0},events:{onReady:e=>{ if(!isMuted){ e.target.unMute(); e.target.setVolume(100); } else { e.target.mute(); } if(seekSec>3){ try{e.target.seekTo(seekSec,true);}catch(err){} } e.target.playVideo(); updateSoundBtn(); },onStateChange:e=>{ if(e.data===0){ playNextImmediate(); } }}});
-  } else {
-    box.innerHTML=`<video src="${d.url}" autoplay playsinline muted controlsList="nodownload nofullscreen noremoteplayback" disablePictureInPicture></video><div class="ytBlock"></div>`;
-    let v=box.querySelector('video'); v.muted=isMuted; if(!isMuted) v.volume=1; if(seekSec>3){ v.currentTime=seekSec; } v.play().catch(()=>{}); v.onended=()=>playNextImmediate();
-  }
-}
-window.tapSound=()=>{ isMuted=false; saveSound(); let btn=document.getElementById('soundBtn'); if(ytPlayer && ytPlayer.unMute){ ytPlayer.unMute(); ytPlayer.setVolume(100); ytPlayer.playVideo(); } let v=document.querySelector('#videoWrap video'); if(v){ v.muted=false; v.volume=1; v.play().catch(()=>{}); } if(btn) btn.innerText='SOUND ON'; };
-window.toggleMute=()=>{ isMuted=!isMuted; saveSound(); if(ytPlayer){ isMuted?ytPlayer.mute():ytPlayer.unMute(); } let v=document.querySelector('#videoWrap video'); if(v) v.muted=isMuted; updateSoundBtn(); };
-window.requestPiP=()=>{let v=document.querySelector('#videoWrap video'); if(v&&document.pictureInPictureEnabled) v.requestPictureInPicture().catch(()=>alert('PiP not available for YouTube, use video file')); else alert('PiP: Keep watching while using other apps - works for MP4 videos');}
-window.downloadVideo=()=>{
-  if(!currentUrl) return alert('No video playing');
-  let yid=getYTId(currentUrl);
-  if(yid){ window.open('https://www.youtube.com/watch?v='+yid,'_blank'); setTimeout(()=>{ window.open('https://yt1s.com/en/youtube-to-mp4?q=https://www.youtube.com/watch?v='+yid,'_blank'); },400); alert('YouTube blocks direct download. We opened YouTube + Downloader for you. Paste link there to download Video.'); }
-  else { let a=document.createElement('a'); a.href=currentUrl; a.download='hit-tv-video.mp4'; a.target='_blank'; document.body.appendChild(a); a.click(); a.remove(); }
-};
-window.downloadAudio=()=>{
-  if(!currentUrl) return alert('No video playing');
-  let yid=getYTId(currentUrl);
-  if(yid){ window.open('https://yt1s.com/en/youtube-to-mp3?q=https://www.youtube.com/watch?v='+yid,'_blank'); alert('Downloader opened. Tap MP3 to download Audio.'); }
-  else { let a=document.createElement('a'); a.href=currentUrl; a.download='hit-tv-audio.mp3'; a.target='_blank'; document.body.appendChild(a); a.click(); a.remove(); }
-};
-onValue(ref(db,'live'),snap=>{let d=snap.val(); if(d) renderLive(d);});
-onValue(ref(db,'ticker'),snap=>{let t=snap.val(); if(t) document.getElementById('tickerText').innerText=t.text||t;});
-onValue(ref(db,'programs'),snap=>{ programCache=snap.val()||{}; checkPrograms(); });
-onValue(ref(db,'queueState'),snap=>{ let q=snap.val(); if(q && q.playing===false){ currentMode='manual'; } });
-onValue(ref(db,'lineup'),snap=>{ lineupCache=snap.val()||{}; lineupKeys=Object.keys(lineupCache); if(lineupKeys.length>1){ let ni=(currentQueueIndex+1)%lineupKeys.length; document.getElementById('nextPlaying').innerText=lineupCache[lineupKeys[ni]].title||lineupCache[lineupKeys[ni]].url; } else if(lineupKeys.length===1){ document.getElementById('nextPlaying').innerText=lineupCache[lineupKeys[0]].title+' (Loop)'; } else document.getElementById('nextPlaying').innerText='-'; });
-onValue(ref(db,'comments'),snap=>{let v=snap.val()||{}; let h1=""; Object.values(v).forEach(c=>{h1+=`<div class="item"><b>${c.name}:</b> ${c.text}<div class="muted">${c.reply? 'Admin: '+c.reply : ''}</div></div>`;}); document.getElementById('viewerComments').innerHTML=h1;});
-onValue(ref(db,'notifications'),snap=>{let v=snap.val()||{}; let h=""; Object.values(v).reverse().forEach(n=>{h+=`<div class="item">${n.text}</div>`;}); document.getElementById('viewerNotifs').innerHTML=h||'No notifications';});
-onValue(ref(db,'audioStreams'),snap=>{let v=snap.val()||{}; let h1=""; Object.values(v).forEach(a=>{h1+=`<div class="item"><b>${a.title}</b><br><audio controls src="${a.url}" style="width:100%"></audio></div>`;}); document.getElementById('viewerAudio').innerHTML=h1||'No audio yet';});
-window.sendComment=()=>{let t=document.getElementById('commentInput').value.trim(); if(!t) return; push(ref(db,'comments'),{name:myName||'Viewer',text:t,reply:"",time:Date.now()}); document.getElementById('commentInput').value=''; alert('Comment sent to Admin');}
-window.submitArtist=()=>{let a=document.getElementById('artistName').value, l=document.getElementById('artistLink').value; if(!a||!l) return alert('Fill all'); push(ref(db,'artistSubmissions'),{artist:a,link:l}); alert('Submitted to Admin');}
-window.sendFeedback=()=>{let t=document.getElementById('feedbackText').value; if(!t) return; push(ref(db,'feedback'),{name:myName,text:t,time:Date.now()}); alert('Feedback sent. Thank y
+function startQueueAt(idx){if(!lineupKeys.length)return;let i=((idx%lineupKeys.length)+lineupKeys.length)%lineupKeys.length;let item=lineupCache[lineupKeys[i]];currentMode='queue';currentQueueIndex=i;set(ref(db,'queueState'),{playing:true,index:i,startedAt:Date.now()});set(ref(db,'live'),{url:item.url,title:item.title,detail:item.detail,mode:'queue',startedAt:Date.now(),queueIndex:i});}
+function playNextImmediate(){if(currentMode==='program')return;if(!lineupKeys.length)return;if(lineupKeys.length===1){startQueueAt(0);return;}startQueueAt(currentQueueIndex+1);}
+function renderLive(d){if(!d||!d.url){document.getElementById('playerBox').innerHTML='Waiting for Live...<br>No video yet.';return;}let key=d.url+'|'+(d.startedAt||0)+'|'+(d.mode||'');if(key===lastLiveKey&&ytPlayer)return;lastLiveKey=key;currentUrl=d.url;currentMode=d.mode||'manual';if(d.mode==='queue')currentQueueIndex=d.queueIndex||0;document.getElementById('nowPlaying').innerText=d.title||d.url||"-";document.getElementById('nowDetail').innerText=d.detail||"";let box=document.getElementById('playerBox');let seekSec=0;if(d.startedAt)seekSec=Math.floor((Date.now()-d.startedAt)/1000);let yid=getYTId(d.url);if(yid){box.innerHTML=`<div class="ytCrop"><div id="ytDiv" style="width:100%;height:100%"></div></div><div class="ytBlock"></div>`;if(ytPlayer){try{ytPlayer.destroy();}catch(e){}}ytPlayer=new YT.Player('ytDiv',{videoId:yid,playerVars:{autoplay:1,controls:0,disablekb:1,modestbranding:1,rel:0,playsinline:1,fs:0,mute:1,iv_load_policy:3,cc_load_policy:0,showinfo:0},events:{onReady:e=>{if(!isMuted){e.target.unMute();e.target.setVolume(100);}else{e.target.mute();}if(seekSec>3){try{e.target.seekTo(seekSec,true);}catch(err){}}e.target.playVideo();updateSoundBtn();},onStateChange:e=>{if(e.data===0){playNextImmediate();}}}});}else{box.innerHTML=`<video src="${d.url}" autoplay playsinline muted controlsList="nodownload nofullscreen noremoteplayback" disablePictureInPicture></video><div class="ytBlock"></div>`;let v=box.querySelector('video');v.muted=isMuted;if(!isMuted)v.volume=1;if(seekSec>3){v.currentTime=seekSec;}v.play().catch(()=>{});v.onended=()=>playNextImmediate();}}
+window.tapSound=()=>{isMuted=false;saveSound();let btn=document.getElementById('soundBtn');if(ytPlayer&&ytPlayer.unMute){ytPlayer.unMute();ytPlayer.setVolume(100);ytPlayer.playVideo();}let v=document.querySelector('#videoWrap video');if(v){v.muted=false;v.volume=1;v.play().catch(()=>{});}if(btn)btn.innerText='SOUND ON';};
+window.toggleMute=()=>{isMuted=!isMuted;saveSound();if(ytPlayer){isMuted?ytPlayer.mute():ytPlayer.unMute();}let v=document.querySelector('#videoWrap video');if(v)v.muted=isMuted;updateSoundBtn();};
+window.requestPiP=()=>{let v=document.querySelector('#videoWrap video');if(v&&document.pictureInPictureEnabled)v.requestPictureInPicture().catch(()=>alert('PiP not available for YouTube, use video file'));else alert('PiP: Keep watching while using other apps - works for MP4 videos');}
+window.downloadVideo=()=>{if(!currentUrl)return alert('No video playing');let yid=getYTId(currentUrl);if(yid){window.open('https://www.youtube.com/watch?v='+yid,'_blank');setTimeout(()=>{window.open('https://yt1s.com/en/youtube-to-mp4?q=https://www.youtube.com/watch?v='+yid,'_blank');},400);alert('YouTube blocks direct download. We opened YouTube + Downloader for you. Paste link there to download Video.');}else{let a=document.createElement('a');a.href=currentUrl;a.download='hit-tv-video.mp4';a.target='_blank';document.body.appendChild(a);a.click();a.remove();}};
+window.downloadAudio=()=>{if(!currentUrl)return alert('No video playing');let yid=getYTId(currentUrl);if(yid){window.open('https://yt1s.com/en/youtube-to-mp3?q=https://www.youtube.com/watch?v='+yid,'_blank');alert('Downloader opened. Tap MP3 to download Audio.');}else{let a=document.createElement('a');a.href=currentUrl;a.download='hit-tv-audio.mp3';a.target='_blank';document.body.appendChild(a);a.click();a.remove();}};
+onValue(ref(db,'live'),snap=>{let d=snap.val();if(d)renderLive(d);});
+onValue(ref(db,'ticker'),snap=>{let t=snap.val();if(t)document.getElementById('tickerText').innerText=t.text||t;});
+onValue(ref(db,'programs'),snap=>{programCache=snap.val()||{};checkPrograms();});
+onValue(ref(db,'queueState'),snap=>{let q=snap.val();if(q&&q.playing===false){currentMode='manual';}});
+onValue(ref(db,'lineup'),snap=>{lineupCache=snap.val()||{};lineupKeys=Object.keys(lineupCache);if(lineupKeys.length>1){let ni=(currentQueueIndex+1)%lineupKeys.length;document.getElementById('nextPlaying').innerText=lineupCache[lineupKeys[ni]].title||lineupCache[lineupKeys[ni]].url;}else if(lineupKeys.length===1){document.getElementById('nextPlaying').innerText=lineupCache[lineupKeys[0]].title+' (Loop)';}else document.getElementById('nextPlaying').innerText='-';});
+onValue(ref(db,'comments'),snap=>{let v=snap.val()||{};let h1="";Object.values(v).forEach(c=>{h1+=`<div class="item"><b>${c.name}:</b> ${c.text}<div class="muted">${c.reply?'Admin: '+c.reply:''}</div></div>`;});document.getElementById('viewerComments').innerHTML=h1;});
+onValue(ref(db,'notifications'),snap=>{let v=snap.val()||{};let h="";Object.values(v).reverse().forEach(n=>{h+=`<div class="item">${n.text}</div>`;});document.getElementById('viewerNotifs').innerHTML=h||'No notifications';});
+onValue(ref(db,'audioStreams'),snap=>{let v=snap.val()||{};let h1="";Object.values(v).forEach(a=>{h1+=`<div class="item"><b>${a.title}</b><br><audio controls src="${a.url}" style="width:100%"></audio></div>`;});document.getElementById('viewerAudio').innerHTML=h1||'No audio yet';});
+window.sendComment=()=>{let t=document.getElementById('commentInput').value.trim();if(!t)return;push(ref(db,'comments'),{name:myName||'Viewer',text:t,reply:"",time:Date.now()});document.getElementById('commentInput').value='';alert('Comment sent to Admin');}
+window.submitArtist=()=>{let a=document.getElementById('artistName').value,l=document.getElementById('artistLink').value;if(!a||!l)return alert('Fill all');push(ref(db,'artistSubmissions'),{artist:a,link:l});alert('Submitted to Admin');}
+window.sendFeedback=()=>{let t=document.getElementById('feedbackText').value;if(!t)return;push(ref(db,'feedback'),{name:myName,text:t,time:Date.now()});alert('Feedback sent. Thank you!');}
+</script>
+</body>
+</html>
