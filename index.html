@@ -136,7 +136,9 @@ window.getYTId=(url)=>{let m=(url||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/
 let ytPlayer=null, currentUrl="", isMuted=localStorage.getItem('hitv_sound')!=='on', currentMode="manual", currentQueueIndex=-1, lineupCache={}, lineupKeys=[], programCache={}, programPlayingKey="", programEndAt=0, lastLiveKey="";
 let lastAdvanceAt=0, lastPlayedUrl="", shuffledOrder=[], shufflePos=0;
 let ytReady=false, pendingLive=null;
+if(window.YT && window.YT.Player){ ytReady=true; }
 window.onYouTubeIframeAPIReady=()=>{ ytReady=true; if(pendingLive){ let d=pendingLive; pendingLive=null; lastLiveKey=""; renderLive(d); } };
+setInterval(()=>{ if(!ytReady && window.YT && window.YT.Player){ ytReady=true; if(pendingLive){ let d=pendingLive; pendingLive=null; lastLiveKey=""; renderLive(d); } } },1000);
 function updateSoundBtn(){ let b=document.getElementById('soundBtn'); if(b) b.innerText=isMuted?'TAP FOR SOUND':'SOUND ON'; }
 function applySound(){
   updateSoundBtn();
@@ -241,8 +243,4 @@ window.downloadAudio=()=>{
   if(!currentUrl) return alert('No video playing');
   let yid=getYTId(currentUrl);
   if(yid){ window.open('https://yt1s.com/en/youtube-to-mp3?q=https://www.youtube.com/watch?v='+yid,'_blank'); alert('Downloader opened. Tap MP3 to download Audio.'); }
-  else { let a=document.createElement('a'); a.href=currentUrl; a.download='hit-tv-audio.mp3'; a.target='_blank'; document.body.appendChild(a); a.click(); a.remove(); }
-};
-onValue(ref(db,'live'),snap=>{let d=snap.val(); if(d) renderLive(d);});
-onValue(ref(db,'ticker'),snap=>{let t=snap.val(); if(t) document.getElementById('tickerText').innerText=t.text||t;});
-onValue(ref(db,'programs'
+  else { let a=document.createElement('a'); a.href=currentUrl; a.download='hit-tv-audio.mp3'; a.target='_blank'; document.body.appendChild(a); a.click(); a.re
