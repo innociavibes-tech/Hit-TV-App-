@@ -131,7 +131,17 @@ function buildUI() {
 }
 
 // 4. LOGIC
-let myName = localStorage.getItem('hitv_name') || "";
+// FIX: Check BOTH localStorage + Cookie - so it NEVER asks again
+function getSavedName(){
+  try{ let n = localStorage.getItem('hitv_name'); if(n) return n; }catch(e){}
+  try{ let m = document.cookie.match(/(?:^|;)hitv_name=([^;]*)/); if(m) return decodeURIComponent(m[1]); }catch(e){}
+  return "";
+}
+function saveName(n){
+  try{ localStorage.setItem('hitv_name', n); }catch(e){}
+  try{ document.cookie = "hitv_name=" + encodeURIComponent(n) + ";max-age=31536000;path=/"; }catch(e){}
+}
+let myName = getSavedName();
 let ytPlayer = null, currentUrl = "", isMuted = true;
 
 function autoLogin() {
