@@ -5,17 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Hit TV by Inno</title>
 <style>
-  // HIDE GATE BEFORE PAGE SHOWS - IF ALREADY SIGNED IN
-  try{
-    var _n = localStorage.getItem('hitv_name');
-    if(!_n){ var _m = document.cookie.match(/(?:^|;)hitv_name=([^;]*)/); if(_m) _n = decodeURIComponent(_m[1]); }
-    if(_n){ document.documentElement.className += ' logged-in'; }
-  }catch(e){}
-</script>
-<style>
-  html.logged-in #nameGate{display:none !important;}
-  html.logged-in #viewerMain{display:block !important;}
-            </style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,Helvetica,sans-serif}
 body{background:#000;color:#fff;overflow-x:hidden;padding-bottom:70px}
 .topbar{background:#000;padding:12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;border-bottom:1px solid #222}
@@ -184,6 +173,16 @@ onValue(ref(db,'audioStreams'),snap=>{let v=snap.val()||{}; let h1=""; Object.va
 window.sendComment=()=>{let t=document.getElementById('commentInput').value.trim(); if(!t) return; push(ref(db,'comments'),{name:myName||'Viewer',text:t,reply:"",time:Date.now()}); document.getElementById('commentInput').value=''; alert('Comment sent to Admin');}
 window.submitArtist=()=>{let a=document.getElementById('artistName').value, l=document.getElementById('artistLink').value; if(!a||!l) return alert('Fill all'); push(ref(db,'artistSubmissions'),{artist:a,link:l}); alert('Submitted to Admin');}
 window.sendFeedback=()=>{let t=document.getElementById('feedbackText').value; if(!t) return; push(ref(db,'feedback'),{name:myName,text:t,time:Date.now()}); alert('Feedback sent. Thank you!');}
+<script>
+  // HIDE GATE BEFORE PAGE SHOWS - IF ALREADY SIGNED IN
+  try{
+    var _n = localStorage.getItem('hitv_name');
+    if(!_n){ var _m = document.cookie.match(/(?:^|;)hitv_name=([^;]*)/); if(_m) _n = decodeURIComponent(_m[1]); }
+    if(_n){ document.documentElement.className += ' logged-in'; }
+  }catch(e){}
 </script>
+  html.logged-in #nameGate{display:none !important;}
+  html.logged-in #viewerMain{display:block !important;}
+</style>
 </body>
 </html>
