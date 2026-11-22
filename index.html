@@ -212,3 +212,30 @@ setInterval(doResync,5000);
 window.tapSound=()=>{ isMuted=false; try{localStorage.setItem('hitv_sound','1');}catch(e){} let btn=document.getElementById('soundBtn'); if(ytPlayer && ytPlayer.unMute){ ytPlayer.unMute(); ytPlayer.setVolume(100); ytPlayer.playVideo(); } let v=document.querySelector('#videoWrap video'); if(v){ v.muted=false; v.volume=1; v.play().catch(()=>{}); } if(btn) btn.innerText='SOUND ON'; };
 window.toggleMute=()=>{ isMuted=!isMuted; try{localStorage.setItem('hitv_sound',isMuted?'0':'1');}catch(e){} if(ytPlayer){ isMuted?ytPlayer.mute():ytPlayer.unMute(); } let v=document.querySelector('#videoWrap video'); if(v) v.muted=isMuted; let btn=document.getElementById('soundBtn'); if(btn) btn.innerText=isMuted?'TAP FOR SOUND':'SOUND ON'; };
 window.requestPiP=async()=>{ try{ let v=document.querySelector('#videoWrap video'); if(v && document.pictureInPictureEnabled){ if(document.pictureInPictureElement) await document.exitPictureInPicture(); else await v.requestPictureInPicture(); return; } if(window.documentPictur
+window.requestPiP=async()=>{ try{ let v=document.querySelector('#videoWrap video'); if(v && document.pictureInPictureEnabled){ if(document.pictureInPictureElement) await document.exitPictureInPicture(); else await v.requestPictureInPicture(); return; } if(window.documentPictureInPicture){ let pipWin=await documentPictureInPicture.requestWindow({width:640,height:480}); let box=document.getElementById('playerBox'); if(box){ pipWin.document.body.innerHTML=''; let clone=box.cloneNode(true); clone.style.width='100%'; clone.style.height='100%'; pipWin.document.body.appendChild(clone); let yid=window.getYTId(currentUrl); if(yid){ clone.innerHTML='<iframe src="https://www.youtube.com/embed/'+yid+'?autoplay=1&controls=0&modestbranding=1&rel=0" style="width:100%;height:100%;border:0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>'; } } return; } alert('Picture in Picture is not supported on this device. Keep Hit TV open to keep watching.'); }catch(e){ alert('Picture in Picture could not open. Try again.'); } };
+window.downloadVideo=()=>{
+  if(!currentUrl) return alert('No video playing');
+  let yid=window.getYTId(currentUrl);
+  if(yid){ window.open('https://www.youtube.com/watch?v='+yid,'_blank'); setTimeout(()=>{ window.open('https://yt1s.com/en/youtube-to-mp4?q=https://www.youtube.com/watch?v='+yid,'_blank'); },400); alert('YouTube blocks direct download. We opened YouTube + Downloader for you. Paste link there to download Video.'); }
+  else { let a=document.createElement('a'); a.href=currentUrl; a.download='hit-tv-video.mp4'; a.target='_blank'; document.body.appendChild(a); a.click(); a.remove(); }
+};
+window.downloadAudio=()=>{
+  if(!currentUrl) return alert('No video playing');
+  let yid=window.getYTId(currentUrl);
+  if(yid){ window.open('https://yt1s.com/en/youtube-to-mp3?q=https://www.youtube.com/watch?v='+yid,'_blank'); alert('Downloader opened. Tap MP3 to download Audio.'); }
+  else { let a=document.createElement('a'); a.href=currentUrl; a.download='hit-tv-audio.mp3'; a.target='_blank'; document.body.appendChild(a); a.click(); a.remove(); }
+};
+onValue(ref(db,'live'),snap=>{let d=snap.val(); if(d) renderLive(d);});
+onValue(ref(db,'ticker'),snap=>{let t=snap.val(); if(t) document.getElementById('tickerText').innerText=t.text||t;});
+onValue(ref(db,'programs'),snap=>{ programCache=snap.val()||{}; checkPrograms(); });
+onValue(ref(db,'queueState'),snap=>{ let q=snap.val(); if(q && q.playing===false){ currentMode='manual'; } });
+onValue(ref(db,'lineup'),snap=>{ lineupCache=snap.val()||{}; lineupKeys=Object.keys(lineupCache); updateNextLabel(); });
+onValue(ref(db,'comments'),snap=>{let v=snap.val()||{}; let h1=""; Object.values(v).forEach(c=>{h1+='<div class="item"><b>'+c.name+':</b> '+c.text+'<div class="muted">'+(c.reply? 'Admin: '+c.reply : '')+'</div></div>';}); document.getElementById('viewerComments').innerHTML=h1;});
+onValue(ref(db,'notifications'),snap=>{let v=snap.val()||{}; let h=""; Object.values(v).reverse().forEach(n=>{h+='<div class="item">'+n.text+'</div>';}); document.getElementById('viewerNotifs').innerHTML=h||'No notifications';});
+onValue(ref(db,'audioStreams'),snap=>{let v=snap.val()||{}; let h1=""; Object.values(v).forEach(a=>{h1+='<div class="item"><b>'+a.title+'</b><br><audio controls src="'+a.url+'" style="width:100%"></audio></div>';}); document.getElementById('viewerAudio').innerHTML=h1||'No audio yet';});
+window.sendComment=()=>{let t=document.getElementById('commentInput').value.trim(); if(!t) return; push(ref(db,'comments'),{name:myName||'Viewer',text:t,reply:"",time:Date.now()}); document.getElementById('commentInput').value=''; alert('Comment sent to Admin');};
+window.submitArtist=()=>{let a=document.getElementById('artistName').value, l=document.getElementById('artistLink').value; if(!a||!l) return alert('Fill all'); push(ref(db,'artistSubmissions'),{artist:a,link:l}); alert('Submitted to Admin');};
+window.sendFeedback=()=>{let t=document.getElementById('feedbackText').value; if(!t) return; push(ref(db,'feedback'),{name:myName,text:t,time:Date.now()}); alert('Feedback sent. Thank you!');};
+</script>
+</body>
+</html>
