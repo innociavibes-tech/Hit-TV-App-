@@ -133,13 +133,13 @@ window.openSettings=()=>{ let s=document.getElementById('settingsBox'); s.classL
 window.toggleTheme=()=>{document.body.classList.toggle('light');document.getElementById('themeSwitch').classList.toggle('on');}
 window.enterWatch=()=>{let n=document.getElementById('viewerName').value.trim(); if(!n) return alert('Enter your name'); myName=n; saveName(n); goInside();};
 window.getYTId=(url)=>{let m=(url||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/); return m?m[1]:null;}
-let ytPlayer=null, currentUrl="", isMuted=true, currentMode="manual", currentQueueIndex=-1, lineupCache={}, lineupKeys=[], programCache={}, programPlayingKey="", programEndAt=0, lastLiveKey="";
+let ytPlayer=null, currentUrl="", isMuted=localStorage.getItem('hitv_sound')!=='on', currentMode="manual", currentQueueIndex=-1, lineupCache={}, lineupKeys=[], programCache={}, programPlayingKey="", programEndAt=0, lastLiveKey="";
 function getEAT(){ let d=new Date(new Date().toLocaleString('en-US',{timeZone:'Africa/Kampala'})); let hh=String(d.getHours()).padStart(2,'0'); let mm=String(d.getMinutes()).padStart(2,'0'); return {hhmm:hh+':'+mm, date:d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}; }
 function checkPrograms(){
   let eat=getEAT(); let found=null, foundKey="";
   Object.entries(programCache).forEach(([k,p])=>{ if(p.time===eat.hhmm && p.lastPlayedDate!==eat.date){ found=p; foundKey=k; } });
   if(found){ programPlayingKey=foundKey; let mins=parseInt(found.duration||30); programEndAt=Date.now()+mins*60000; update(ref(db,'programs/'+foundKey),{lastPlayedDate:eat.date}); set(ref(db,'live'),{url:found.url,title:found.title||found.name,detail:found.detail||found.name,mode:'program',startedAt:Date.now(),programKey:foundKey}); }
-  if(programPlayingKey && Date.now()>programEndAt){ programPlayingKey=""; get(ref(db,'queueState')).then(s=>{ let q=s.val(); if(q && q.playing) startQueueAt(q.index||0); }); }
+  if(programPlayingKey && Date.now()>programEndAt){ programPlayingKey=""; }
 }
 setInterval(checkPrograms,10000);
 function startQueueAt(idx){
@@ -147,13 +147,21 @@ function startQueueAt(idx){
   let i=((idx%lineupKeys.length)+lineupKeys.length)%lineupKeys.length;
   let item=lineupCache[lineupKeys[i]];
   currentMode='queue'; currentQueueIndex=i;
+  lastLiveKey="";
+  if(ytPlayer){ try{ytPlayer.destroy();}catch(e){} ytPlayer=null; }
   set(ref(db,'queueState'),{playing:true,index:i,startedAt:Date.now()});
   set(ref(db,'live'),{url:item.url,title:item.title,detail:item.detail,mode:'queue',startedAt:Date.now(),queueIndex:i});
 }
 function playNextImmediate(){
   if(currentMode==='program') return;
-  if(currentMode==='queue' && lineupKeys.length){ startQueueAt(currentQueueIndex+1); return; }
-  if(lineupKeys.length){ startQueueAt(0); }
+  if(!lineupKeys.length) return;
+  get(ref(db,'live')).then(s=>{
+    let d=s.val()||{};
+    let cur=(typeof d.queueIndex==='number') ? d.queueIndex : currentQueueIndex;
+    let next=(cur+1)%lineupKeys.length;
+    if(next===cur && lineupKeys.length>1) next=0;
+    startQueueAt(next);
+  });
 }
 function renderLive(d){
   if(!d||!d.url){ document.getElementById('playerBox').innerHTML='Waiting for Live...<br>No video yet.'; return; }
@@ -168,14 +176,14 @@ function renderLive(d){
   if(yid){
     box.innerHTML=`<div class="ytCrop"><div id="ytDiv" style="width:100%;height:100%"></div></div><div class="ytBlock"></div>`;
     if(ytPlayer){ try{ytPlayer.destroy();}catch(e){} }
-    ytPlayer=new YT.Player('ytDiv',{videoId:yid,playerVars:{autoplay:1,controls:0,disablekb:1,modestbranding:1,rel:0,playsinline:1,fs:0,mute:1,iv_load_policy:3,cc_load_policy:0,showinfo:0},events:{onReady:e=>{ e.target.mute(); if(seekSec>3){ try{e.target.seekTo(seekSec,true);}catch(err){} } e.target.playVideo(); document.getElementById('soundBtn').innerText='TAP FOR SOUND'; },onStateChange:e=>{ if(e.data===0){ playNextImmediate(); } }}});
+    ytPlayer=new YT.Player('ytDiv',{videoId:yid,playerVars:{autoplay:1,controls:0,disablekb:1,modestbranding:1,rel:0,playsinline:1,fs:0,mute:1,iv_load_policy:3,cc_load_policy:0,showinfo:0},events:{onReady:e=>{ if(isMuted){ e.target.mute(); } else { e.target.unMute(); e.target.setVolume(100); } if(seekSec>3){ try{e.target.seekTo(seekSec,true);}catch(err){} } e.target.playVideo(); document.getElementById('soundBtn').innerText=isMuted?'TAP FOR SOUND':'SOUND ON'; },onStateChange:e=>{ if(e.data===0){ playNextImmediate(); } }}});
   } else {
-    box.innerHTML=`<video src="${d.url}" autoplay playsinline muted controlsList="nodownload nofullscreen noremoteplayback" disablePictureInPicture></video><div class="ytBlock"></div>`;
-    let v=box.querySelector('video'); if(seekSec>3){ v.currentTime=seekSec; } v.play().catch(()=>{}); v.onended=()=>playNextImmediate();
+    box.innerHTML=`<video src="${d.url}" autoplay playsinline ${isMuted?'muted':''} controlsList="nodownload nofullscreen noremoteplayback" disablePictureInPicture></video><div class="ytBlock"></div>`;
+    let v=box.querySelector('video'); if(seekSec>3){ v.currentTime=seekSec; } v.volume=isMuted?0:1; v.play().catch(()=>{}); v.onended=()=>playNextImmediate();
   }
 }
-window.tapSound=()=>{ isMuted=false; let btn=document.getElementById('soundBtn'); if(ytPlayer && ytPlayer.unMute){ ytPlayer.unMute(); ytPlayer.setVolume(100); ytPlayer.playVideo(); } let v=document.querySelector('#videoWrap video'); if(v){ v.muted=false; v.volume=1; v.play().catch(()=>{}); } if(btn) btn.innerText='SOUND ON'; };
-window.toggleMute=()=>{ isMuted=!isMuted; if(ytPlayer){ isMuted?ytPlayer.mute():ytPlayer.unMute(); } let v=document.querySelector('#videoWrap video'); if(v) v.muted=isMuted; let btn=document.getElementById('soundBtn'); if(btn) btn.innerText=isMuted?'TAP FOR SOUND':'SOUND ON'; };
+window.tapSound=()=>{ isMuted=false; localStorage.setItem('hitv_sound','on'); let btn=document.getElementById('soundBtn'); if(ytPlayer && ytPlayer.unMute){ ytPlayer.unMute(); ytPlayer.setVolume(100); ytPlayer.playVideo(); } let v=document.querySelector('#videoWrap video'); if(v){ v.muted=false; v.volume=1; v.play().catch(()=>{}); } if(btn) btn.innerText='SOUND ON'; };
+window.toggleMute=()=>{ isMuted=!isMuted; localStorage.setItem('hitv_sound',isMuted?'off':'on'); if(ytPlayer){ isMuted?ytPlayer.mute():ytPlayer.unMute(); } let v=document.querySelector('#videoWrap video'); if(v) v.muted=isMuted; let btn=document.getElementById('soundBtn'); if(btn) btn.innerText=isMuted?'TAP FOR SOUND':'SOUND ON'; };
 window.requestPiP=()=>{let v=document.querySelector('#videoWrap video'); if(v&&document.pictureInPictureEnabled) v.requestPictureInPicture().catch(()=>alert('PiP not available for YouTube, use video file')); else alert('PiP: Keep watching while using other apps - works for MP4 videos');}
 window.downloadVideo=()=>{
   if(!currentUrl) return alert('No video playing');
@@ -193,7 +201,7 @@ onValue(ref(db,'live'),snap=>{let d=snap.val(); if(d) renderLive(d);});
 onValue(ref(db,'ticker'),snap=>{let t=snap.val(); if(t) document.getElementById('tickerText').innerText=t.text||t;});
 onValue(ref(db,'programs'),snap=>{ programCache=snap.val()||{}; checkPrograms(); });
 onValue(ref(db,'queueState'),snap=>{ let q=snap.val(); if(q && q.playing===false){ currentMode='manual'; } });
-onValue(ref(db,'lineup'),snap=>{ lineupCache=snap.val()||{}; lineupKeys=Object.keys(lineupCache); let html=""; lineupKeys.forEach((k,i)=>{html+=`<div class="item"><b>${lineupCache[k].title||lineupCache[k].url}</b><div class="muted">${lineupCache[k].url}</div></div>`;}); document.getElementById('viewerQueue').innerHTML=html||'No songs in queue'; if(lineupKeys.length>1){ let ni=(currentQueueIndex+1)%lineupKeys.length; document.getElementById('nextPlaying').innerText=lineupCache[lineupKeys[ni]].title||lineupCache[lineupKeys[ni]].url; } else document.getElementById('nextPlaying').innerText='-'; });
+onValue(ref(db,'lineup'),snap=>{ lineupCache=snap.val()||{}; lineupKeys=Object.keys(lineupCache); if(lineupKeys.length>1){ let ni=(currentQueueIndex+1)%lineupKeys.length; document.getElementById('nextPlaying').innerText=lineupCache[lineupKeys[ni]].title||'Hit Song'; } else document.getElementById('nextPlaying').innerText='-'; });
 onValue(ref(db,'comments'),snap=>{let v=snap.val()||{}; let h1=""; Object.values(v).forEach(c=>{h1+=`<div class="item"><b>${c.name}:</b> ${c.text}<div class="muted">${c.reply? 'Admin: '+c.reply : ''}</div></div>`;}); document.getElementById('viewerComments').innerHTML=h1;});
 onValue(ref(db,'notifications'),snap=>{let v=snap.val()||{}; let h=""; Object.values(v).reverse().forEach(n=>{h+=`<div class="item">${n.text}</div>`;}); document.getElementById('viewerNotifs').innerHTML=h||'No notifications';});
 onValue(ref(db,'audioStreams'),snap=>{let v=snap.val()||{}; let h1=""; Object.values(v).forEach(a=>{h1+=`<div class="item"><b>${a.title}</b><br><audio controls src="${a.url}" style="width:100%"></audio></div>`;}); document.getElementById('viewerAudio').innerHTML=h1||'No audio yet';});
