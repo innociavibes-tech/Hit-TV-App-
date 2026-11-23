@@ -250,7 +250,16 @@ window.toggleRotate = async () => {
     }
   }catch(e){ alert('Please rotate your phone'); }
 };
-
+// Only Home Tab
+document.querySelectorAll('button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    const t=b.textContent.trim().toLowerCase();
+    const btn=document.getElementById('rotBtn');
+    if(!btn) return;
+    if(t.includes('home')) btn.style.display='block';
+    else if(t.includes('notification')||t.includes('audio')||t.includes('artist')) btn.style.display='none';
+  });
+});
   </script>
  <button id="rotBtn"...>
   </script>
