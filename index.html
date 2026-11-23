@@ -184,3 +184,7 @@ onValue(ref(db,'audioStreams'),snap=>{let v=snap.val()||{};let h1="";Object.valu
 window.sendComment=()=>{let t=document.getElementById('commentInput').value.trim();if(!t)return;push(ref(db,'comments'),{name:myName||'Viewer',text:t,reply:"",time:Date.now()});document.getElementById('commentInput').value='';alert('Comment sent to Admin');}
 window.submitArtist=()=>{let a=document.getElementById('artistName').value,l=document.getElementById('artistLink').value;if(!a||!l)return alert('Fill all');push(ref(db,'artistSubmissions'),{artist:a,link:l});alert('Submitted to Admin');}
 window.sendFeedback=()=>{let t=document.getElementById('feedbackText').value;if(!t)return;push(ref(db,'feedback'),{name:myName,text:t,time:Date.now()});alert('Feedback
+;if(!t)return;push(ref(db,'feedback'),{name:myName,text:t,time:Date.now()});alert('Feedback sent. Thank you!');}
+</script>
+</body>
+</html>
