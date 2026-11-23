@@ -248,14 +248,9 @@ function rotateVideo(){
   v.classList.toggle('rotated');
   alert('Button works! Rotated = ' + v.classList.contains('rotated'));
 }
-  // AUTO CREATE ROTATE BUTTON - No need to find TAP FOR SOUND
-(function(){
-  var b = document.createElement('button');
-  b.textContent = '⟳ ROTATE';
-  b.onclick = rotateVideo;
-  b.style.cssText = 'position:fixed;top:70px;right:10px;z-index:9999;padding:8px 12px;background:#f5c518;color:#000;border:none;border-radius:20px;font-weight:800;font-size:12px;';
-  document.body.appendChild(b);
-})();
+function rotateVideo(){
+  document.getElementById('videoWrap').classList.toggle('rotated');
+}
   </script>
 <button onclick="rotateVideo()" style="position:fixed;left:5px;top:50%;transform:translateY(-50%);z-index:9999;padding:10px 8px;background:#f5c518;color:#000;border:none;border-radius:10px;font-weight:800;font-size:13px;">⟳</button>
 </body>
