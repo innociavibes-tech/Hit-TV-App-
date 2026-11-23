@@ -383,4 +383,121 @@ window.downloadVideo = () => {
   if(!currentUrl) return alert('No video playing');
   let yid = getYTId(currentUrl);
   if(yid){
-    window.open('https://www.youtube.com
+        window.open('https://www.youtube.com/watch?v=' + yid, '_blank');
+    setTimeout(()=>{
+      window.open('https://yt1s.com/en/youtube-to-mp4?q=https://www.youtube.com/watch?v=' + yid, '_blank');
+    }, 400);
+    alert('YouTube blocks direct download. We opened YouTube + Downloader for you.');
+  } else {
+    let a = document.createElement('a');
+    a.href = currentUrl;
+    a.download = 'hit-tv-video.mp4';
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+};
+
+window.downloadAudio = () => {
+  if(!currentUrl) return alert('No video playing');
+  let yid = getYTId(currentUrl);
+  if(yid){
+    window.open('https://yt1s.com/en/youtube-to-mp3?q=https://www.youtube.com/watch?v=' + yid, '_blank');
+    alert('Downloader opened. Tap MP3 to download Audio.');
+  } else {
+    let a = document.createElement('a');
+    a.href = currentUrl;
+    a.download = 'hit-tv-audio.mp3';
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+};
+
+onValue(ref(db,'live'), snap => {
+  let d = snap.val();
+  if(d) renderLive(d, false);
+});
+
+onValue(ref(db,'ticker'), snap => {
+  let t = snap.val();
+  if(t) document.getElementById('tickerText').innerText = t.text || t;
+});
+
+onValue(ref(db,'programs'), snap => {
+  programCache = snap.val() || {};
+  checkPrograms();
+});
+
+onValue(ref(db,'queueState'), snap => {
+  let q = snap.val();
+  if(q && q.playing === false){ currentMode = 'manual'; }
+});
+
+onValue(ref(db,'lineup'), snap => {
+  lineupCache = snap.val() || {};
+  lineupKeys = Object.keys(lineupCache);
+  if(lineupKeys.length > 1){
+    let ni = (currentQueueIndex + 1) % lineupKeys.length;
+    document.getElementById('nextPlaying').innerText = lineupCache[lineupKeys[ni]].title || lineupCache[lineupKeys[ni]].url;
+  } else if(lineupKeys.length === 1){
+    document.getElementById('nextPlaying').innerText = lineupCache[lineupKeys[0]].title + ' (Loop)';
+  } else {
+    document.getElementById('nextPlaying').innerText = '-';
+  }
+});
+
+onValue(ref(db,'comments'), snap => {
+  let v = snap.val() || {};
+  let h1 = "";
+  Object.values(v).forEach(c=>{
+    h1 += '<div class="item"><b>' + c.name + ':</b> ' + c.text + '<div class="muted">' + (c.reply ? 'Admin: ' + c.reply : '') + '</div></div>';
+  });
+  document.getElementById('viewerComments').innerHTML = h1;
+});
+
+onValue(ref(db,'notifications'), snap => {
+  let v = snap.val() || {};
+  let h = "";
+  Object.values(v).reverse().forEach(n=>{
+    h += '<div class="item">' + n.text + '</div>';
+  });
+  document.getElementById('viewerNotifs').innerHTML = h || 'No notifications';
+});
+
+onValue(ref(db,'audioStreams'), snap => {
+  let v = snap.val() || {};
+  let h1 = "";
+  Object.values(v).forEach(a=>{
+    h1 += '<div class="item"><b>' + a.title + '</b><br><audio controls src="' + a.url + '" style="width:100%"></audio></div>';
+  });
+  document.getElementById('viewerAudio').innerHTML = h1 || 'No audio yet';
+});
+
+window.sendComment = () => {
+  let t = document.getElementById('commentInput').value.trim();
+  if(!t) return;
+  push(ref(db,'comments'),{name: myName || 'Viewer', text: t, reply: "", time: Date.now()});
+  document.getElementById('commentInput').value = '';
+  alert('Comment sent to Admin');
+};
+
+window.submitArtist = () => {
+  let a = document.getElementById('artistName').value;
+  let l = document.getElementById('artistLink').value;
+  if(!a || !l) return alert('Fill all');
+  push(ref(db,'artistSubmissions'),{artist: a, link: l});
+  alert('Submitted to Admin');
+};
+
+window.sendFeedback = () => {
+  let t = document.getElementById('feedbackText').value;
+  if(!t) return;
+  push(ref(db,'feedback'),{name: myName, text: t, time: Date.now()});
+  alert('Feedback sent. Thank you!');
+};
+</script>
+</body>
+</html>
