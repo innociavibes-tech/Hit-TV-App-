@@ -237,23 +237,6 @@ onValue(ref(db,'privateComments/' + myName), snap => {
 // === END ===
  // === END ===
 
-window.toggleRotate = async () => {
-  try{
-    if(!document.fullscreenElement) await document.documentElement.requestFullscreen();
-    if(screen.orientation && screen.orientation.lock){
-      if(screen.orientation.type.includes('portrait')) await screen.orientation.lock('landscape');
-      else await screen.orientation.lock('portrait');
-    }
-  }catch(e){ alert('Please rotate your phone'); }
-};
-// HOME ONLY - check if NOW PLAYING is on screen
-setInterval(()=>{
-  const btn=document.getElementById('rotBtn');
-  if(!btn) return;
-
   </script>
- <button id="rotBtn"...>
-  </script>
-  <button id="rotBtn" onclick="toggleRotate()">⛶</button>
 </body>
 </html>
