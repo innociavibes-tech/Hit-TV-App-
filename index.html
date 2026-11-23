@@ -147,6 +147,42 @@ onValue(ref(db,'audioStreams'),snap=>{let v=snap.val()||{};let h1="";Object.valu
 window.sendComment=()=>{let t=document.getElementById('commentInput').value.trim();if(!t)return;push(ref(db,'comments'),{name:myName||'Viewer',text:t,reply:"",time:Date.now()});document.getElementById('commentInput').value='';alert('Comment sent to Admin');}
 window.submitArtist=()=>{let a=document.getElementById('artistName').value,l=document.getElementById('artistLink').value;if(!a||!l)return alert('Fill all');push(ref(db,'artistSubmissions'),{artist:a,link:l});alert('Submitted to Admin');}
 window.sendFeedback=()=>{let t=document.getElementById('feedbackText').value;if(!t)return;push(ref(db,'feedback'),{name:myName,text:t,time:Date.now()});alert('Feedback sent. Thank you!');}
+// === SYNC PATCH - VIEWERS ONLY - PASTE HERE ===
+let lastSyncCheck = 0;
+function getLiveSec(){
+  if(!currentLive) return 0;
+  if(!currentLive.startedAt) return 0;
+  let played = (Date.now() - currentLive.startedAt) / 1000;
+  return played;
+}
+function doSync(){
+  let want = getLiveSec();
+  if(want < 3) return;
+  if(window.ytPlayer && window.ytPlayer.getCurrentTime){
+    try{
+      let now = window.ytPlayer.getCurrentTime();
+      let diff = want - now;
+      if(diff > 5 || diff < -5){
+        window.ytPlayer.seekTo(want, true);
+        window.ytPlayer.playVideo();
+      }
+    }catch(e){}
+    return;
+  }
+  let v = document.querySelector('#videoWrap video');
+  if(v){
+    let diff = want - v.currentTime;
+    if(diff > 5 || diff < -5){
+      v.currentTime = want;
+      v.play().catch(()=>{});
+    }
+  }
+}
+setInterval(doSync, 5000);
+setInterval(doSync, 30000);
+// === END SYNC PATCH ===
 </script>
+</body>
+</html></script>
 </body>
 </html>
