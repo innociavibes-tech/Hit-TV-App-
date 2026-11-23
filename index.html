@@ -8,8 +8,7 @@
 try{var _n=localStorage.getItem('hitv_name');if(!_n){var _m=document.cookie.match(/(?:^|;)hitv_name=([^;]*)/);if(_m)_n=decodeURIComponent(_m[1]);}if(_n){document.documentElement.className+=' logged-in';}}catch(e){}
 </script>
 <style>
-  #rotBtn{position:fixed !important;top:31% !important;right:8px !important;z-index:99999 !important;width:32px;height:32px;border-radius:50%;border:1px solid #fff;background:rgba(0,0,0,0.75);color:#fff;font-size:15px;cursor:pointer}
-body{background:#000;color:#fff;overflow-x:hidden;padding-bottom:70px}
+#rotBtn{position:fixed !important;top:28.5% !important;right:10px !important;z-index:99999 !important;width:32px;height:32px;border-radius:50%;border:none !important;background:rgba(255,255,255,0.9) !important;color:#000 !important;font-size:15px;box-shadow:0 2px 6px rgba(0,0,0,0.3);cursor:pointer}
 .topbar{background:#000;padding:12px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;border-bottom:1px solid #222}
 .topbar h1{font-size:18px}.topbar h1 span{color:#1e3a8a}
 .topbar button{background:#111;color:#fff;border:1px solid #333;padding:8px 12px;border-radius:20px;font-weight:700}
@@ -248,14 +247,17 @@ window.toggleRotate = async () => {
     }
   }catch(e){ alert('Please rotate your phone'); }
 };
-// Only Home Tab - works for any tab type
-document.addEventListener('click', (e)=>{
-  const t = e.target.textContent.trim().toLowerCase();
-  const btn = document.getElementById('rotBtn');
+// HOME ONLY - check if NOW PLAYING is on screen
+setInterval(()=>{
+  const btn=document.getElementById('rotBtn');
   if(!btn) return;
-  if(t.includes('home')) btn.style.display='block';
-  if(t.includes('notification') || t.includes('audio') || t.includes('artist')) btn.style.display='none';
-});
+  // NOW PLAYING only exists on Home tab
+  if(document.body.innerText.includes('NOW PLAYING')){
+    btn.style.display='block';
+  } else {
+    btn.style.display='none';
+  }
+},500);
   </script>
  <button id="rotBtn"...>
   </script>
