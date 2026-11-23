@@ -181,8 +181,44 @@ function doSync(){
 setInterval(doSync, 5000);
 setInterval(doSync, 30000);
 // === END SYNC PATCH ===
+// === LOOP PATCH - TIME BASED ===
+function getLoopPosition(){
+  if(!currentLive) return null;
+  if(!currentLive.startedAt) return null;
+  if(!window.lineupCache) return null;
+  let keys = Object.keys(window.lineupCache);
+  if(keys.length === 0) return null;
+  let elapsed = (Date.now() - currentLive.startedAt) / 1000;
+  // Assume each song = 180 sec, change 180 if your songs longer
+  let songLen = 180;
+  let totalLoop = keys.length * songLen;
+  let posInLoop = elapsed % totalLoop;
+  let idx = Math.floor(posInLoop / songLen);
+  let secInSong = posInLoop % songLen;
+  return { idx: idx, sec: secInSong, key: keys[idx] };
+}
+setInterval(()=>{
+  let p = getLoopPosition();
+  if(!p) return;
+  // If Admin is on queue mode and viewer is on wrong song, jump
+  if(currentLive.mode === 'queue' && currentQueueIndex !== p.idx){
+    // Tell renderLive to switch song
+    let song = window.lineupCache[p.key];
+    if(song){
+      currentQueueIndex = p.idx;
+      // Force reload with new song but same startedAt
+      let fakeLive = {
+        url: song.url,
+        title: song.title,
+        mode: 'queue',
+        startedAt: currentLive.startedAt + (p.idx * 180 * 1000),
+        queueIndex: p.idx
+      };
+      if(typeof renderLive === 'function') renderLive(fakeLive, true);
+    }
+  }
+}, 5000);
+// === END LOOP PATCH ===
 </script>
-</body>
-</html></script>
 </body>
 </html>
