@@ -219,6 +219,30 @@ setInterval(()=>{
   }
 }, 5000);
 // === END LOOP PATCH ===
+// === PRIVATE COMMENT - VIEWER ===
+window.sendPrivateComment = () => {
+  let txt = document.getElementById('commentInput').value.trim();
+  if(!txt) return;
+  let myName = localStorage.getItem('viewerName') || 'Viewer';
+  let myId = localStorage.getItem('viewerId') || myName;
+  push(ref(db,'privateComments/' + myId), { from: myName, text: txt, to: 'admin', time: Date.now() });
+  document.getElementById('commentInput').value = '';
+  alert('Sent to Admin privately');
+};
+let myId2 = localStorage.getItem('viewerId') || localStorage.getItem('viewerName');
+if(myId2){
+  onValue(ref(db,'privateComments/' + myId2), snap => {
+    let box = document.getElementById('commentBox');
+    if(!box) return;
+    box.innerHTML = '';
+    snap.forEach(c => {
+      let d = c.val();
+      let who = d.from === 'admin' ? 'ADMIN' : 'YOU';
+      box.innerHTML += '<div><b>'+who+':</b> '+d.text+'</div>';
+    });
+  });
+}
+// === END ===
 </script>
 </body>
 </html>
