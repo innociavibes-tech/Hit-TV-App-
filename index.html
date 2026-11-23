@@ -251,14 +251,9 @@ onValue(ref(db,'privateComments/' + myName), snap => {
 // === END ===
  // === END ===
 function rotateVideo(){
-  var v=document.getElementById('videoWrap');
-  v.classList.toggle('rotated');
-  alert('Button works! Rotated = ' + v.classList.contains('rotated'));
-}
-function rotateVideo(){
   document.getElementById('videoWrap').classList.toggle('rotated');
 }
   </script>
-<button onclick="rotateVideo()" style="position:fixed;left:5px;top:50%;transform:translateY(-50%);z-index:9999;padding:10px 8px;background:#f5c518;color:#000;border:none;border-radius:10px;font-weight:800;font-size:13px;">⟳</button>
+<button onclick="rotateVideo()" style="position:fixed;left:5px;top:50%;z-index:9999;padding:10px;background:#f5c518;color:#000;border:none;border-radius:10px;">⟳</button>
 </body>
 </html>
