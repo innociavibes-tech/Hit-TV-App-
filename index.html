@@ -219,31 +219,25 @@ setInterval(()=>{
   }
 }, 5000);
 // === END LOOP PATCH ===
-  // === PRIVATE COMMENT - VIEWER - FINAL ===
-window.sendPrivateComment = () => {
-  let txt = document.getElementById('commentInput').value.trim();
-  if(!txt) return;
-  let myName = localStorage.getItem('viewerName') || 'Viewer';
-  let myId = localStorage.getItem('viewerId') || myName;
-  push(ref(db,'privateComments/' + myId), { from: myName, text: txt, to: 'admin', time: Date.now() });
+// === PRIVATE COMMENT - PASTE HERE ===
+window.sendComment = () => {
+  let t = document.getElementById('commentInput').value.trim();
+  if(!t) return;
+  push(ref(db,'privateComments/' + myName), {from: myName, text: t, time: Date.now()});
   document.getElementById('commentInput').value = '';
   alert('Sent to Admin');
 };
-let myId2 = localStorage.getItem('viewerId') || localStorage.getItem('viewerName');
-if(myId2){
-  onValue(ref(db,'privateComments/' + myId2), snap => {
-    let box = document.getElementById('commentBox');
-    if(!box) return;
-    box.innerHTML = '';
-    snap.forEach(c => {
-      let d = c.val();
-      if(d.from === 'admin'){
-        box.innerHTML += '<div><b>ADMIN:</b> ' + d.text + '</div>';
-      }
-    });
+onValue(ref(db,'privateComments/' + myName), snap => {
+  let box = document.getElementById('viewerComments');
+  if(!box) return;
+  box.innerHTML = '';
+  snap.forEach(c => {
+    let d = c.val();
+    if(d.from === 'admin'){
+      box.innerHTML += '<div class="item"><b>ADMIN:</b> ' + d.text + '</div>';
+    }
   });
-}
-// === END FINAL ===
-</script>
+});
+// === END ===
 </body>
 </html>
