@@ -219,7 +219,7 @@ setInterval(()=>{
   }
 }, 5000);
 // === END LOOP PATCH ===
-// === PRIVATE COMMENT - VIEWER ===
+  // === PRIVATE COMMENT - VIEWER - FINAL ===
 window.sendPrivateComment = () => {
   let txt = document.getElementById('commentInput').value.trim();
   if(!txt) return;
@@ -227,7 +227,7 @@ window.sendPrivateComment = () => {
   let myId = localStorage.getItem('viewerId') || myName;
   push(ref(db,'privateComments/' + myId), { from: myName, text: txt, to: 'admin', time: Date.now() });
   document.getElementById('commentInput').value = '';
-  alert('Sent to Admin privately');
+  alert('Sent to Admin');
 };
 let myId2 = localStorage.getItem('viewerId') || localStorage.getItem('viewerName');
 if(myId2){
@@ -237,12 +237,13 @@ if(myId2){
     box.innerHTML = '';
     snap.forEach(c => {
       let d = c.val();
-      let who = d.from === 'admin' ? 'ADMIN' : 'YOU';
-      box.innerHTML += '<div><b>'+who+':</b> '+d.text+'</div>';
+      if(d.from === 'admin'){
+        box.innerHTML += '<div><b>ADMIN:</b> ' + d.text + '</div>';
+      }
     });
   });
 }
-// === END ===
+// === END FINAL ===
 </script>
 </body>
 </html>
