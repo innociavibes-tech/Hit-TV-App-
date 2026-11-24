@@ -290,7 +290,10 @@ onValue(ref(db,'privateComments/' + myName), snap => {
 });
 // === END ===
  // === END ===
-
+// SUPER FORCE SOUND ON - paste above </script>
+window.tapSound=()=>{isMuted=false;try{localStorage.setItem('hitv_sound_on','1')}catch(e){}let btn=document.getElementById('soundBtn');if(ytPlayer&&ytPlayer.unMute){ytPlayer.unMute();ytPlayer.setVolume(100);ytPlayer.playVideo();}let v=document.querySelector('#videoWrap video');if(v){v.muted=false;v.volume=1;v.play().catch(()=>{});}if(btn)btn.innerText='SOUND ON';};
+setInterval(()=>{if(!isMuted){if(ytPlayer&&ytPlayer.unMute&&ytPlayer.isMuted&&ytPlayer.isMuted()){ytPlayer.unMute();ytPlayer.setVolume(100);}let v=document.querySelector('#videoWrap video');if(v&&v.muted){v.muted=false;v.volume=1;}}},500);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!isMuted&&ytPlayer&&ytPlayer.unMute){ytPlayer.unMute();ytPlayer.setVolume(100);}});
   </script>
 </body>
 </html>
