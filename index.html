@@ -294,6 +294,34 @@ onValue(ref(db,'privateComments/' + myName), snap => {
 window.tapSound=()=>{isMuted=false;try{localStorage.setItem('hitv_sound_on','1')}catch(e){}let btn=document.getElementById('soundBtn');if(ytPlayer&&ytPlayer.unMute){ytPlayer.unMute();ytPlayer.setVolume(100);ytPlayer.playVideo();}let v=document.querySelector('#videoWrap video');if(v){v.muted=false;v.volume=1;v.play().catch(()=>{});}if(btn)btn.innerText='SOUND ON';};
 setInterval(()=>{if(!isMuted){if(ytPlayer&&ytPlayer.unMute&&ytPlayer.isMuted&&ytPlayer.isMuted()){ytPlayer.unMute();ytPlayer.setVolume(100);}let v=document.querySelector('#videoWrap video');if(v&&v.muted){v.muted=false;v.volume=1;}}},500);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!isMuted&&ytPlayer&&ytPlayer.unMute){ytPlayer.unMute();ytPlayer.setVolume(100);}});
-  </script>
+// SUPER FORCE LOOP LINEUP FOREVER - paste above 
+setInterval(()=>{
+  try{
+    if(!ytPlayer || !ytPlayer.getPlayerState) return;
+    let st = ytPlayer.getPlayerState();
+    // 0 = ENDED, 5 = CUED but not playing
+    if(st===0 || st===5){
+      // Try every possible next function your app has
+      if(typeof nextSong==='function') return nextSong();
+      if(typeof playNext==='function') return playNext();
+      if(typeof nextVideo==='function') return nextVideo();
+      if(typeof playNextSong==='function') return playNextSong();
+      // If no next function, try to go to next index manually
+      let list = window.videos || window.lineup || window.songs || window.playlist || window.queue;
+      if(list && list.length){
+        let cur = window.currentIdx ?? window.currentIndex ?? window.curIdx ?? window.idx ?? 0;
+        let nxt = (cur + 1) % list.length; // last -> back to 0, forever
+        window.currentIdx = nxt; window.currentIndex = nxt; window.curIdx = nxt; window.idx = nxt;
+        if(typeof renderLive==='function') return renderLive();
+        if(typeof playSong==='function') return playSong(nxt);
+        if(typeof playVideo==='function') return playVideo(nxt);
+      }
+    }
+  }catch(e){}
+},1000);
+  // VIEWERS FORCE - SOUND + LOOP FOREVER - paste above 
+setInterval(()=>{if(!isMuted&&ytPlayer&&ytPlayer.unMute&&ytPlayer.isMuted&&ytPlayer.isMuted()){ytPlayer.unMute();ytPlayer.setVolume(100);}},500);
+setInterval(()=>{try{if(!ytPlayer||!ytPlayer.getPlayerState)return;let st=ytPlayer.getPlayerState();if(st===0||st===5){if(typeof nextSong==='function')return nextSong();if(typeof playNext==='function')return playNext();if(typeof nextVideo==='function')return nextVideo();let list=window.videos||window.lineup||window.songs||window.playlist||window.queue;if(list&&list.length){let cur=window.currentIdx??window.currentIndex??window.curIdx??window.idx??0;let nxt=(cur+1)%list.length;window.currentIdx=nxt;window.currentIndex=nxt;window.curIdx=nxt;window.idx=nxt;if(typeof renderLive==='function')return renderLive();if(typeof playSong==='function')return playSong(nxt);}}}catch(e){}},1000);
+</script>
 </body>
 </html>
