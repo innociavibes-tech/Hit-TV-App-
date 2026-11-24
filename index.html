@@ -123,7 +123,9 @@ window.toggleTheme=()=>{document.body.classList.toggle('light');document.getElem
 window.enterWatch=()=>{let n=document.getElementById('viewerName').value.trim();if(!n)return alert('Enter your name');myName=n;saveName(n);goInside();};
 window.getYTId=(url)=>{let m=(url||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/);return m?m[1]:null;}
 let savedSound="0";try{savedSound=localStorage.getItem('hitv_sound_on')||"0";}catch(e){}
-let ytPlayer=null,currentUrl="",isMuted=(savedSound!=="1"),currentMode="manual",currentQueueIndex=-1,lineupCache={},lineupKeys=[],programCache={},programPlayingKey="",programEndAt=0;
+let ytPlayer=null, currentUrl="", isMuted=false;
+let soundOn = localStorage.getItem('hitv_sound') === 'on';
+if(soundOn){ isMuted = false; } else { isMuted = true; }
 let lastLiveKey="";
 function saveSound(){try{localStorage.setItem('hitv_sound_on',isMuted?"0":"1");}catch(e){}}
 function updateSoundBtn(){let b=document.getElementById('soundBtn');if(b)b.innerText=isMuted?'TAP FOR SOUND':'SOUND ON';}
