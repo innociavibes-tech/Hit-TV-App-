@@ -152,11 +152,35 @@ function playNextImmediate(){
   if(lineupKeys.length){
     startQueueAt(0);
   }
-}
-function renderLive(d)if(!d || !d.url || d.mode === 'waiting'){
-  document.getElementById('playerBox').innerHTML = 'Waiting for Next Program...';
-  return;
-     }{if(!d||!d.url){document.getElementById('playerBox').innerHTML='Waiting for Live...<br>No video yet.';return;}let key=d.url+'|'+(d.startedAt||0)+'|'+(d.mode||'');if(key===lastLiveKey&&ytPlayer)return;lastLiveKey=key;currentUrl=d.url;currentMode=d.mode||'manual';if(d.mode==='queue')currentQueueIndex=d.queueIndex||0;document.getElementById('nowPlaying').innerText=d.title||d.url||"-";document.getElementById('nowDetail').innerText=d.detail||"";let box=document.getElementById('playerBox');let seekSec=0;if(d.startedAt)seekSec=Math.floor((Date.now()-d.startedAt)/1000);let yid=getYTId(d.url);if(yid){box.innerHTML=`<div class="ytCrop"><div id="ytDiv" style="width:100%;height:100%"></div></div><div class="ytBlock"></div>`;if(ytPlayer){try{ytPlayer.destroy();}catch(e){}}ytPlayer=new YT.Player('ytDiv',{videoId:yid,playerVars:{autoplay:1,controls:0,disablekb:1,modestbranding:1,rel:0,playsinline:1,fs:0,mute:1,iv_load_policy:3,cc_load_policy:0,showinfo:0},events:{onReady:e=>{if(!isMuted){e.target.unMute();e.target.setVolume(100);}else{e.target.mute();}if(seekSec>3){try{e.target.seekTo(seekSec,true);}catch(err){}}e.target.playVideo();updateSoundBtn();},onStateChange:e=>{if(e.data===0){playNextImmediate();}}}});}else{box.innerHTML=`<video src="${d.url}" autoplay playsinline muted controlsList="nodownload nofullscreen noremoteplayback" disablePictureInPicture></video><div class="ytBlock"></div>`;let v=box.querySelector('video');v.muted=isMuted;if(!isMuted)v.volume=1;if(seekSec>3){v.currentTime=seekSec;}v.play().catch(()=>{});v.onended=()=>playNextImmediate();}}
+  }
+  function renderLive(d){
+  // --- FIX 2 STARTS HERE ---
+  if(!d || !d.url || d.mode === 'waiting'){
+    document.getElementById('playerBox').innerHTML = 'Waiting for Next Program...';
+    return;
+  }
+  // --- FIX 2 ENDS HERE ---
+
+  if(!d||!d.url){ document.getElementById('playerBox').innerHTML='Waiting for Live...<br>No video yet.'; return; }
+  let key=d.url+'|'+(d.startedAt||0)+'|'+(d.mode||'');
+  if(key===lastLiveKey && ytPlayer) return;
+  lastLiveKey=key; currentUrl=d.url; currentMode=d.mode||'manual';
+  if(d.mode==='queue') currentQueueIndex=d.queueIndex||0;
+  document.getElementById('nowPlaying').innerText=d.title||d.url||"-";
+  document.getElementById('nowDetail').innerText=d.detail||"";
+  let box=document.getElementById('playerBox');
+  let seekSec=0;
+  if(d.startedAt) seekSec=Math.floor((Date.now()-d.startedAt)/1000);
+  let yid=getYTId(d.url);
+  if(yid){
+    box.innerHTML=`<div class="ytCrop"><div id="ytDiv" style="width:100%;height:100%"></div></div><div class="ytBlock"></div>`;
+    if(ytPlayer){ try{ytPlayer.destroy();}catch(e){} }
+    ytPlayer=new YT.Player('ytDiv',{videoId:yid,playerVars:{autoplay:1,controls:0,disablekb:1,modestbranding:1,rel:0,playsinline:1,fs:0,mute:1,iv_load_policy:3,cc_load_policy:0,showinfo:0},events:{onReady:e=>{ e.target.mute(); if(seekSec>3){ try{e.target.seekTo(seekSec,true);}catch(err){} } e.target.playVideo(); document.getElementById('soundBtn').innerText='TAP FOR SOUND'; },onStateChange:e=>{ if(e.data===0){ playNextImmediate(); } }}});
+  } else {
+    box.innerHTML=`<video src="${d.url}" autoplay playsinline muted controlsList="nodownload nofullscreen noremoteplayback" disablePictureInPicture></video><div class="ytBlock"></div>`;
+    let v=box.querySelector('video'); if(seekSec>3){ v.currentTime=seekSec; } v.play().catch(()=>{}); v.onended=()=>playNextImmediate();
+  }
+  }
 window.tapSound=()=>{isMuted=false;saveSound();let btn=document.getElementById('soundBtn');if(ytPlayer&&ytPlayer.unMute){ytPlayer.unMute();ytPlayer.setVolume(100);ytPlayer.playVideo();}let v=document.querySelector('#videoWrap video');if(v){v.muted=false;v.volume=1;v.play().catch(()=>{});}if(btn)btn.innerText='SOUND ON';};
 window.toggleMute=()=>{isMuted=!isMuted;saveSound();if(ytPlayer){isMuted?ytPlayer.mute():ytPlayer.unMute();}let v=document.querySelector('#videoWrap video');if(v)v.muted=isMuted;updateSoundBtn();};
 window.requestPiP=()=>{let v=document.querySelector('#videoWrap video');if(v&&document.pictureInPictureEnabled)v.requestPictureInPicture().catch(()=>alert('PiP not available for YouTube, use video file'));else alert('PiP: Keep watching while using other apps - works for MP4 videos');}
