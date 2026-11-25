@@ -322,6 +322,38 @@ setInterval(()=>{
   // VIEWERS FORCE - SOUND + LOOP FOREVER - paste above 
 setInterval(()=>{if(!isMuted&&ytPlayer&&ytPlayer.unMute&&ytPlayer.isMuted&&ytPlayer.isMuted()){ytPlayer.unMute();ytPlayer.setVolume(100);}},500);
 setInterval(()=>{try{if(!ytPlayer||!ytPlayer.getPlayerState)return;let st=ytPlayer.getPlayerState();if(st===0||st===5){if(typeof nextSong==='function')return nextSong();if(typeof playNext==='function')return playNext();if(typeof nextVideo==='function')return nextVideo();let list=window.videos||window.lineup||window.songs||window.playlist||window.queue;if(list&&list.length){let cur=window.currentIdx??window.currentIndex??window.curIdx??window.idx??0;let nxt=(cur+1)%list.length;window.currentIdx=nxt;window.currentIndex=nxt;window.curIdx=nxt;window.idx=nxt;if(typeof renderLive==='function')return renderLive();if(typeof playSong==='function')return playSong(nxt);}}}catch(e){}},1000);
+// VIEWERS SUPER FORCE - FOLLOW ADMIN WITH YOUR FIREBASE - paste above
+try{
+  if(window.firebase && firebase.apps && firebase.apps.length===0 && typeof firebaseConfig!=='undefined'){
+    firebase.initializeApp(firebaseConfig);
+  }
+}catch(e){}
+let lastSuperIdx = -1;
+function superForcePlay(idx){
+  if(idx===lastSuperIdx) return;
+  lastSuperIdx = idx;
+  window.currentIdx = idx; window.currentIndex = idx; window.idx = idx;
+  if(typeof renderLive==='function') renderLive();
+  if(typeof playSong==='function') playSong(idx);
+  if(typeof playVideo==='function') playVideo(idx);
+}
+try{
+  if(window.firebase && firebase.database){
+    firebase.database().ref('hitv_now_playing').on('value', (snap)=>{
+      let d = snap.val();
+      if(d && typeof d.idx==='number') superForcePlay(d.idx);
+    });
+  }
+}catch(e){}
+setInterval(()=>{
+  try{
+    let raw = localStorage.getItem('hitv_now_playing');
+    if(!raw) return;
+    let d = JSON.parse(raw);
+    if(d && Date.now() - d.time < 15000) superForcePlay(d.idx);
+  }catch(e){}
+},1000);
+  
 </script>
 </body>
 </html>
