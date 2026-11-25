@@ -16,13 +16,22 @@ body{background:#000;display:flex;justify-content:center;min-height:100vh}
 .pills{display:flex;gap:6px}
 .pill{background:#111;border:1px solid #333;padding:6px 10px;border-radius:20px;font-size:11px;white-space:nowrap}
 .pill.blue{background:#0033cc;border-color:#0033cc;font-weight:800}
-.liveBox{margin:0 12px;position:relative;width:calc(100% - 24px);aspect-ratio:16/12;background:#000;border-radius:12px;overflow:hidden;border:1px solid #222}
-.liveBox iframe,.liveBox video{position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none!important}
+
+/* ===== VIDEO - ZOOMED TO HIDE YOUTUBE ===== */
+.liveBox{margin:0 12px;position:relative;width:calc(100% - 24px);aspect-ratio:16/11;background:#000;border-radius:12px 12px 0 0;overflow:hidden;border:1px solid #222;border-bottom:none}
+#playerHolder{position:absolute;inset:0;overflow:hidden;background:#000}
+/* This ZOOM wrapper crops YouTube top title + bottom buttons + logo */
+.yt-zoom{position:absolute;left:-12%;top:-22%;width:124%;height:144%;overflow:hidden;pointer-events:none}
+.yt-zoom iframe{width:100%;height:100%;border:0;pointer-events:none}
+#playerHolder video{width:100%;height:100%;object-fit:cover;pointer-events:none}
 .expand{position:absolute;top:10px;right:10px;z-index:5;background:rgba(0,0,0,.7);color:#fff;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer}
-.noSignal{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;text-align:center;padding:20px}
-.ticker{background:#0033cc;color:#fff;overflow:hidden;white-space:nowrap;height:30px;display:flex;align-items:center;margin-top:8px}
-.tickerInner{display:inline-block;padding-left:100%;animation:tick 30s linear infinite;font-size:13px;font-weight:600}
+.noSignal{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;text-align:center;padding:20px;z-index:2}
+
+/* ===== TICKER - FIXED: ON THE END OF VIDEO, NOT DOWN ===== */
+.ticker{background:#0033cc;color:#fff;overflow:hidden;white-space:nowrap;height:32px;display:flex;align-items:center;margin:0 12px 0 12px;border-radius:0 0 12px 12px;position:relative}
+.tickerInner{display:inline-block;white-space:nowrap;will-change:transform;font-size:13px;font-weight:600;padding-left:100%;animation:tick 25s linear infinite}
 @keyframes tick{to{transform:translateX(-100%)}}
+
 .row2{display:flex;gap:10px;padding:10px 12px}
 .box{flex:1;background:#161616;border:1px solid #222;border-radius:10px;padding:10px}
 .box small{color:#888;font-size:11px;letter-spacing:.5px}.box b{font-size:14px;display:block;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -47,33 +56,29 @@ input{width:100%;background:#1a1a1a;border:1px solid #2a2a2a;color:#fff;padding:
 <div class="app" id="app">
   <div class="top"><b>Hit TV <span>by Inno</span></b><button class="setBtn" onclick="openSettings()">Settings</button></div>
 
-  <!-- HOME - LIKE YOUR PICTURE -->
   <div class="page active" id="page-home">
     <div class="head2"><b>Hi Inno ADMIN • LIVE</b><div class="pills"><span class="pill">● LIVE • 24/7</span><span class="pill blue" onclick="tapSound()">TAP FOR SOUND</span></div></div>
+
+    <!-- VIDEO + TICKER TOGETHER - NO GAP -->
     <div class="liveBox"><div class="noSignal" id="noSignal">HIT TV<br>CONNECTING LIVE...</div><div id="playerHolder"></div><button class="expand" onclick="goFullscreen()">↗</button></div>
-    <div class="ticker"><div class="tickerInner" id="tickerText">when you are watching the music movies and shows . Thanks you 🙂👍 • when you are watching the music movies and shows . Thanks you 🙂👍 •</div></div>
+    <div class="ticker"><div class="tickerInner" id="tickerText">when you are watching the music movies and shows . Thanks you 🙂👍 •</div></div>
+
     <div class="row2">
       <div class="box"><small>NOW PLAYING</small><b id="npTitle">Butta my bread _ lasmid ft jzyno</b></div>
       <div class="box"><small>NEXT</small><b id="nextTitle">Fola</b></div>
     </div>
     <div class="grid">
-      <button class="gbtn" onclick="alert('Download Video - Coming')">Download Video</button>
-      <button class="gbtn" onclick="alert('Download Audio - Coming')">Download Audio</button>
+      <button class="gbtn">Download Video</button>
+      <button class="gbtn">Download Audio</button>
       <button class="gbtn" onclick="pip()">Picture in Picture</button>
       <button class="gbtn" id="muteBtn" onclick="toggleMute()">Mute / Unmute</button>
     </div>
     <div class="note">Real TV: No pause, no forward, no seek. You join where live is now.</div>
     <div class="card"><h3>Live Comments - To Admin</h3><input id="commentInput" placeholder="Write comment..."><button class="sendBtn" onclick="sendComment()">Send Comment</button><p id="commentMsg" style="font-size:12px;color:#aaa;margin-top:8px"></p></div>
-    <!-- NO LINEUP LIST - HIDDEN FROM VIEWERS -->
   </div>
 
-  <!-- NOTIFICATIONS -->
-  <div class="page" id="page-notifications"><div style="padding:14px"><h3>Notifications</h3><div id="notifList" style="margin-top:10px">No new notifications. Admin will post here.</div></div></div>
-
-  <!-- AUDIO -->
-  <div class="page" id="page-audio"><div style="padding:14px"><h3>Audio Streams</h3><p style="color:#888;font-size:13px;margin-top:6px">Same LIVE lineup in audio mode. No lineup list shown.</p><div style="margin-top:12px;background:#161616;padding:14px;border-radius:10px"><small style="color:#888">NOW PLAYING AUDIO</small><b id="audioNow" style="display:block;margin-top:4px">-</b></div></div></div>
-
-  <!-- ARTIST -->
+  <div class="page" id="page-notifications"><div style="padding:14px"><h3>Notifications</h3><div>No new notifications. Admin will post here.</div></div></div>
+  <div class="page" id="page-audio"><div style="padding:14px"><h3>Audio Streams</h3><p style="color:#888;font-size:13px;margin-top:6px">Same LIVE in audio mode.</p><div style="margin-top:12px;background:#161616;padding:14px;border-radius:10px"><small style="color:#888">NOW PLAYING AUDIO</small><b id="audioNow" style="display:block;margin-top:4px">-</b></div></div></div>
   <div class="page" id="page-artist"><div style="padding:14px"><h3>Artist Console</h3><div class="card" style="margin:10px 0"><p>Now On Air: <b id="artistNow">-</b></p><p style="margin-top:8px">Next: <b id="artistNext">-</b></p><p style="margin-top:8px;color:#00ff88">● ON AIR</p></div><div class="card" style="margin:0"><h3>Request Song</h3><input id="reqName" placeholder="Artist Name" style="margin-bottom:8px"><input id="reqSong" placeholder="Song Title" style="margin-bottom:8px"><input id="reqLink" placeholder="YouTube / MP4 Link"><button class="sendBtn" onclick="sendReq()">Send Request</button></div></div></div>
 
   <div class="bottom">
@@ -109,8 +114,13 @@ function playItem(item){
   if(!item||!item.url||item.url===currentUrl) return;
   currentUrl=item.url; document.getElementById('npTitle').innerText=item.title; document.getElementById('artistNow').innerText=item.title; document.getElementById('audioNow').innerText=item.title; document.getElementById('noSignal').style.display='none';
   let h=document.getElementById('playerHolder'); let yt=getYTId(item.url); clearTimeout(timer);
-  if(yt){ h.innerHTML=`<iframe src="https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&mute=1&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&playsinline=1" allow="autoplay"></iframe>`; timer=setTimeout(nextInLineup,(item.duration||240)*1000); }
-  else{ h.innerHTML=`<video src="${item.url}" autoplay playsinline preload="auto" muted></video>`; currentVideo=h.querySelector('video'); currentVideo.play().catch(()=>{}); currentVideo.onended=nextInLineup; timer=setTimeout(nextInLineup,300000); }
+  if(yt){
+    // ZOOMED: crops top title + bottom YouTube bar + logo
+    h.innerHTML=`<div class="yt-zoom"><iframe src="https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&mute=1&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3" allow="autoplay"></iframe></div>`;
+    timer=setTimeout(nextInLineup,(item.duration||240)*1000);
+  } else {
+    h.innerHTML=`<video src="${item.url}" autoplay playsinline preload="auto" muted></video>`; currentVideo=h.querySelector('video'); currentVideo.play().catch(()=>{}); currentVideo.onended=nextInLineup; timer=setTimeout(nextInLineup,300000);
+  }
   if(lineup.length>0){ let nxt=lineup[(lineup.findIndex(x=>x.url===item.url)+1)%lineup.length]; if(nxt){ document.getElementById('nextTitle').innerText=nxt.title; document.getElementById('artistNext').innerText=nxt.title; } }
 }
 function nextInLineup(){ if(override) return; if(!lineup.length) return; currentIndex=(currentIndex+1)%lineup.length; playItem(lineup[currentIndex]); }
@@ -120,10 +130,23 @@ function pip(){ if(currentVideo&&document.pictureInPictureEnabled){currentVideo.
 function goFullscreen(){ let el=document.querySelector('.liveBox'); if(el.requestFullscreen) el.requestFullscreen(); }
 function sendComment(){ let v=document.getElementById('commentInput').value.trim(); if(!v) return; db.ref('comments').push({text:v,time:Date.now()}); document.getElementById('commentMsg').innerText='Comment sent to Admin!'; document.getElementById('commentInput').value=''; }
 function sendReq(){ let n=document.getElementById('reqName').value.trim(),s=document.getElementById('reqSong').value.trim(),l=document.getElementById('reqLink').value.trim(); if(!n||!s) return alert('Fill Name + Song'); db.ref('requests').push({name:n,song:s,link:l,time:Date.now()}); alert('Request sent to Admin!'); }
+
+// ===== TICKER FIX: REPLACE - NEVER ADD - NEVER DOUBLE =====
+function setTicker(text){
+  let el=document.getElementById('tickerText');
+  // 1. STOP old animation, CLEAR old text completely
+  el.style.animation='none';
+  el.innerText=''; // old removed
+  void el.offsetWidth; // force reset
+  // 2. Put ONLY new text, once
+  el.innerText = text + '  •  ' + text + '  •  ';
+  el.style.animation=''; // restart animation clean
+}
+
 db.ref('lineup').on('value',s=>{ let v=s.val()||{}; lineup=Object.keys(v).map(k=>({...v[k],_key:k})); lineup.sort((a,b)=>(a.order||0)-(b.order||0)); if(lineup.length&&currentIndex===-1&&!override){currentIndex=0;playItem(lineup[0])} });
 db.ref('liveOverride').on('value',s=>{ let d=s.val(); if(d&&d.url){override=d;playItem(d)} else override=null; });
 db.ref('control').on('value',s=>{ let c=s.val()||{}; if(c.action==='next'){nextInLineup();db.ref('control').set({action:'none'})} if(c.action==='restart'){currentIndex=-1;currentUrl="";if(lineup.length){currentIndex=0;playItem(lineup[0])}db.ref('control').set({action:'none'})} });
-db.ref('ticker').on('value',s=>{ let t=s.val(); if(t&&t.text) document.getElementById('tickerText').innerText=t.text+" • "+t.text; });
+db.ref('ticker').on('value',s=>{ let t=s.val(); if(t&&t.text) setTicker(t.text); });
 </script>
 </body>
-  </html>
+                                                                                                                 </html>
