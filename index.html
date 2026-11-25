@@ -3,209 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Hit TV by Inno - ADMIN</title>
+<title>Hit TV by Inno</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
 body{background:#000;display:flex;justify-content:center;min-height:100vh}
 .app{width:390px;max-width:430px;width:100%;height:100vh;height:100dvh;background:#0a0a0a;color:#fff;margin:0 auto;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;position:relative}
-.top{display:flex;justify-content:space-between;align-items:center;padding:12px 14px}
-.top b{font-size:17px}.top b span{color:#1a2fd6}
-.setBtn{background:#e60000;color:#fff;border:none;padding:7px 14px;border-radius:20px;font-size:12px;font-weight:800}
-.card{background:#111;border:1px solid #222;border-radius:12px;margin:8px 12px;padding:14px}
-.card h3{font-size:15px;margin-bottom:4px}.card p.sub{color:#888;font-size:12px}
-input{width:100%;background:#1a1a1a;border:1px solid #2a2a2a;color:#fff;padding:13px;border-radius:10px;outline:none;margin-top:8px}
-.btn{width:100%;background:#0033cc;color:#fff;border:none;padding:13px;border-radius:10px;font-weight:800;margin-top:10px;cursor:pointer}
-.btn.green{background:#00a651}.btn.red{background:#e60000}.btn.gray{background:#333}
-.row{display:flex;gap:8px}.row>*{flex:1}
-.item{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:11px;margin-top:8px;display:flex;justify-content:space-between;gap:8px;align-items:center}
-.item b{font-size:13px;display:block}.item p{font-size:11px;color:#888}
-.small{padding:8px 10px;border-radius:8px;border:none;cursor:pointer;font-weight:800;font-size:12px;white-space:nowrap}
-.live{color:#00ff88;font-weight:800}
-.page{display:none;flex:1}.page.active{display:block}
-.bottom{position:sticky;bottom:0;background:#111;border-top:1px solid #222;display:flex;padding:6px 4px;z-index:100}
-.nav{flex:1;text-align:center;padding:8px 2px;font-size:11px;color:#888;cursor:pointer;border-radius:10px}
-.nav.active{background:#0033cc;color:#fff}
-.nav b{display:block;font-size:16px}
-</style>
-</head>
-<body>
-<div class="app">
-  <div class="top"><b>Hit TV <span>by Inno</span> - ADMIN</b><span class="setBtn">● ADMIN</span></div>
-
-  <!-- HOME / LINEUP -->
-  <div class="page active" id="page-home">
-    <div class="card"><h3>1. Add to Lineup</h3><p class="sub">Viewer will play it, but will NOT see lineup list. Only NOW PLAYING / NEXT.</p>
-    <input id="aTitle" placeholder="Song Title - e.g. Butta my bread">
-    <input id="aDetail" placeholder="Artist / Detail - e.g. Lasmid ft Jzyno">
-    <input id="aUrl" placeholder="Paste YouTube Link OR MP4 Link">
-    <input id="aDuration" type="number" placeholder="Duration in seconds for YouTube (e.g. 240)">
-    <button class="btn" onclick="addToLineup()">+ Add to Lineup</button></div>
-
-    <div class="card"><h3>2. Live Control - ALIVE LINEUP</h3><p class="sub">Now on Viewer: <span class="live" id="nowPlaying">LINEUP LOOP</span></p><p class="sub" id="liveInfo" style="margin-top:4px">Live clock not started yet. Press START.</p>
-    <div class="row"><button class="btn green" onclick="sendControl('restart')">▶ START / RESTART</button><button class="btn" onclick="sendControl('next')">⏭ NEXT</button></div>
-    <button class="btn red" onclick="clearOverride()">■ STOP FORCED LIVE - Back to Loop</button></div>
-
-    <div class="card"><h3>3. Blue Ticker</h3>
-    <input id="tickerText" placeholder="Type ticker... e.g. Welcome to Hit TV by Inno">
-    <button class="btn" onclick="saveTicker()">Update Ticker on Viewer</button></div>
-
-    <div class="card"><h3>4. Current Lineup - Only Admin Sees This</h3><div id="lineupList">Loading...</div></div>
-
-    <!-- 5. AUDIO STREAMS - NEW -->
-    <div class="card"><h3>5. Audio Streams - Upload for Viewers to Download</h3><p class="sub">Admin uploads audio here. Viewer sees it in Audio Streams tab + Download button.</p>
-    <input id="auTitle" placeholder="Audio Title - e.g. New Song Audio">
-    <input id="auDetail" placeholder="Artist / Detail - e.g. Lasmid">
-    <input id="auUrl" placeholder="Paste MP3 / Audio Link">
-    <button class="btn" onclick="addAudio()">+ Upload Audio Stream</button>
-    <div id="audioAdminList" style="margin-top:8px">No audios yet.</div></div>
-  </div>
-
-  <!-- COMMENTS -->
-  <div class="page" id="page-comments">
-    <div class="card"><h3>Live Comments - From Viewers</h3><div id="commentList">No comments yet.</div></div>
-  </div>
-
-  <!-- REQUESTS - WITH PHONE -->
-  <div class="page" id="page-requests">
-    <div class="card"><h3>Artist Requests - With Phone / WhatsApp</h3><p class="sub">Artist name, song, phone number, link. Tap + ADD to add to lineup.</p><div id="reqList">No requests yet.</div></div>
-  </div>
-
-  <!-- SETTINGS -->
-  <div class="page" id="page-settings">
-    <div class="card"><h3>Admin Settings</h3><p class="sub">App: Hit TV by Inno<br>Size: 390px / 430px / 100vh<br>Firebase: hit-tv-app-40fb9<br>Viewer + Admin connected - ALIVE LINEUP</p>
-    <button class="btn gray" onclick="if(confirm('Clear ALL lineup?')){ db.ref('lineup').remove(); db.ref('liveState').remove(); }">Clear All Lineup</button>
-    <button class="btn gray" onclick="if(confirm('Clear Comments?')) db.ref('comments').remove()">Clear Comments</button>
-    <button class="btn gray" onclick="if(confirm('Clear Audio Streams?')) db.ref('audioStreams').remove()">Clear Audio Streams</button></div>
-  </div>
-
-  <div class="bottom">
-    <div class="nav active" onclick="showTab('home',this)"><b>⌂</b>Lineup</div>
-    <div class="nav" onclick="showTab('comments',this)"><b>💬</b>Comments</div>
-    <div class="nav" onclick="showTab('requests',this)"><b>★</b>Requests</div>
-    <div class="nav" onclick="showTab('settings',this)"><b>⚙</b>Settings</div>
-  </div>
-</div>
-
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyBT9bXCGb6WgriW1wodo6IeRKOUQ5jdCes",
-  authDomain: "hit-tv-app-40fb9.firebaseapp.com",
-  databaseURL: "https://hit-tv-app-40fb9-default-rtdb.firebaseio.com",
-  projectId: "hit-tv-app-40fb9",
-  storageBucket: "hit-tv-app-40fb9.firebasestorage.app",
-  messagingSenderId: "740828744097",
-  appId: "1:740828744097:web:49104b3522d02de64ce3e0"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-let lineupCache=[], liveStartedAt=0, forced=null;
-function showTab(id,el){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));document.getElementById('page-'+id).classList.add('active');el.classList.add('active');}
-
-// ===== ALIVE LINEUP HELPERS =====
-function getLiveNow(){
-  if(!lineupCache.length||!liveStartedAt) return null;
-  let total=lineupCache.reduce((s,x)=>s+(x.duration||240),0);
-  if(total<=0) return null;
-  let elapsed=Math.floor((Date.now()-liveStartedAt)/1000);
-  let pos=elapsed%total;
-  let acc=0;
-  for(let i=0;i<lineupCache.length;i++){
-    let dur=lineupCache[i].duration||240;
-    if(pos<acc+dur) return {index:i, item:lineupCache[i], offset:pos-acc, remaining:dur-(pos-acc)};
-    acc+=dur;
-  }
-  return {index:0,item:lineupCache[0],offset:0,remaining:lineupCache[0].duration||240};
-}
-function updateLiveLabel(){
-  if(forced){ document.getElementById('nowPlaying').innerText='FORCED: '+forced.title; document.getElementById('liveInfo').innerText='Forced live - loop paused'; return; }
-  let now=getLiveNow();
-  if(!now){ document.getElementById('nowPlaying').innerText='LINEUP LOOP'; document.getElementById('liveInfo').innerText='Live clock not started yet. Press START.'; return; }
-  let next=lineupCache[(now.index+1)%lineupCache.length];
-  document.getElementById('nowPlaying').innerText=now.item.title+' ('+Math.floor(now.offset)+'s in)';
-  document.getElementById('liveInfo').innerText='Next: '+(next?next.title:'-')+' in '+now.remaining+'s - ALIVE, viewers join in middle';
-}
-setInterval(updateLiveLabel,1000);
-
-function addToLineup(){
-  let title=document.getElementById('aTitle').value.trim(), detail=document.getElementById('aDetail').value.trim(), url=document.getElementById('aUrl').value.trim(), dur=parseInt(document.getElementById('aDuration').value)||240;
-  if(!title||!url) return alert('Fill Title + Link');
-  db.ref('lineup').push({title, detail, url, duration:dur, order:Date.now()});
-  document.getElementById('aTitle').value='';document.getElementById('aUrl').value='';document.getElementById('aDetail').value='';
-  db.ref('liveState').once('value', snap=>{
-    if(!snap.val()) db.ref('liveState').set({startedAt: Date.now()});
-  });
-  alert('Added! Viewer will play it. Viewer will NOT see lineup list.');
-}
-
-// ===== FIXED sendControl - ALIVE =====
-function sendControl(action){
-  if(action==='restart'){
-    db.ref('liveState').set({startedAt: Date.now()});
-    db.ref('liveOverride').remove();
-    db.ref('control').set({action:'restart', time:Date.now()});
-    alert('LIVE RESTARTED - Viewers join live from Song 1 now');
-    return;
-  }
-  if(action==='next'){
-    let now=getLiveNow();
-    if(!now||!lineupCache.length){ alert('No lineup playing'); return; }
-    let nextIndex=(now.index+1)%lineupCache.length;
-    let sumBefore=0; for(let i=0;i<nextIndex;i++) sumBefore+=(lineupCache[i].duration||240);
-    let newStartedAt = Date.now() - (sumBefore*1000);
-    db.ref('liveState').set({startedAt: newStartedAt});
-    db.ref('control').set({action:'none', time:Date.now()});
-    alert('NEXT sent - Viewer now on: '+lineupCache[nextIndex].title+' IMMEDIATELY');
-    return;
-  }
-}
-function saveTicker(){ let t=document.getElementById('tickerText').value.trim(); if(!t) return alert('Type ticker'); db.ref('ticker').set({text:t}); alert('Ticker Updated on Viewer!'); }
-function forceLive(item){ db.ref('liveOverride').set({url:item.url, title:item.title, detail:item.detail, duration:item.duration}); alert('FORCED LIVE on Viewer: '+item.title); }
-function clearOverride(){
-  db.ref('liveOverride').remove();
-  db.ref('liveState').set({startedAt: Date.now()});
-  alert('Back to ALIVE Lineup Loop on Viewer');
-}
-function deleteItem(key){ if(confirm('Delete this song?')) db.ref('lineup/'+key).remove(); }
-function addReqToLineup(r){ db.ref('lineup').push({title:r.song, detail:r.name+' • '+ (r.phone||''), url:r.link||'', duration:240, order:Date.now()}); alert('Request added to Lineup'); }
-
-// ===== 5. AUDIO STREAMS - NEW =====
-function addAudio(){
-  let t=document.getElementById('auTitle').value.trim(), d=document.getElementById('auDetail').value.trim(), u=document.getElementById('auUrl').value.trim();
-  if(!t||!u) return alert('Fill Audio Title + Audio Link');
-  db.ref('audioStreams').push({title:t, detail:d, url:u, time:Date.now()});
-  document.getElementById('auTitle').value=''; document.getElementById('auDetail').value=''; document.getElementById('auUrl').value='';
-  alert('Audio Uploaded! Viewers can now see + Download it in Audio Streams.');
-}
-function deleteAudio(key){ if(confirm('Delete this audio?')) db.ref('audioStreams/'+key).remove(); }
-
-db.ref('lineup').on('value', snap=>{
-  let v=snap.val()||{}; lineupCache=Object.keys(v).map(k=>({...v[k],_key:k})); lineupCache.sort((a,b)=>(a.order||0)-(b.order||0));
-  let html=''; Object.keys(v).forEach(k=>{ let it=v[k]; html+=`<div class="item"><div><b>${it.title}</b><p>${it.detail||''} • ${it.duration||240}s</p></div><div style="display:flex;gap:6px"><button class="small" style="background:#00a651;color:#fff" onclick='forceLive(${JSON.stringify(it).replace(/'/g,"")})'>LIVE</button><button class="small" style="background:#e60000;color:#fff" onclick="deleteItem('${k}')">DEL</button></div></div>`; });
-  document.getElementById('lineupList').innerHTML=html||'No lineup yet. Add songs above.';
-  updateLiveLabel();
-});
-db.ref('liveState').on('value', snap=>{ let d=snap.val(); liveStartedAt=d&&d.startedAt?d.startedAt:0; updateLiveLabel(); });
-db.ref('liveOverride').on('value', snap=>{ let d=snap.val(); forced=d||null; updateLiveLabel(); });
-db.ref('comments').on('value', snap=>{
-  let v=snap.val()||{}; let html=''; Object.keys(v).reverse().forEach(k=>{ let c=v[k]; html+=`<div class="item"><div><b>${c.text}</b></div></div>`; });
-  document.getElementById('commentList').innerHTML=html||'No comments yet.';
-});
-// ===== REQUESTS - WITH PHONE / WHATSAPP =====
-db.ref('requests').on('value', snap=>{
-  let v=snap.val()||{}; let html='';
-  Object.keys(v).reverse().forEach(k=>{ let r=v[k];
-    html+=`<div class="item"><div><b>${r.name} - ${r.song}</b><p>📞 ${r.phone||'No phone'}<br>${r.link||''}</p></div><div style="display:flex;gap:6px;flex-direction:column"><button class="small" style="background:#0033cc;color:#fff" onclick='addReqToLineup(${JSON.stringify(r).replace(/'/g,"")})'>+ ADD</button>${r.phone?`<a href="https://wa.me/${String(r.phone).replace(/[^0-9]/g,'')}" target="_blank" style="text-decoration:none"><button class="small" style="background:#00a651;color:#fff;width:100%">WhatsApp</button></a>`:''}</div></div>`;
-  });
-  document.getElementById('reqList').innerHTML=html||'No requests yet.';
-});
-// ===== AUDIO STREAMS LIST IN ADMIN =====
-db.ref('audioStreams').on('value', snap=>{
-  let v=snap.val()||{}; let html='';
-  Object.keys(v).forEach(k=>{ let a=v[k]; html+=`<div class="item"><div><b>${a.title}</b><p>${a.detail||''}</p></div><button class="small" style="background:#e60000;color:#fff" onclick="deleteAudio('${k}')">DEL</button></div>`; });
-  document.getElementById('audioAdminList').innerHTML=html||'No audios yet.';
-});
-</script>
-</body>
-  </html>
+.app.white{background:#f5f5f5;color:#111}.app.white .card,.app.white .box,.app.white .gbtn,.app.white .bottom{background:#fff;color:#111;border-color:#ddd}.app.white input{background:#eee;color:#111}.app.white .sheet{background:#fff;color:#111}
+.app.darkblue{background:#000a2e;color:#fff}.app.rotate{transform:rotate(90deg);transform-origin:center;width:100vh;height:100vw;max-width:none}
+.top{display:flex;justify-content:space-between;align-items:center;padding:12px 14px}.top b{font-size:17px}.top b span{color:#1a2fd6}
+.setBtn{background:#111;border:1px solid #333;color:#fff;padding:7px 14px;border-radius:20px;font-size:13px;cursor:pointer}
+.head2{display:flex;justify-content:space-between;align-items:center;padding:4px 14px 10px;gap:8px}.head2 b{font-size:14px;white-space:nowrap}
+.pills{display:flex;gap:6px}.pill{background:#111;border:1px solid #333;padding:6px 10px;border-radius:20px;font-size:11px;white-space:nowrap}.pill.blue{background:#0033cc;border-color:#0033cc;font-weight:800}
+.liveBox{margin:0 12px;position:relative;width:calc(100% - 24px);aspect-ratio:16/11;background:#000;border-radius:12px 12px 0 0;overflow:hidden;border:1px solid #222;border-bottom:none}
+#playerHolder{position:absolute;inset:0;overflow:hidden;background:#000}
+.yt-zoom{position:absolute;left:-12%;top:-22%;width:124%;height:144%;overflow:hidden;pointer-events:none}.yt-zoom iframe{width:100%;height:100%;border:0;pointer-events:none}
+#playerHolder video{width:100%;height:100%;object-fit:cover;pointer-events:none}
+.expand{position:absolute;top:10px;right:10px;z-index:5;background:rgba(0,0,0,.7);color:#fff;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer}
+.noSignal{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;text-align:center;padding:20px;z-index:2}
+.ticker{background:#0033cc;color:#fff;overflow:hidden;white-space:nowrap;height:32px;display:flex;align-items:center;margin:0 12px;border-radius:0 0 12px 12px}
+.tickerInner{display:inline-block;white-space:nowrap;font-size:13px;font-weight:600;padding-left:100%;animation:tick 20s linear infinite}
+@keyframes tick{to{transform:translateX(-100%)}}
+.row2{display:flex;gap:10px;padding:10px 12px}.box{flex:1;background:#161616;border:1px solid #222;border-radius:10px;padding:10px}.box small{color:#888;font-size:11px}.box b{font-size:14px;display:block;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 12px}.gbtn{background:#1e1e1e;border:1px solid #2a2a2a;color:#fff;padding:13px 6px;border-radius:10px;font-weight:600;font-size:13px;cursor:pointer}
+.note{padding:10px 12px;color:#888;font-size:12px}.card{background:#111;border:1px solid #222;border-radius:12px;margin:4px 12px 12px;padding:14px}.card h3{font-size:16px;margin-bottom:10px}
+input{width:100%;background:#1a1a1a;border:1px solid #2a2a2a;color:#fff;padding:13px;border-radius:10px;outline:none}
+.sendBtn{width:100%;background:#0033cc;color:#fff;border:none;padding:13px;border-radius:10px;font-weight:800;margin-top:10px;cursor:pointer}
+.page{display:none;flex:1}.page.active{display:block}.bottom{position:sticky;bottom:0;background:#111;border-top:1px solid #222;display:flex;padding:6px 4px;z-index:100}.nav{flex:1;text-align:center;padding:8px 2px;font-size:11px;color:#888;cursor:pointer;border-radius:10px}.nav.active{background:#0033cc;color:#fff}.nav b{display:block;font-size:16px}
+.modal{position:absolute;inset:0;background:rgba(0,0,0,.7);display:none;align-items:flex-end;z-index:200}.modal.open{display:flex}.sheet{background:#161616;width:100%;border-radius:20px 20px 0 0;padding:20px;padding-bottom:30px}.srow{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #222;font-size:14px;font-weight:600}
+.tongo{position:relative;width:52px;height:28px;background:#333;border-radius:20px;cursor:pointer;flex-shrink:0}.tongo:after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;background:#fff;border-radius:50%;transition:.3s}.tongo.on{background:#0033cc}.tongo.on:after{left:27px}
+.aItem{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:11px;margin-top:8px;display:flex;justify-content:space-between;gap:8px;align-items:center}.aItem b{font-size:13px;display:block}.aItem p{font-size:11px;color:#888}.dlBtn{background:#00a651;color:#
