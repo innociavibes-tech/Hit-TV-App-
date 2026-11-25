@@ -3,66 +3,89 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Hit TV by inno- LIVE 24/7</title>
+<title>Hit TV by Inno</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif;-webkit-tap-highlight-color:transparent}
-:root{--bg:#fff;--card:#f1f3f5;--card2:#fff;--text:#111;--muted:#666;--line:#e5e7eb;--blue:#0033cc;--red:#e60000}
-body.dark{--bg:#08090c;--card:#15171c;--card2:#1c1f26;--text:#fff;--muted:#aaa;--line:#262932}
-body{background:var(--bg);color:var(--text)}
-header{position:sticky;top:0;z-index:100;background:var(--bg);display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
-.logo{font-weight:900;font-size:22px}.logo span{color:var(--red)}.logo small{display:block;font-size:9px;letter-spacing:3px;color:var(--muted)}
-.hRight{display:flex;gap:8px;align-items:center}
-.liveBadge{background:var(--red);color:#fff;padding:6px 12px;border-radius:100px;font-size:11px;font-weight:900}
-.iconBtn{background:var(--card);border:1px solid var(--line);color:var(--text);font-size:19px;width:42px;height:42px;border-radius:50%;cursor:pointer}
-.wrap{max-width:900px;margin:0 auto}
-.liveWrap{padding:12px 12px 0}
-.liveBox{position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden;border:3px solid var(--blue)}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
+body{background:#000;display:flex;justify-content:center;min-height:100vh}
+.app{width:390px;max-width:430px;width:100%;height:100vh;height:100dvh;background:#0a0a0a;color:#fff;margin:0 auto;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;position:relative}
+.top{display:flex;justify-content:space-between;align-items:center;padding:12px 14px}
+.top b{font-size:17px}.top b span{color:#1a2fd6}
+.setBtn{background:#111;border:1px solid #333;color:#fff;padding:7px 14px;border-radius:20px;font-size:13px;cursor:pointer}
+.head2{display:flex;justify-content:space-between;align-items:center;padding:4px 14px 10px;gap:8px}
+.head2 b{font-size:14px;white-space:nowrap}
+.pills{display:flex;gap:6px}
+.pill{background:#111;border:1px solid #333;padding:6px 10px;border-radius:20px;font-size:11px;white-space:nowrap}
+.pill.blue{background:#0033cc;border-color:#0033cc;font-weight:800}
+.liveBox{margin:0 12px;position:relative;width:calc(100% - 24px);aspect-ratio:16/12;background:#000;border-radius:12px;overflow:hidden;border:1px solid #222}
 .liveBox iframe,.liveBox video{position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none!important}
-.liveTop{position:absolute;top:10px;left:10px;z-index:5;background:rgba(0,0,0,.75);color:#fff;padding:5px 10px;border-radius:100px;font-size:11px;font-weight:800}
-.noSignal{position:absolute;inset:0;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;color:#fff;text-align:center}
-.nowRow{display:flex;justify-content:space-between;align-items:center;padding:12px 14px}
-.nowRow b{font-size:17px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70vw}
-.nowRow p{color:var(--muted);font-size:12px}
-.viewers{background:var(--card);padding:7px 12px;border-radius:100px;font-size:12px;font-weight:700}
-.ticker{background:var(--blue);color:#fff;overflow:hidden;white-space:nowrap;height:34px;display:flex;align-items:center;position:relative}
-.ticker span{position:absolute;left:0;background:#000;color:#fff;padding:0 12px;height:100%;display:flex;align-items:center;font-weight:900;font-size:12px;z-index:2}
-.tickerInner{display:inline-block;padding-left:100%;animation:tick 35s linear infinite;font-weight:700;font-size:14px}
+.expand{position:absolute;top:10px;right:10px;z-index:5;background:rgba(0,0,0,.7);color:#fff;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer}
+.noSignal{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;text-align:center;padding:20px}
+.ticker{background:#0033cc;color:#fff;overflow:hidden;white-space:nowrap;height:30px;display:flex;align-items:center;margin-top:8px}
+.tickerInner{display:inline-block;padding-left:100%;animation:tick 30s linear infinite;font-size:13px;font-weight:600}
 @keyframes tick{to{transform:translateX(-100%)}}
-.tabs{display:flex;background:var(--bg);border-bottom:1px solid var(--line);position:sticky;top:66px;z-index:90}
-.tab{flex:1;padding:15px 2px;text-align:center;font-size:13px;font-weight:800;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent}
-.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
-.page{display:none;padding:14px}.page.active{display:block}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
-.card h3{font-size:15px;margin-bottom:4px}.card p.sub{color:var(--muted);font-size:12.5px;line-height:1.5}
-.item{display:flex;gap:11px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:11px;margin-top:9px;align-items:center}
-.item.playing{border-color:var(--red)}
-.num{background:var(--blue);color:#fff;min-width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px}
-.item b{font-size:14px}.item p{font-size:12px;color:var(--muted)}
-.liveTag{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:900;padding:4px 8px;border-radius:100px}
-.btn{width:100%;background:var(--blue);color:#fff;border:none;padding:13px;border-radius:12px;font-weight:900;cursor:pointer;font-size:14px}
-input,select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);margin-top:9px;background:var(--card2);color:var(--text);font-size:14px;outline:none}
-.row{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid var(--line)}
-.switch{width:54px;height:30px;background:#cbd5e1;border-radius:100px;position:relative;cursor:pointer;transition:.2s}
-.switch:after{content:'';position:absolute;width:26px;height:26px;background:#fff;border-radius:50%;top:2px;left:2px;transition:.2s}
-.switch.on{background:var(--blue)}.switch.on:after{left:26px}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:flex-end;z-index:300}
-.modal.open{display:flex}.sheet{background:var(--bg);width:100%;border-radius:22px 22px 0 0;padding:20px 20px 32px;max-width:600px;margin:0 auto}
-.badge{background:#00a651;color:#fff;padding:4px 9px;border-radius:100px;font-size:11px;font-weight:900}
+.row2{display:flex;gap:10px;padding:10px 12px}
+.box{flex:1;background:#161616;border:1px solid #222;border-radius:10px;padding:10px}
+.box small{color:#888;font-size:11px;letter-spacing:.5px}.box b{font-size:14px;display:block;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 12px}
+.gbtn{background:#1e1e1e;border:1px solid #2a2a2a;color:#fff;padding:13px 6px;border-radius:10px;font-weight:600;font-size:13px;cursor:pointer}
+.note{padding:10px 12px;color:#888;font-size:12px}
+.card{background:#111;border:1px solid #222;border-radius:12px;margin:4px 12px 12px;padding:14px}
+.card h3{font-size:16px;margin-bottom:10px}
+input{width:100%;background:#1a1a1a;border:1px solid #2a2a2a;color:#fff;padding:13px;border-radius:10px;outline:none}
+.sendBtn{width:100%;background:#0033cc;color:#fff;border:none;padding:13px;border-radius:10px;font-weight:800;margin-top:10px;cursor:pointer}
+.page{display:none;flex:1}.page.active{display:block}
+.bottom{position:sticky;bottom:0;background:#111;border-top:1px solid #222;display:flex;padding:6px 4px;z-index:100}
+.nav{flex:1;text-align:center;padding:8px 2px;font-size:11px;color:#888;cursor:pointer;border-radius:10px}
+.nav.active{background:#0033cc;color:#fff}
+.nav b{display:block;font-size:16px}
+.modal{position:absolute;inset:0;background:rgba(0,0,0,.7);display:none;align-items:flex-end;z-index:200}
+.modal.open{display:flex}.sheet{background:#161616;width:100%;border-radius:20px 20px 0 0;padding:20px;padding-bottom:30px}
+.srow{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #222}
 </style>
 </head>
 <body>
-<header><div class="logo">PREMIER <span>TV</span><small>LIVE • 24/7 • UGANDA</small></div><div class="hRight"><div class="liveBadge">● LIVE</div><button class="iconBtn" onclick="openSettings()">⚙</button></div></header>
-<div class="wrap">
-<div class="liveWrap"><div class="liveBox"><div class="liveTop">PREMIER TV • LIVE</div><div class="noSignal" id="noSignal"><b>PREMIER TV</b><p>Connecting...</p></div><div id="playerHolder"></div></div></div>
-<div class="nowRow"><div><b id="npTitle">Waiting for Lineup...</b><p id="npDetail">Auto Lineup 24/7 • You join where LIVE is</p></div><div class="viewers">👁 <span id="viewCount">1,248</span> watching</div></div>
-<div class="ticker"><span>BREAKING</span><div class="tickerInner" id="tickerText">WELCOME TO PREMIER TV • LIVE 24/7 • YOUR HOME OF MUSIC • STAY TUNED •</div></div>
-<nav class="tabs"><div class="tab active" onclick="showTab('home',this)">Home</div><div class="tab" onclick="showTab('audio',this)">Audio Streams</div><div class="tab" onclick="showTab('artist',this)">Artist Console</div><div class="tab" onclick="showTab('settingsPage',this)">Settings</div></nav>
-<div class="page active" id="page-home"><div class="card"><h3>Now Showing - Lineup Loop</h3><p class="sub">Real TV style. No pause, no skip. Everyone watches same LIVE moment. Lineup plays forever.</p><div id="lineupList">Loading lineup...</div></div><div class="card"><h3>About Premier TV</h3><p class="sub">Premier TV is 24/7 Music TV. Lineup loops non-stop.</p></div></div>
-<div class="page" id="page-audio"><div class="card"><h3>Audio Streams</h3><p class="sub">Same LIVE lineup in audio mode. Perfect for low data.</p><div id="audioList">Loading...</div></div></div>
-<div class="page" id="page-artist"><div class="card"><h3>Artist Console</h3><div class="row"><span>Now On Air</span><b id="artistNow">-</b></div><div class="row"><span>Status</span><span class="badge">ON AIR</span></div><div class="row"><span>Next Up</span><b id="artistNext">-</b></div></div><div class="card"><h3>Request Your Song</h3><input id="reqName" placeholder="Your Artist Name"><input id="reqSong" placeholder="Song Title"><input id="reqLink" placeholder="YouTube / MP4 Link"><button class="btn" onclick="sendReq()">Send Request to Admin</button><p class="sub" id="reqMsg"></p></div></div>
-<div class="page" id="page-settingsPage"><div class="card"><h3>Appearance</h3><div class="row"><span><b>Theme</b><br><small style="color:var(--muted)">White / Black</small></span><div style="display:flex;gap:10px;align-items:center"><span id="themeLabel">White</span><div class="switch" id="themeSwitch" onclick="toggleTheme()"></div></div></div><div class="row"><span>Fast Play</span><span class="badge">ON</span></div></div><div class="card"><h3>Playback</h3><div class="row"><span>Quality</span><select><option>Auto - Fast Play</option><option>720p</option><option>1080p</option></select></div><div class="row"><span>Auto Loop</span><span>24/7 • Always On</span></div></div><div class="card"><h3>App</h3><p class="sub">Premier TV v2.0 • Built for 24/7 Non-Stop TV</p></div></div>
+<div class="app" id="app">
+  <div class="top"><b>Hit TV <span>by Inno</span></b><button class="setBtn" onclick="openSettings()">Settings</button></div>
+
+  <!-- HOME - LIKE YOUR PICTURE -->
+  <div class="page active" id="page-home">
+    <div class="head2"><b>Hi Inno ADMIN • LIVE</b><div class="pills"><span class="pill">● LIVE • 24/7</span><span class="pill blue" onclick="tapSound()">TAP FOR SOUND</span></div></div>
+    <div class="liveBox"><div class="noSignal" id="noSignal">HIT TV<br>CONNECTING LIVE...</div><div id="playerHolder"></div><button class="expand" onclick="goFullscreen()">↗</button></div>
+    <div class="ticker"><div class="tickerInner" id="tickerText">when you are watching the music movies and shows . Thanks you 🙂👍 • when you are watching the music movies and shows . Thanks you 🙂👍 •</div></div>
+    <div class="row2">
+      <div class="box"><small>NOW PLAYING</small><b id="npTitle">Butta my bread _ lasmid ft jzyno</b></div>
+      <div class="box"><small>NEXT</small><b id="nextTitle">Fola</b></div>
+    </div>
+    <div class="grid">
+      <button class="gbtn" onclick="alert('Download Video - Coming')">Download Video</button>
+      <button class="gbtn" onclick="alert('Download Audio - Coming')">Download Audio</button>
+      <button class="gbtn" onclick="pip()">Picture in Picture</button>
+      <button class="gbtn" id="muteBtn" onclick="toggleMute()">Mute / Unmute</button>
+    </div>
+    <div class="note">Real TV: No pause, no forward, no seek. You join where live is now.</div>
+    <div class="card"><h3>Live Comments - To Admin</h3><input id="commentInput" placeholder="Write comment..."><button class="sendBtn" onclick="sendComment()">Send Comment</button><p id="commentMsg" style="font-size:12px;color:#aaa;margin-top:8px"></p></div>
+    <!-- NO LINEUP LIST - HIDDEN FROM VIEWERS -->
+  </div>
+
+  <!-- NOTIFICATIONS -->
+  <div class="page" id="page-notifications"><div style="padding:14px"><h3>Notifications</h3><div id="notifList" style="margin-top:10px">No new notifications. Admin will post here.</div></div></div>
+
+  <!-- AUDIO -->
+  <div class="page" id="page-audio"><div style="padding:14px"><h3>Audio Streams</h3><p style="color:#888;font-size:13px;margin-top:6px">Same LIVE lineup in audio mode. No lineup list shown.</p><div style="margin-top:12px;background:#161616;padding:14px;border-radius:10px"><small style="color:#888">NOW PLAYING AUDIO</small><b id="audioNow" style="display:block;margin-top:4px">-</b></div></div></div>
+
+  <!-- ARTIST -->
+  <div class="page" id="page-artist"><div style="padding:14px"><h3>Artist Console</h3><div class="card" style="margin:10px 0"><p>Now On Air: <b id="artistNow">-</b></p><p style="margin-top:8px">Next: <b id="artistNext">-</b></p><p style="margin-top:8px;color:#00ff88">● ON AIR</p></div><div class="card" style="margin:0"><h3>Request Song</h3><input id="reqName" placeholder="Artist Name" style="margin-bottom:8px"><input id="reqSong" placeholder="Song Title" style="margin-bottom:8px"><input id="reqLink" placeholder="YouTube / MP4 Link"><button class="sendBtn" onclick="sendReq()">Send Request</button></div></div></div>
+
+  <div class="bottom">
+    <div class="nav active" onclick="showTab('home',this)"><b>⌂</b>Home</div>
+    <div class="nav" onclick="showTab('notifications',this)"><b>○</b>Notifications</div>
+    <div class="nav" onclick="showTab('audio',this)"><b>♫</b>Audio Streams</div>
+    <div class="nav" onclick="showTab('artist',this)"><b>★</b>Artist Console</div>
+  </div>
+
+  <div class="modal" id="settingsModal" onclick="if(event.target==this)closeSettings()"><div class="sheet"><h2>Settings</h2><div class="srow"><span>App</span><span>Hit TV by Inno</span></div><div class="srow"><span>Auto Play 24/7</span><span>ON</span></div><button class="sendBtn" onclick="closeSettings()">Done</button></div></div>
 </div>
-<div class="modal" id="settingsModal" onclick="if(event.target==this)closeSettings()"><div class="sheet"><h2>Settings</h2><div class="row"><span><b>Dark Mode</b><br><small>Black theme</small></span><div style="display:flex;gap:10px;align-items:center"><span id="themeLabel2">White</span><div class="switch" id="themeSwitch2" onclick="toggleTheme()"></div></div></div><div class="row"><span>Auto Play</span><span>On - 24/7</span></div><button class="btn" onclick="closeSettings()">Done</button></div></div>
+
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <script>
@@ -77,80 +100,30 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-let lineup=[], currentIndex=-1, currentUrl="", override=null, lineupTimer=null;
-function showTab(id,el){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('page-'+id).classList.add('active');el.classList.add('active');}
+let lineup=[], currentIndex=-1, currentUrl="", override=null, timer=null, isMuted=true, currentVideo=null;
+function showTab(id,el){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));document.getElementById('page-'+id).classList.add('active');el.classList.add('active');}
 function openSettings(){document.getElementById('settingsModal').classList.add('open')}
 function closeSettings(){document.getElementById('settingsModal').classList.remove('open')}
-function toggleTheme(){let d=document.body.classList.toggle('dark');document.getElementById('themeSwitch').classList.toggle('on',d);document.getElementById('themeSwitch2').classList.toggle('on',d);document.getElementById('themeLabel').innerText=d?'Black':'White';document.getElementById('themeLabel2').innerText=d?'Black':'White';localStorage.setItem('premier_theme',d?'dark':'light')}
-if(localStorage.getItem('premier_theme')==='dark') toggleTheme();
-function sendReq(){let n=document.getElementById('reqName').value.trim(),s=document.getElementById('reqSong').value.trim(),l=document.getElementById('reqLink').value.trim();if(!n||!s)return document.getElementById('reqMsg').innerText='Please fill Name + Song';db.ref('requests').push({name:n,song:s,link:l,time:Date.now()});document.getElementById('reqMsg').innerText='Request sent to Admin! Thank you.';}
-function getYTId(url){let m=url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);return m?m[1]:null;}
+function getYTId(u){let m=u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);return m?m[1]:null}
 function playItem(item){
-  if(!item||!item.url) return;
-  if(item.url===currentUrl) return;
-  currentUrl=item.url;
-  document.getElementById('npTitle').innerText=item.title||'PREMIER TV LIVE';
-  document.getElementById('npDetail').innerText=item.detail||'Live Now - Premier TV';
-  document.getElementById('artistNow').innerText=item.title||'-';
-  document.getElementById('noSignal').style.display='none';
-  let holder=document.getElementById('playerHolder');
-  let yt=getYTId(item.url);
-  clearTimeout(lineupTimer);
-  if(yt){
-    holder.innerHTML=`<iframe src="https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&mute=0&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&playsinline=1" allow="autoplay; encrypted-media"></iframe>`;
-    // YouTube has no end event without API, so auto-next after duration or 4 mins default - Admin can set duration in Admin
-    let dur = (item.duration||240)*1000;
-    lineupTimer=setTimeout(()=>{nextInLineup()}, dur);
-  } else {
-    holder.innerHTML=`<video src="${item.url}" autoplay playsinline preload="auto" muted></video>`;
-    let v=holder.querySelector('video');
-    v.play().catch(()=>{v.muted=true;v.play()});
-    document.addEventListener('click',()=>{v.muted=false},{once:true});
-    v.onended=()=>{nextInLineup()};
-    // Safety: if MP4 hangs, next after 5 mins
-    lineupTimer=setTimeout(()=>{nextInLineup()}, 300000);
-  }
-  renderLists();
+  if(!item||!item.url||item.url===currentUrl) return;
+  currentUrl=item.url; document.getElementById('npTitle').innerText=item.title; document.getElementById('artistNow').innerText=item.title; document.getElementById('audioNow').innerText=item.title; document.getElementById('noSignal').style.display='none';
+  let h=document.getElementById('playerHolder'); let yt=getYTId(item.url); clearTimeout(timer);
+  if(yt){ h.innerHTML=`<iframe src="https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&mute=1&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&playsinline=1" allow="autoplay"></iframe>`; timer=setTimeout(nextInLineup,(item.duration||240)*1000); }
+  else{ h.innerHTML=`<video src="${item.url}" autoplay playsinline preload="auto" muted></video>`; currentVideo=h.querySelector('video'); currentVideo.play().catch(()=>{}); currentVideo.onended=nextInLineup; timer=setTimeout(nextInLineup,300000); }
+  if(lineup.length>0){ let nxt=lineup[(lineup.findIndex(x=>x.url===item.url)+1)%lineup.length]; if(nxt){ document.getElementById('nextTitle').innerText=nxt.title; document.getElementById('artistNext').innerText=nxt.title; } }
 }
-function nextInLineup(){
-  if(override) return; // If Admin forced LIVE, don't auto-next
-  if(lineup.length===0) return;
-  currentIndex=(currentIndex+1)%lineup.length; // LOOP FOREVER
-  playItem(lineup[currentIndex]);
-}
-function renderLists(){
-  let html="", audio="";
-  lineup.forEach((it,i)=>{
-    let isP = it.url===currentUrl;
-    html+=`<div class="item ${isP?'playing':''}"><div class="num">${i+1}</div><div><b>${it.title}</b><p>${it.detail||''}</p></div>${isP?'<span class="liveTag">LIVE</span>':''}</div>`;
-    audio+=`<div class="item ${isP?'playing':''}"><div class="num">${i+1}</div><div><b>${it.title}</b><p>Audio Stream • Premier TV</p></div>${isP?'<span class="liveTag">LIVE</span>':''}</div>`;
-  });
-  document.getElementById('lineupList').innerHTML=html||'No lineup yet. Admin is adding songs.';
-  document.getElementById('audioList').innerHTML=audio||'No audio yet.';
-  // Next up
-  if(lineup.length>0 && currentIndex>=0){ let nxt=lineup[(currentIndex+1)%lineup.length]; document.getElementById('artistNext').innerText=nxt.title; }
-}
-// ADMIN CONTROLS - LISTEN
-db.ref('lineup').on('value', snap=>{
-  let v=snap.val()||{}; lineup=Object.keys(v).map(k=>({...v[k],_key:k}));
-  // Sort by order added
-  lineup.sort((a,b)=>(a.order||0)-(b.order||0));
-  if(lineup.length>0 && currentIndex===-1 && !override){ currentIndex=0; playItem(lineup[0]); }
-  renderLists();
-});
-db.ref('liveOverride').on('value', snap=>{
-  let d=snap.val();
-  if(d && d.url){ override=d; playItem(d); }
-  else { override=null; }
-});
-db.ref('control').on('value', snap=>{
-  let c=snap.val()||{};
-  if(c.action==='next'){ nextInLineup(); db.ref('control').set({action:'none'}); }
-  if(c.action==='restart'){ currentIndex=-1; currentUrl=""; if(lineup.length>0){currentIndex=0; playItem(lineup[0]);} db.ref('control').set({action:'none'}); }
-});
-db.ref('ticker').on('value', snap=>{ let t=snap.val(); if(t && t.text) document.getElementById('tickerText').innerText=t.text+" • "+t.text; });
-// Fake viewers count - looks real
-setInterval(()=>{ document.getElementById('viewCount').innerText=(1200+Math.floor(Math.random()*400)).toLocaleString(); },5000);
+function nextInLineup(){ if(override) return; if(!lineup.length) return; currentIndex=(currentIndex+1)%lineup.length; playItem(lineup[currentIndex]); }
+function tapSound(){ isMuted=false; if(currentVideo){currentVideo.muted=false} alert('Sound ON'); }
+function toggleMute(){ isMuted=!isMuted; if(currentVideo) currentVideo.muted=isMuted; document.getElementById('muteBtn').innerText=isMuted?'Unmute':'Mute / Unmute'; }
+function pip(){ if(currentVideo&&document.pictureInPictureEnabled){currentVideo.requestPictureInPicture()} else alert('PiP for MP4 only.'); }
+function goFullscreen(){ let el=document.querySelector('.liveBox'); if(el.requestFullscreen) el.requestFullscreen(); }
+function sendComment(){ let v=document.getElementById('commentInput').value.trim(); if(!v) return; db.ref('comments').push({text:v,time:Date.now()}); document.getElementById('commentMsg').innerText='Comment sent to Admin!'; document.getElementById('commentInput').value=''; }
+function sendReq(){ let n=document.getElementById('reqName').value.trim(),s=document.getElementById('reqSong').value.trim(),l=document.getElementById('reqLink').value.trim(); if(!n||!s) return alert('Fill Name + Song'); db.ref('requests').push({name:n,song:s,link:l,time:Date.now()}); alert('Request sent to Admin!'); }
+db.ref('lineup').on('value',s=>{ let v=s.val()||{}; lineup=Object.keys(v).map(k=>({...v[k],_key:k})); lineup.sort((a,b)=>(a.order||0)-(b.order||0)); if(lineup.length&&currentIndex===-1&&!override){currentIndex=0;playItem(lineup[0])} });
+db.ref('liveOverride').on('value',s=>{ let d=s.val(); if(d&&d.url){override=d;playItem(d)} else override=null; });
+db.ref('control').on('value',s=>{ let c=s.val()||{}; if(c.action==='next'){nextInLineup();db.ref('control').set({action:'none'})} if(c.action==='restart'){currentIndex=-1;currentUrl="";if(lineup.length){currentIndex=0;playItem(lineup[0])}db.ref('control').set({action:'none'})} });
+db.ref('ticker').on('value',s=>{ let t=s.val(); if(t&&t.text) document.getElementById('tickerText').innerText=t.text+" • "+t.text; });
 </script>
 </body>
   </html>
