@@ -32,27 +32,25 @@ input{width:100%;background:#1a1a1a;border:1px solid #2a2a2a;color:#fff;padding:
 .modal{position:absolute;inset:0;background:rgba(0,0,0,.7);display:none;align-items:flex-end;z-index:200}.modal.open{display:flex}.sheet{background:#161616;width:100%;border-radius:20px 20px 0 0;padding:20px;padding-bottom:30px}.srow{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #222;font-size:14px;font-weight:600}
 .tongo{position:relative;width:52px;height:28px;background:#333;border-radius:20px;cursor:pointer;flex-shrink:0}.tongo:after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;background:#fff;border-radius:50%;transition:.3s}.tongo.on{background:#0033cc}.tongo.on:after{left:27px}
 .aItem{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:11px;margin-top:8px;display:flex;justify-content:space-between;gap:8px;align-items:center}.aItem b{font-size:13px;display:block}.aItem p{font-size:11px;color:#888}.dlBtn{background:#00a651;color:#fff;border:none;padding:9px 12px;border-radius:8px;font-weight:800;font-size:12px;cursor:pointer;white-space:nowrap}
-/* ENTER NAME - FIRST TIME ONLY */
-.nameGate{position:absolute;inset:0;background:#000;z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center}
-.nameGate.hidden{display:none}
+/* NAME GATE - FIXED: Fully removed after Start, does NOT block tabs */
+.nameGate{position:fixed;inset:0;background:#000;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center}
 .nameGate h1{font-size:28px}.nameGate h1 span{color:#1a2fd6}
 .nameGate p{color:#888;font-size:13px;margin:10px 0 20px}
-.nameGate input{margin-bottom:12px;text-align:center;font-size:16px}
-.nameGate .sendBtn{font-size:16px;padding:15px}
-.progBadge{display:inline-block;background:#00ff88;color:#000;padding:3px 8px;border-radius:10px;font-size:10px;font-weight:800;margin-left:6px}
+.nameGate input{margin-bottom:12px;text-align:center;font-size:16px;max-width:340px}
+.nameGate .sendBtn{font-size:16px;padding:15px;max-width:340px}
 </style>
 </head>
 <body>
-<div class="app" id="app">
-  <!-- ENTER NAME GATE - SHOWS ONLY FIRST TIME -->
-  <div class="nameGate" id="nameGate">
-    <h1>Hit TV <span>by Inno</span></h1>
-    <p>Welcome! Enter your name to start watching.<br>You will only do this once.</p>
-    <input id="userNameInput" placeholder="Enter Your Name - e.g. Inno">
-    <button class="sendBtn" onclick="saveUserName()">▶ Start Watching</button>
-    <p style="font-size:11px;margin-top:16px">Your name helps Admin know who is watching.</p>
-  </div>
+<!-- NAME GATE - OUTSIDE APP, SO IT CANNOT BLOCK TABS AFTER -->
+<div class="nameGate" id="nameGate">
+  <h1>Hit TV <span>by Inno</span></h1>
+  <p>Welcome! Enter your name to start watching.<br>You will only do this once.</p>
+  <input id="userNameInput" placeholder="Enter Your Name - e.g. Inno">
+  <button class="sendBtn" onclick="saveUserName()">▶ Start Watching</button>
+  <p style="font-size:11px;margin-top:16px">Your name helps Admin know who is watching.</p>
+</div>
 
+<div class="app" id="app">
   <div class="top"><b>Hit TV <span>by Inno</span></b><button class="setBtn" onclick="openSettings()">Settings</button></div>
   <div class="page active" id="page-home">
     <div class="head2"><b id="welcomeName">Hi • LIVE</b><div class="pills"><span class="pill">● LIVE • 24/7</span><span class="pill blue" onclick="forceSound()">TAP FOR SOUND</span></div></div>
@@ -81,20 +79,27 @@ input{width:100%;background:#1a1a1a;border:1px solid #2a2a2a;color:#fff;padding:
   <div class="modal" id="settingsModal" onclick="if(event.target==this)closeSettings()"><div class="sheet"><h2>Settings - Hit TV by Inno</h2><div class="srow"><span>🔄 Rotate Screen</span><div class="tongo" id="tongoRotate" onclick="toggleRotate()"></div></div><div class="srow"><span>☀️ White Mode</span><div class="tongo" id="tongoWhite" onclick="toggleWhite()"></div></div><div class="srow"><span>🌙 Dark Blue Mode</span><div class="tongo" id="tongoDarkBlue" onclick="toggleDarkBlue()"></div></div><div class="srow"><span>App</span><span>Hit TV by Inno</span></div><div class="srow"><span>Sound</span><span id="soundStatus">Tap For Sound</span></div><button class="sendBtn" onclick="closeSettings()">Done</button></div></div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <script>
+const firebaseConfig={apiKey:"AIzaSyBT9bXCGb6WgriW1wodo6IeRKOUQ5jdCes",authDomain:"hit-tv-app-40fb9.firebaseapp.com",databaseURL:"https://hit-tv-app-40fb9-default-rtdb.firebaseio.com",projectId:"hit-tv-app-40fb9",storageBucket:"hit-tv-app-40fb9.firebasestorage.app",messagingSenderId:"740828744097",appId:"1:740828744097:web:49104b3522d02de64ce3e0"};
+firebase.initializeApp(firebaseConfig); const db=firebase.database();
 let soundOn = localStorage.getItem('hitTV_sound')==='on';
-// ===== ENTER NAME - ONCE ONLY =====
 let myName = localStorage.getItem('hitTV_userName') || '';
 let myId = localStorage.getItem('hitTV_userId') || ('user_'+Date.now()+'_'+Math.floor(Math.random()*9999));
 localStorage.setItem('hitTV_userId', myId);
+let lineup=[], currentUrl="", currentItem=null, override=null, timer=null, currentVideo=null, liveStartedAt=0, programsCache={}, isProgramPlaying=false;
+
+// ===== NAME GATE - FIXED, RUNS AFTER FIREBASE =====
 function checkNameGate(){
+  let gate=document.getElementById('nameGate');
   if(myName){
-    document.getElementById('nameGate').classList.add('hidden');
+    gate.style.display='none';
     document.getElementById('welcomeName').innerText='Hi '+myName+' • LIVE';
-    // Auto-fill artist name
-    let rn=document.getElementById('reqName'); if(rn&&!rn.value) rn.value=myName;
+    let rn=document.getElementById('reqName'); if(rn) rn.value=myName;
+    reportSeen();
   } else {
-    document.getElementById('nameGate').classList.remove('hidden');
+    gate.style.display='flex';
   }
 }
 function saveUserName(){
@@ -102,25 +107,19 @@ function saveUserName(){
   if(!n) return alert('Please enter your name to start watching');
   myName=n;
   localStorage.setItem('hitTV_userName', n);
-  // Save to Firebase for Admin Users list
-  if(window.db) db.ref('users/'+myId).set({name:n, device: navigator.userAgent.includes('Android')?'Android':navigator.userAgent.includes('iPhone')?'iPhone':'Phone/Web', lastSeen: Date.now()});
-  document.getElementById('nameGate').classList.add('hidden');
+  db.ref('users/'+myId).set({name:n, device: navigator.userAgent.includes('Android')?'Android':navigator.userAgent.includes('iPhone')?'iPhone':'Phone/Web', lastSeen: Date.now()});
+  // FULLY REMOVE GATE - SO TABS WORK
+  let gate=document.getElementById('nameGate');
+  gate.style.display='none';
+  gate.remove();
   document.getElementById('welcomeName').innerText='Hi '+n+' • LIVE';
   document.getElementById('reqName').value=n;
   forceSound();
 }
-checkNameGate();
-function forceSound(){ soundOn=true; localStorage.setItem('hitTV_sound','on'); document.getElementById('soundStatus').innerText='ON'; let v=document.querySelector('#playerHolder video'); if(v){v.muted=false;v.volume=1;v.play().catch(()=>{});} let ifr=document.querySelector('#playerHolder iframe'); if(ifr){ifr.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}','*');ifr.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[100]}','*');ifr.contentWindow.postMessage('{"event":"command","func":"play","args":""}','*');} }
+function forceSound(){ soundOn=true; localStorage.setItem('hitTV_sound','on'); let s=document.getElementById('soundStatus'); if(s) s.innerText='ON'; let v=document.querySelector('#playerHolder video'); if(v){v.muted=false;v.volume=1;v.play().catch(()=>{});} let ifr=document.querySelector('#playerHolder iframe'); if(ifr){ifr.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}','*');ifr.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[100]}','*');ifr.contentWindow.postMessage('{"event":"command","func":"play","args":""}','*');} }
 document.addEventListener('click',()=>{if(!soundOn) forceSound();}); document.addEventListener('touchstart',()=>{if(!soundOn) forceSound();},{passive:true});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&soundOn) forceSound();}); window.addEventListener('focus',()=>{if(soundOn) forceSound();});
-</script>
 
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-<script>
-const firebaseConfig={apiKey:"AIzaSyBT9bXCGb6WgriW1wodo6IeRKOUQ5jdCes",authDomain:"hit-tv-app-40fb9.firebaseapp.com",databaseURL:"https://hit-tv-app-40fb9-default-rtdb.firebaseio.com",projectId:"hit-tv-app-40fb9",storageBucket:"hit-tv-app-40fb9.firebasestorage.app",messagingSenderId:"740828744097",appId:"1:740828744097:web:49104b3522d02de64ce3e0"};
-firebase.initializeApp(firebaseConfig); const db=firebase.database();
-let lineup=[], currentUrl="", currentItem=null, override=null, timer=null, currentVideo=null, liveStartedAt=0, programsCache={}, isProgramPlaying=false;
 function showTab(id,el){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));document.getElementById('page-'+id).classList.add('active');el.classList.add('active');}
 function openSettings(){document.getElementById('settingsModal').classList.add('open')}
 function closeSettings(){document.getElementById('settingsModal').classList.remove('open')}
@@ -129,7 +128,7 @@ function toggleWhite(){let a=document.getElementById('app');a.classList.remove('
 function toggleDarkBlue(){let a=document.getElementById('app');a.classList.remove('white');document.getElementById('tongoWhite').classList.remove('on');a.classList.toggle('darkblue');document.getElementById('tongoDarkBlue').classList.toggle('on');}
 function getYTId(u){if(!u) return null; let m=u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);return m?m[1]:null}
 function joinLive(){
-  if(isProgramPlaying) return; // Program has priority
+  if(isProgramPlaying) return;
   if(!lineup.length||!liveStartedAt) return;
   let total=lineup.reduce((s,x)=>s+(x.duration||240),0); if(total<=0) return;
   let elapsed=Math.floor((Date.now()-liveStartedAt)/1000); let pos=elapsed%total; let acc=0;
@@ -159,7 +158,6 @@ function playItem(item, offsetSeconds, isProg){
     document.getElementById('artistNext').innerText='Back to Lineup';
   }
 }
-// ===== PROGRAMS - Plays at set time, then back to lineup, tomorrow again =====
 function checkProgram(){
   if(override) return;
   let now=new Date(); let mins=now.getHours()*60+now.getMinutes();
@@ -173,14 +171,10 @@ function checkProgram(){
     else { if(mins>=startMins){isActive=true; offset=(mins-startMins)*60+now.getSeconds();} else if(mins<endMins-1440){isActive=true; offset=(1440-startMins+mins)*60+now.getSeconds();} }
     if(isActive) found={prog:p, offset:offset};
   });
-  if(found){
-    if(currentUrl!==found.prog.url || !isProgramPlaying){ playItem(found.prog, found.offset, true); }
-  } else {
-    if(isProgramPlaying){ isProgramPlaying=false; currentUrl=""; joinLive(); }
-  }
+  if(found){ if(currentUrl!==found.prog.url || !isProgramPlaying){ playItem(found.prog, found.offset, true); } }
+  else { if(isProgramPlaying){ isProgramPlaying=false; currentUrl=""; joinLive(); } }
 }
 setInterval(checkProgram, 10000);
-// ===== DOWNLOAD BUTTONS - WORKING =====
 function downloadCurrent(type){
   if(!currentItem||!currentUrl) return alert('No song playing now');
   let yt=getYTId(currentUrl);
@@ -193,7 +187,6 @@ function downloadAudio(){ downloadCurrent('audio'); }
 function downloadAudioFile(url,title){
   let a=document.createElement('a'); a.href=url; a.download=title+' - Hit TV'; a.target='_blank'; document.body.appendChild(a); a.click(); a.remove();
 }
-function tapSound(){forceSound();}
 function toggleMute(){ if(soundOn){soundOn=false;localStorage.setItem('hitTV_sound','off');document.getElementById('soundStatus').innerText='OFF';} else {forceSound();} let v=document.querySelector('#playerHolder video'); if(v) v.muted=!soundOn; }
 function pip(){if(currentVideo&&document.pictureInPictureEnabled){currentVideo.requestPictureInPicture()} else alert('PiP for MP4 only.');}
 function goFullscreen(){let el=document.querySelector('.liveBox'); if(el.requestFullscreen) el.requestFullscreen();}
@@ -203,7 +196,10 @@ function sendComment(){
   document.getElementById('commentMsg').innerText='Comment sent to Admin!';
   document.getElementById('commentInput').value='';
 }
-// ===== ARTIST CONSOLE - WITH PHONE + AUTO CLEAR =====
 function sendReq(){
   let n=document.getElementById('reqName').value.trim(), s=document.getElementById('reqSong').value.trim(), ph=document.getElementById('reqPhone').value.trim(), l=document.getElementById('reqLink').value.trim();
-  if(!n||!s) return alert('Fill Name + Song'
+  if(!n||!s) return alert('Fill Name + Song');
+  db.ref('requests').push({name:n, song:s, phone:ph, link:l, time:Date.now()});
+  document.getElementById('reqName').value=myName||''; document.getElementById('reqSong').value=''; document.getElementById('reqPhone').value=''; document.getElementById('reqLink').value='';
+  document.getElementById('reqMsg').innerText='Request submitted to Admin! ✅';
+  setTimeout(()=>{document.getElementById('
