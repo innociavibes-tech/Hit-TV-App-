@@ -1,1 +1,156 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PREMIER TV - LIVE 24/7</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+:root{--bg:#fff;--card:#f1f3f5;--card2:#fff;--text:#111;--muted:#666;--line:#e5e7eb;--blue:#0033cc;--red:#e60000}
+body.dark{--bg:#08090c;--card:#15171c;--card2:#1c1f26;--text:#fff;--muted:#aaa;--line:#262932}
+body{background:var(--bg);color:var(--text)}
+header{position:sticky;top:0;z-index:100;background:var(--bg);display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.logo{font-weight:900;font-size:22px}.logo span{color:var(--red)}.logo small{display:block;font-size:9px;letter-spacing:3px;color:var(--muted)}
+.hRight{display:flex;gap:8px;align-items:center}
+.liveBadge{background:var(--red);color:#fff;padding:6px 12px;border-radius:100px;font-size:11px;font-weight:900}
+.iconBtn{background:var(--card);border:1px solid var(--line);color:var(--text);font-size:19px;width:42px;height:42px;border-radius:50%;cursor:pointer}
+.wrap{max-width:900px;margin:0 auto}
+.liveWrap{padding:12px 12px 0}
+.liveBox{position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden;border:3px solid var(--blue)}
+.liveBox iframe,.liveBox video{position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none!important}
+.liveTop{position:absolute;top:10px;left:10px;z-index:5;background:rgba(0,0,0,.75);color:#fff;padding:5px 10px;border-radius:100px;font-size:11px;font-weight:800}
+.noSignal{position:absolute;inset:0;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;color:#fff;text-align:center}
+.nowRow{display:flex;justify-content:space-between;align-items:center;padding:12px 14px}
+.nowRow b{font-size:17px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70vw}
+.nowRow p{color:var(--muted);font-size:12px}
+.viewers{background:var(--card);padding:7px 12px;border-radius:100px;font-size:12px;font-weight:700}
+.ticker{background:var(--blue);color:#fff;overflow:hidden;white-space:nowrap;height:34px;display:flex;align-items:center;position:relative}
+.ticker span{position:absolute;left:0;background:#000;color:#fff;padding:0 12px;height:100%;display:flex;align-items:center;font-weight:900;font-size:12px;z-index:2}
+.tickerInner{display:inline-block;padding-left:100%;animation:tick 35s linear infinite;font-weight:700;font-size:14px}
+@keyframes tick{to{transform:translateX(-100%)}}
+.tabs{display:flex;background:var(--bg);border-bottom:1px solid var(--line);position:sticky;top:66px;z-index:90}
+.tab{flex:1;padding:15px 2px;text-align:center;font-size:13px;font-weight:800;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.page{display:none;padding:14px}.page.active{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.card h3{font-size:15px;margin-bottom:4px}.card p.sub{color:var(--muted);font-size:12.5px;line-height:1.5}
+.item{display:flex;gap:11px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:11px;margin-top:9px;align-items:center}
+.item.playing{border-color:var(--red)}
+.num{background:var(--blue);color:#fff;min-width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px}
+.item b{font-size:14px}.item p{font-size:12px;color:var(--muted)}
+.liveTag{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:900;padding:4px 8px;border-radius:100px}
+.btn{width:100%;background:var(--blue);color:#fff;border:none;padding:13px;border-radius:12px;font-weight:900;cursor:pointer;font-size:14px}
+input,select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);margin-top:9px;background:var(--card2);color:var(--text);font-size:14px;outline:none}
+.row{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid var(--line)}
+.switch{width:54px;height:30px;background:#cbd5e1;border-radius:100px;position:relative;cursor:pointer;transition:.2s}
+.switch:after{content:'';position:absolute;width:26px;height:26px;background:#fff;border-radius:50%;top:2px;left:2px;transition:.2s}
+.switch.on{background:var(--blue)}.switch.on:after{left:26px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;align-items:flex-end;z-index:300}
+.modal.open{display:flex}.sheet{background:var(--bg);width:100%;border-radius:22px 22px 0 0;padding:20px 20px 32px;max-width:600px;margin:0 auto}
+.badge{background:#00a651;color:#fff;padding:4px 9px;border-radius:100px;font-size:11px;font-weight:900}
+</style>
+</head>
+<body>
+<header><div class="logo">PREMIER <span>TV</span><small>LIVE • 24/7 • UGANDA</small></div><div class="hRight"><div class="liveBadge">● LIVE</div><button class="iconBtn" onclick="openSettings()">⚙</button></div></header>
+<div class="wrap">
+<div class="liveWrap"><div class="liveBox"><div class="liveTop">PREMIER TV • LIVE</div><div class="noSignal" id="noSignal"><b>PREMIER TV</b><p>Connecting...</p></div><div id="playerHolder"></div></div></div>
+<div class="nowRow"><div><b id="npTitle">Waiting for Lineup...</b><p id="npDetail">Auto Lineup 24/7 • You join where LIVE is</p></div><div class="viewers">👁 <span id="viewCount">1,248</span> watching</div></div>
+<div class="ticker"><span>BREAKING</span><div class="tickerInner" id="tickerText">WELCOME TO PREMIER TV • LIVE 24/7 • YOUR HOME OF MUSIC • STAY TUNED •</div></div>
+<nav class="tabs"><div class="tab active" onclick="showTab('home',this)">Home</div><div class="tab" onclick="showTab('audio',this)">Audio Streams</div><div class="tab" onclick="showTab('artist',this)">Artist Console</div><div class="tab" onclick="showTab('settingsPage',this)">Settings</div></nav>
+<div class="page active" id="page-home"><div class="card"><h3>Now Showing - Lineup Loop</h3><p class="sub">Real TV style. No pause, no skip. Everyone watches same LIVE moment. Lineup plays forever.</p><div id="lineupList">Loading lineup...</div></div><div class="card"><h3>About Premier TV</h3><p class="sub">Premier TV is 24/7 Music TV. Lineup loops non-stop.</p></div></div>
+<div class="page" id="page-audio"><div class="card"><h3>Audio Streams</h3><p class="sub">Same LIVE lineup in audio mode. Perfect for low data.</p><div id="audioList">Loading...</div></div></div>
+<div class="page" id="page-artist"><div class="card"><h3>Artist Console</h3><div class="row"><span>Now On Air</span><b id="artistNow">-</b></div><div class="row"><span>Status</span><span class="badge">ON AIR</span></div><div class="row"><span>Next Up</span><b id="artistNext">-</b></div></div><div class="card"><h3>Request Your Song</h3><input id="reqName" placeholder="Your Artist Name"><input id="reqSong" placeholder="Song Title"><input id="reqLink" placeholder="YouTube / MP4 Link"><button class="btn" onclick="sendReq()">Send Request to Admin</button><p class="sub" id="reqMsg"></p></div></div>
+<div class="page" id="page-settingsPage"><div class="card"><h3>Appearance</h3><div class="row"><span><b>Theme</b><br><small style="color:var(--muted)">White / Black</small></span><div style="display:flex;gap:10px;align-items:center"><span id="themeLabel">White</span><div class="switch" id="themeSwitch" onclick="toggleTheme()"></div></div></div><div class="row"><span>Fast Play</span><span class="badge">ON</span></div></div><div class="card"><h3>Playback</h3><div class="row"><span>Quality</span><select><option>Auto - Fast Play</option><option>720p</option><option>1080p</option></select></div><div class="row"><span>Auto Loop</span><span>24/7 • Always On</span></div></div><div class="card"><h3>App</h3><p class="sub">Premier TV v2.0 • Built for 24/7 Non-Stop TV</p></div></div>
+</div>
+<div class="modal" id="settingsModal" onclick="if(event.target==this)closeSettings()"><div class="sheet"><h2>Settings</h2><div class="row"><span><b>Dark Mode</b><br><small>Black theme</small></span><div style="display:flex;gap:10px;align-items:center"><span id="themeLabel2">White</span><div class="switch" id="themeSwitch2" onclick="toggleTheme()"></div></div></div><div class="row"><span>Auto Play</span><span>On - 24/7</span></div><button class="btn" onclick="closeSettings()">Done</button></div></div>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBT9bXCGb6WgriW1wodo6IeRKOUQ5jdCes",
+  authDomain: "hit-tv-app-40fb9.firebaseapp.com",
+  databaseURL: "https://hit-tv-app-40fb9-default-rtdb.firebaseio.com",
+  projectId: "hit-tv-app-40fb9",
+  storageBucket: "hit-tv-app-40fb9.firebasestorage.app",
+  messagingSenderId: "740828744097",
+  appId: "1:740828744097:web:49104b3522d02de64ce3e0"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+let lineup=[], currentIndex=-1, currentUrl="", override=null, lineupTimer=null;
+function showTab(id,el){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('page-'+id).classList.add('active');el.classList.add('active');}
+function openSettings(){document.getElementById('settingsModal').classList.add('open')}
+function closeSettings(){document.getElementById('settingsModal').classList.remove('open')}
+function toggleTheme(){let d=document.body.classList.toggle('dark');document.getElementById('themeSwitch').classList.toggle('on',d);document.getElementById('themeSwitch2').classList.toggle('on',d);document.getElementById('themeLabel').innerText=d?'Black':'White';document.getElementById('themeLabel2').innerText=d?'Black':'White';localStorage.setItem('premier_theme',d?'dark':'light')}
+if(localStorage.getItem('premier_theme')==='dark') toggleTheme();
+function sendReq(){let n=document.getElementById('reqName').value.trim(),s=document.getElementById('reqSong').value.trim(),l=document.getElementById('reqLink').value.trim();if(!n||!s)return document.getElementById('reqMsg').innerText='Please fill Name + Song';db.ref('requests').push({name:n,song:s,link:l,time:Date.now()});document.getElementById('reqMsg').innerText='Request sent to Admin! Thank you.';}
+function getYTId(url){let m=url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);return m?m[1]:null;}
+function playItem(item){
+  if(!item||!item.url) return;
+  if(item.url===currentUrl) return;
+  currentUrl=item.url;
+  document.getElementById('npTitle').innerText=item.title||'PREMIER TV LIVE';
+  document.getElementById('npDetail').innerText=item.detail||'Live Now - Premier TV';
+  document.getElementById('artistNow').innerText=item.title||'-';
+  document.getElementById('noSignal').style.display='none';
+  let holder=document.getElementById('playerHolder');
+  let yt=getYTId(item.url);
+  clearTimeout(lineupTimer);
+  if(yt){
+    holder.innerHTML=`<iframe src="https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&mute=0&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&playsinline=1" allow="autoplay; encrypted-media"></iframe>`;
+    // YouTube has no end event without API, so auto-next after duration or 4 mins default - Admin can set duration in Admin
+    let dur = (item.duration||240)*1000;
+    lineupTimer=setTimeout(()=>{nextInLineup()}, dur);
+  } else {
+    holder.innerHTML=`<video src="${item.url}" autoplay playsinline preload="auto" muted></video>`;
+    let v=holder.querySelector('video');
+    v.play().catch(()=>{v.muted=true;v.play()});
+    document.addEventListener('click',()=>{v.muted=false},{once:true});
+    v.onended=()=>{nextInLineup()};
+    // Safety: if MP4 hangs, next after 5 mins
+    lineupTimer=setTimeout(()=>{nextInLineup()}, 300000);
+  }
+  renderLists();
+}
+function nextInLineup(){
+  if(override) return; // If Admin forced LIVE, don't auto-next
+  if(lineup.length===0) return;
+  currentIndex=(currentIndex+1)%lineup.length; // LOOP FOREVER
+  playItem(lineup[currentIndex]);
+}
+function renderLists(){
+  let html="", audio="";
+  lineup.forEach((it,i)=>{
+    let isP = it.url===currentUrl;
+    html+=`<div class="item ${isP?'playing':''}"><div class="num">${i+1}</div><div><b>${it.title}</b><p>${it.detail||''}</p></div>${isP?'<span class="liveTag">LIVE</span>':''}</div>`;
+    audio+=`<div class="item ${isP?'playing':''}"><div class="num">${i+1}</div><div><b>${it.title}</b><p>Audio Stream • Premier TV</p></div>${isP?'<span class="liveTag">LIVE</span>':''}</div>`;
+  });
+  document.getElementById('lineupList').innerHTML=html||'No lineup yet. Admin is adding songs.';
+  document.getElementById('audioList').innerHTML=audio||'No audio yet.';
+  // Next up
+  if(lineup.length>0 && currentIndex>=0){ let nxt=lineup[(currentIndex+1)%lineup.length]; document.getElementById('artistNext').innerText=nxt.title; }
+}
+// ADMIN CONTROLS - LISTEN
+db.ref('lineup').on('value', snap=>{
+  let v=snap.val()||{}; lineup=Object.keys(v).map(k=>({...v[k],_key:k}));
+  // Sort by order added
+  lineup.sort((a,b)=>(a.order||0)-(b.order||0));
+  if(lineup.length>0 && currentIndex===-1 && !override){ currentIndex=0; playItem(lineup[0]); }
+  renderLists();
+});
+db.ref('liveOverride').on('value', snap=>{
+  let d=snap.val();
+  if(d && d.url){ override=d; playItem(d); }
+  else { override=null; }
+});
+db.ref('control').on('value', snap=>{
+  let c=snap.val()||{};
+  if(c.action==='next'){ nextInLineup(); db.ref('control').set({action:'none'}); }
+  if(c.action==='restart'){ currentIndex=-1; currentUrl=""; if(lineup.length>0){currentIndex=0; playItem(lineup[0]);} db.ref('control').set({action:'none'}); }
+});
+db.ref('ticker').on('value', snap=>{ let t=snap.val(); if(t && t.text) document.getElementById('tickerText').innerText=t.text+" • "+t.text; });
+// Fake viewers count - looks real
+setInterval(()=>{ document.getElementById('viewCount').innerText=(1200+Math.floor(Math.random()*400)).toLocaleString(); },5000);
+</script>
+</body>
+  </html>
