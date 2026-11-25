@@ -6,8 +6,18 @@
 <title>Hit TV by Inno</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
-body{background:#000;display:flex;justify-content:center;min-height:100vh}
-.app{width:390px;max-width:430px;width:100%;height:100vh;height:100dvh;background:#0a0a0a;color:#fff;margin:0 auto;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;position:relative}
+body{background:#000;display:flex;justify-content:center;min-height:100vh;transition:.3s}
+.app{width:390px;max-width:430px;width:100%;height:100vh;height:100dvh;background:#0a0a0a;color:#fff;margin:0 auto;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;position:relative;transition:.3s}
+/* WHITE MODE */
+.app.white{background:#f5f5f5;color:#111}
+.app.white .top b{color:#111}.app.white .card,.app.white .box,.app.white .gbtn,.app.white .bottom{background:#fff;color:#111;border-color:#ddd}
+.app.white input{background:#eee;color:#111;border-color:#ddd}
+.app.white .sheet{background:#fff;color:#111}
+/* DARK BLUE MODE */
+.app.darkblue{background:#000a2e;color:#fff}
+.app.white .setBtn,.app.darkblue .setBtn{background:#111;color:#fff}
+/* ROTATE MODE */
+.app.rotate{transform:rotate(90deg);transform-origin:center;width:100vh;height:100vw;max-width:none}
 .top{display:flex;justify-content:space-between;align-items:center;padding:12px 14px}
 .top b{font-size:17px}.top b span{color:#1a2fd6}
 .setBtn{background:#111;border:1px solid #333;color:#fff;padding:7px 14px;border-radius:20px;font-size:13px;cursor:pointer}
@@ -16,25 +26,19 @@ body{background:#000;display:flex;justify-content:center;min-height:100vh}
 .pills{display:flex;gap:6px}
 .pill{background:#111;border:1px solid #333;padding:6px 10px;border-radius:20px;font-size:11px;white-space:nowrap}
 .pill.blue{background:#0033cc;border-color:#0033cc;font-weight:800}
-
-/* ===== VIDEO - ZOOMED TO HIDE YOUTUBE ===== */
 .liveBox{margin:0 12px;position:relative;width:calc(100% - 24px);aspect-ratio:16/11;background:#000;border-radius:12px 12px 0 0;overflow:hidden;border:1px solid #222;border-bottom:none}
 #playerHolder{position:absolute;inset:0;overflow:hidden;background:#000}
-/* This ZOOM wrapper crops YouTube top title + bottom buttons + logo */
 .yt-zoom{position:absolute;left:-12%;top:-22%;width:124%;height:144%;overflow:hidden;pointer-events:none}
 .yt-zoom iframe{width:100%;height:100%;border:0;pointer-events:none}
 #playerHolder video{width:100%;height:100%;object-fit:cover;pointer-events:none}
 .expand{position:absolute;top:10px;right:10px;z-index:5;background:rgba(0,0,0,.7);color:#fff;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer}
 .noSignal{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;text-align:center;padding:20px;z-index:2}
-
-/* ===== TICKER - FIXED: ON THE END OF VIDEO, NOT DOWN ===== */
-.ticker{background:#0033cc;color:#fff;overflow:hidden;white-space:nowrap;height:32px;display:flex;align-items:center;margin:0 12px 0 12px;border-radius:0 0 12px 12px;position:relative}
-.tickerInner{display:inline-block;white-space:nowrap;will-change:transform;font-size:13px;font-weight:600;padding-left:100%;animation:tick 25s linear infinite}
+.ticker{background:#0033cc;color:#fff;overflow:hidden;white-space:nowrap;height:32px;display:flex;align-items:center;margin:0 12px;border-radius:0 0 12px 12px}
+.tickerInner{display:inline-block;white-space:nowrap;font-size:13px;font-weight:600;padding-left:100%;animation:tick 25s linear infinite}
 @keyframes tick{to{transform:translateX(-100%)}}
-
 .row2{display:flex;gap:10px;padding:10px 12px}
 .box{flex:1;background:#161616;border:1px solid #222;border-radius:10px;padding:10px}
-.box small{color:#888;font-size:11px;letter-spacing:.5px}.box b{font-size:14px;display:block;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.box small{color:#888;font-size:11px}.box b{font-size:14px;display:block;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 12px}
 .gbtn{background:#1e1e1e;border:1px solid #2a2a2a;color:#fff;padding:13px 6px;border-radius:10px;font-weight:600;font-size:13px;cursor:pointer}
 .note{padding:10px 12px;color:#888;font-size:12px}
@@ -45,24 +49,29 @@ input{width:100%;background:#1a1a1a;border:1px solid #2a2a2a;color:#fff;padding:
 .page{display:none;flex:1}.page.active{display:block}
 .bottom{position:sticky;bottom:0;background:#111;border-top:1px solid #222;display:flex;padding:6px 4px;z-index:100}
 .nav{flex:1;text-align:center;padding:8px 2px;font-size:11px;color:#888;cursor:pointer;border-radius:10px}
-.nav.active{background:#0033cc;color:#fff}
-.nav b{display:block;font-size:16px}
+.nav.active{background:#0033cc;color:#fff}.nav b{display:block;font-size:16px}
+/* SETTINGS SHEET */
 .modal{position:absolute;inset:0;background:rgba(0,0,0,.7);display:none;align-items:flex-end;z-index:200}
 .modal.open{display:flex}.sheet{background:#161616;width:100%;border-radius:20px 20px 0 0;padding:20px;padding-bottom:30px}
-.srow{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #222}
+.srow{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #222;font-size:14px;font-weight:600}
+/* TONGO SWITCH */
+.tongo{position:relative;width:52px;height:28px;background:#333;border-radius:20px;cursor:pointer;transition:.3s;flex-shrink:0}
+.tongo:after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;background:#fff;border-radius:50%;transition:.3s}
+.tongo.on{background:#0033cc}.tongo.on:after{left:27px}
+.soundBar{background:#0033cc;color:#fff;text-align:center;padding:10px;font-size:13px;font-weight:800;cursor:pointer}
 </style>
 </head>
 <body>
 <div class="app" id="app">
+  <!-- FORCE SOUND BAR - TAP ONCE -->
+  <div class="soundBar" id="soundBar" onclick="forceSound()">🔊 TAP HERE FOR SOUND - SOUND WILL KEEP PLAYING</div>
+
   <div class="top"><b>Hit TV <span>by Inno</span></b><button class="setBtn" onclick="openSettings()">Settings</button></div>
 
   <div class="page active" id="page-home">
-    <div class="head2"><b>Hi Inno ADMIN • LIVE</b><div class="pills"><span class="pill">● LIVE • 24/7</span><span class="pill blue" onclick="tapSound()">TAP FOR SOUND</span></div></div>
-
-    <!-- VIDEO + TICKER TOGETHER - NO GAP -->
+    <div class="head2"><b>Hi Inno ADMIN • LIVE</b><div class="pills"><span class="pill">● LIVE • 24/7</span><span class="pill blue" onclick="forceSound()">TAP FOR SOUND</span></div></div>
     <div class="liveBox"><div class="noSignal" id="noSignal">HIT TV<br>CONNECTING LIVE...</div><div id="playerHolder"></div><button class="expand" onclick="goFullscreen()">↗</button></div>
     <div class="ticker"><div class="tickerInner" id="tickerText">when you are watching the music movies and shows . Thanks you 🙂👍 •</div></div>
-
     <div class="row2">
       <div class="box"><small>NOW PLAYING</small><b id="npTitle">Butta my bread _ lasmid ft jzyno</b></div>
       <div class="box"><small>NEXT</small><b id="nextTitle">Fola</b></div>
@@ -77,8 +86,8 @@ input{width:100%;background:#1a1a1a;border:1px solid #2a2a2a;color:#fff;padding:
     <div class="card"><h3>Live Comments - To Admin</h3><input id="commentInput" placeholder="Write comment..."><button class="sendBtn" onclick="sendComment()">Send Comment</button><p id="commentMsg" style="font-size:12px;color:#aaa;margin-top:8px"></p></div>
   </div>
 
-  <div class="page" id="page-notifications"><div style="padding:14px"><h3>Notifications</h3><div>No new notifications. Admin will post here.</div></div></div>
-  <div class="page" id="page-audio"><div style="padding:14px"><h3>Audio Streams</h3><p style="color:#888;font-size:13px;margin-top:6px">Same LIVE in audio mode.</p><div style="margin-top:12px;background:#161616;padding:14px;border-radius:10px"><small style="color:#888">NOW PLAYING AUDIO</small><b id="audioNow" style="display:block;margin-top:4px">-</b></div></div></div>
+  <div class="page" id="page-notifications"><div style="padding:14px"><h3>Notifications</h3><div>No new notifications.</div></div></div>
+  <div class="page" id="page-audio"><div style="padding:14px"><h3>Audio Streams</h3><div style="margin-top:12px;background:#161616;padding:14px;border-radius:10px"><small style="color:#888">NOW PLAYING AUDIO</small><b id="audioNow" style="display:block;margin-top:4px">-</b></div></div></div>
   <div class="page" id="page-artist"><div style="padding:14px"><h3>Artist Console</h3><div class="card" style="margin:10px 0"><p>Now On Air: <b id="artistNow">-</b></p><p style="margin-top:8px">Next: <b id="artistNext">-</b></p><p style="margin-top:8px;color:#00ff88">● ON AIR</p></div><div class="card" style="margin:0"><h3>Request Song</h3><input id="reqName" placeholder="Artist Name" style="margin-bottom:8px"><input id="reqSong" placeholder="Song Title" style="margin-bottom:8px"><input id="reqLink" placeholder="YouTube / MP4 Link"><button class="sendBtn" onclick="sendReq()">Send Request</button></div></div></div>
 
   <div class="bottom">
@@ -88,8 +97,53 @@ input{width:100%;background:#1a1a1a;border:1px solid #2a2a2a;color:#fff;padding:
     <div class="nav" onclick="showTab('artist',this)"><b>★</b>Artist Console</div>
   </div>
 
-  <div class="modal" id="settingsModal" onclick="if(event.target==this)closeSettings()"><div class="sheet"><h2>Settings</h2><div class="srow"><span>App</span><span>Hit TV by Inno</span></div><div class="srow"><span>Auto Play 24/7</span><span>ON</span></div><button class="sendBtn" onclick="closeSettings()">Done</button></div></div>
+  <!-- SETTINGS - 3 TONGOS -->
+  <div class="modal" id="settingsModal" onclick="if(event.target==this)closeSettings()">
+    <div class="sheet">
+      <h2>Settings - Hit TV by Inno</h2>
+      <div class="srow"><span>🔄 Rotate Screen</span><div class="tongo" id="tongoRotate" onclick="toggleRotate()"></div></div>
+      <div class="srow"><span>☀️ White Mode</span><div class="tongo" id="tongoWhite" onclick="toggleWhite()"></div></div>
+      <div class="srow"><span>🌙 Dark Blue Mode</span><div class="tongo" id="tongoDarkBlue" onclick="toggleDarkBlue()"></div></div>
+      <div class="srow"><span>App</span><span>Hit TV by Inno</span></div>
+      <div class="srow"><span>Sound</span><span id="soundStatus">OFF - Tap for Sound</span></div>
+      <button class="sendBtn" onclick="closeSettings()">Done</button>
+    </div>
+  </div>
 </div>
+
+<!-- ===== BOTTOM CODE - FORCE SOUND - BEFORE SCRIPT ===== -->
+<script>
+// FORCE SOUND CODE - This forces sound to keep playing
+let soundOn = localStorage.getItem('hitTV_sound')==='on';
+let ytPlayer = null;
+
+function forceSound(){
+  soundOn = true;
+  localStorage.setItem('hitTV_sound','on');
+  document.getElementById('soundStatus').innerText = 'ON - Keep Playing';
+  document.getElementById('soundBar').innerText = '🔊 SOUND ON - KEEP PLAYING';
+  document.getElementById('soundBar').style.background = '#00a651';
+  // 1. MP4 video
+  let v = document.querySelector('#playerHolder video');
+  if(v){ v.muted=false; v.volume=1; v.play().catch(()=>{}); }
+  // 2. YouTube - send unMute command
+  let ifr = document.querySelector('#playerHolder iframe');
+  if(ifr){ ifr.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}','*'); ifr.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[100]}','*'); ifr.contentWindow.postMessage('{"event":"command","func":"play","args":""}','*'); }
+  // 3. Try again every 500ms for 3 seconds - to catch new song
+  let tries=0; let iv=setInterval(()=>{
+    tries++;
+    let vv=document.querySelector('#playerHolder video'); if(vv && soundOn){ vv.muted=false; vv.volume=1; vv.play().catch(()=>{}); }
+    let ii=document.querySelector('#playerHolder iframe'); if(ii && soundOn){ ii.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}','*'); }
+    if(tries>6) clearInterval(iv);
+  },500);
+}
+// Auto: if user taps ANYWHERE, force sound ON
+document.addEventListener('click', ()=>{ if(!soundOn) forceSound(); }, {once:false});
+document.addEventListener('touchstart', ()=>{ if(!soundOn) forceSound(); }, {passive:true});
+// When user comes back to app (goes out and returns), force sound again
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && soundOn) forceSound(); });
+window.addEventListener('focus', ()=>{ if(soundOn) forceSound(); });
+</script>
 
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -105,44 +159,40 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-let lineup=[], currentIndex=-1, currentUrl="", override=null, timer=null, isMuted=true, currentVideo=null;
+let lineup=[], currentIndex=-1, currentUrl="", override=null, timer=null, currentVideo=null;
 function showTab(id,el){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));document.getElementById('page-'+id).classList.add('active');el.classList.add('active');}
 function openSettings(){document.getElementById('settingsModal').classList.add('open')}
 function closeSettings(){document.getElementById('settingsModal').classList.remove('open')}
+// --- 3 TONGOS ---
+function toggleRotate(){ let app=document.getElementById('app'); app.classList.toggle('rotate'); document.getElementById('tongoRotate').classList.toggle('on'); }
+function toggleWhite(){ let app=document.getElementById('app'); app.classList.remove('darkblue'); document.getElementById('tongoDarkBlue').classList.remove('on'); app.classList.toggle('white'); document.getElementById('tongoWhite').classList.toggle('on'); localStorage.setItem('hitTV_theme', app.classList.contains('white')?'white':'dark'); }
+function toggleDarkBlue(){ let app=document.getElementById('app'); app.classList.remove('white'); document.getElementById('tongoWhite').classList.remove('on'); app.classList.toggle('darkblue'); document.getElementById('tongoDarkBlue').classList.toggle('on'); }
 function getYTId(u){let m=u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);return m?m[1]:null}
 function playItem(item){
   if(!item||!item.url||item.url===currentUrl) return;
   currentUrl=item.url; document.getElementById('npTitle').innerText=item.title; document.getElementById('artistNow').innerText=item.title; document.getElementById('audioNow').innerText=item.title; document.getElementById('noSignal').style.display='none';
   let h=document.getElementById('playerHolder'); let yt=getYTId(item.url); clearTimeout(timer);
   if(yt){
-    // ZOOMED: crops top title + bottom YouTube bar + logo
-    h.innerHTML=`<div class="yt-zoom"><iframe src="https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&mute=1&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3" allow="autoplay"></iframe></div>`;
+    // If sound already ON, start UNMUTED. If not, start muted, then forceSound() will unmute on tap.
+    let muteParam = soundOn ? '0' : '1';
+    h.innerHTML=`<div class="yt-zoom"><iframe src="https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&mute=${muteParam}&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&enablejsapi=1" allow="autoplay"></iframe></div>`;
     timer=setTimeout(nextInLineup,(item.duration||240)*1000);
+    // FORCE sound again for new song if user already tapped
+    if(soundOn) setTimeout(forceSound, 800);
   } else {
-    h.innerHTML=`<video src="${item.url}" autoplay playsinline preload="auto" muted></video>`; currentVideo=h.querySelector('video'); currentVideo.play().catch(()=>{}); currentVideo.onended=nextInLineup; timer=setTimeout(nextInLineup,300000);
+    h.innerHTML=`<video src="${item.url}" autoplay playsinline preload="auto" ${soundOn?'':'muted'}></video>`; currentVideo=h.querySelector('video'); if(soundOn){ currentVideo.muted=false; currentVideo.volume=1; } currentVideo.play().catch(()=>{}); currentVideo.onended=nextInLineup; timer=setTimeout(nextInLineup,300000);
   }
   if(lineup.length>0){ let nxt=lineup[(lineup.findIndex(x=>x.url===item.url)+1)%lineup.length]; if(nxt){ document.getElementById('nextTitle').innerText=nxt.title; document.getElementById('artistNext').innerText=nxt.title; } }
 }
 function nextInLineup(){ if(override) return; if(!lineup.length) return; currentIndex=(currentIndex+1)%lineup.length; playItem(lineup[currentIndex]); }
-function tapSound(){ isMuted=false; if(currentVideo){currentVideo.muted=false} alert('Sound ON'); }
-function toggleMute(){ isMuted=!isMuted; if(currentVideo) currentVideo.muted=isMuted; document.getElementById('muteBtn').innerText=isMuted?'Unmute':'Mute / Unmute'; }
+function tapSound(){ forceSound(); }
+function toggleMute(){ if(soundOn){ soundOn=false; localStorage.setItem('hitTV_sound','off'); } else { forceSound(); } let v=document.querySelector('#playerHolder video'); if(v) v.muted=!soundOn; document.getElementById('muteBtn').innerText=soundOn?'Mute / Unmute':'Unmute'; }
 function pip(){ if(currentVideo&&document.pictureInPictureEnabled){currentVideo.requestPictureInPicture()} else alert('PiP for MP4 only.'); }
 function goFullscreen(){ let el=document.querySelector('.liveBox'); if(el.requestFullscreen) el.requestFullscreen(); }
 function sendComment(){ let v=document.getElementById('commentInput').value.trim(); if(!v) return; db.ref('comments').push({text:v,time:Date.now()}); document.getElementById('commentMsg').innerText='Comment sent to Admin!'; document.getElementById('commentInput').value=''; }
 function sendReq(){ let n=document.getElementById('reqName').value.trim(),s=document.getElementById('reqSong').value.trim(),l=document.getElementById('reqLink').value.trim(); if(!n||!s) return alert('Fill Name + Song'); db.ref('requests').push({name:n,song:s,link:l,time:Date.now()}); alert('Request sent to Admin!'); }
-
-// ===== TICKER FIX: REPLACE - NEVER ADD - NEVER DOUBLE =====
-function setTicker(text){
-  let el=document.getElementById('tickerText');
-  // 1. STOP old animation, CLEAR old text completely
-  el.style.animation='none';
-  el.innerText=''; // old removed
-  void el.offsetWidth; // force reset
-  // 2. Put ONLY new text, once
-  el.innerText = text + '  •  ' + text + '  •  ';
-  el.style.animation=''; // restart animation clean
-}
-
+function setTicker(text){ let el=document.getElementById('tickerText'); el.style.animation='none'; el.innerText=''; void el.offsetWidth; el.innerText=text+'  •  '+text+'  •  '; el.style.animation=''; }
+if(soundOn){ setTimeout(()=>{ document.getElementById('soundStatus').innerText='ON - Keep Playing'; document.getElementById('soundBar').innerText='🔊 SOUND ON - KEEP PLAYING'; },500); }
 db.ref('lineup').on('value',s=>{ let v=s.val()||{}; lineup=Object.keys(v).map(k=>({...v[k],_key:k})); lineup.sort((a,b)=>(a.order||0)-(b.order||0)); if(lineup.length&&currentIndex===-1&&!override){currentIndex=0;playItem(lineup[0])} });
 db.ref('liveOverride').on('value',s=>{ let d=s.val(); if(d&&d.url){override=d;playItem(d)} else override=null; });
 db.ref('control').on('value',s=>{ let c=s.val()||{}; if(c.action==='next'){nextInLineup();db.ref('control').set({action:'none'})} if(c.action==='restart'){currentIndex=-1;currentUrl="";if(lineup.length){currentIndex=0;playItem(lineup[0])}db.ref('control').set({action:'none'})} });
