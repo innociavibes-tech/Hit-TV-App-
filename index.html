@@ -353,6 +353,18 @@ setInterval(()=>{
     if(d && Date.now() - d.time < 15000) superForcePlay(d.idx);
   }catch(e){}
 },1000);
+  // VIEWERS LOOP-BACK FORCE - paste above 
+try{
+  document.addEventListener('ended', ()=>{
+    let list = window.lineup || window.videos || window.songs || window.playlist;
+    if(!list) return;
+    let cur = window.currentIdx ?? window.currentIndex ?? window.idx ?? 0;
+    if(cur >= list.length - 1){
+      // Viewers waits 1 sec for Admin to send 0, if Admin misses, viewers forces 0 itself
+      setTimeout(()=>{ if((window.currentIdx ?? 0) >= list.length - 1) superForcePlay(0); }, 1500);
+    }
+  }, true);
+}catch(e){}
   
 </script>
 </body>
