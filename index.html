@@ -365,6 +365,46 @@ try{
     }
   }, true);
 }catch(e){}
+  // VIEWERS JOIN LIVE FORCE - Start Where TV Has Reached - paste above 
+try{
+  if(window.firebase && firebase.apps && firebase.apps.length===0 && typeof firebaseConfig!=='undefined'){
+    firebase.initializeApp(firebaseConfig);
+  }
+}catch(e){}
+let lastLiveIdx = -1;
+let lastLivePos = 0;
+function joinLive(d){
+  if(!d) return;
+  // Calculate where song has reached NOW: pos when sent + seconds passed since sent
+  let passed = (Date.now() - d.time) / 1000;
+  let livePos = (d.pos || 0) + passed;
+  let media = document.querySelector('video') || document.querySelector('audio');
+  if(d.idx !== lastLiveIdx){
+    lastLiveIdx = d.idx;
+    window.currentIdx = d.idx; window.currentIndex = d.idx; window.idx = d.idx;
+    if(typeof renderLive==='function') renderLive();
+    if(typeof playSong==='function') playSong(d.idx);
+    if(typeof playVideo==='function') playVideo(d.idx);
+    // After song loads, jump to live position
+    setTimeout(()=>{
+      let m2 = document.querySelector('video') || document.querySelector('audio');
+      if(m2) { try{ m2.currentTime = livePos; m2.play(); }catch(e){} }
+    }, 800);
+  } else {
+    // Same song, but if viewer is too far behind (more than 5 sec), snap to live
+    if(media && Math.abs(media.currentTime - livePos) > 5){
+      try{ media.currentTime = livePos; }catch(e){}
+    }
+  }
+}
+try{
+  if(window.firebase && firebase.database){
+    // FIRST TIME ENTER - Get live once immediately, don't start from 1
+    firebase.database().ref('hitv_now_playing').once('value').then((snap)=>{ joinLive(snap.val()); });
+    // Then keep listening live
+    firebase.database().ref('hitv_now_playing').on('value', (snap)=>{ joinLive(snap.val()); });
+  }
+}catch(e){}
   
 </script>
 </body>
