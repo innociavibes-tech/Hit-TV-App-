@@ -8,8 +8,6 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
 body{background:#000;display:flex;justify-content:center;min-height:100vh}
 .app{width:390px;max-width:430px;width:100%;height:100vh;height:100dvh;background:#0a0a0a;color:#fff;margin:0 auto;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;position:relative}
-.app.white{background:#f5f5f5;color:#111}.app.white .card,.app.white .box,.app.white .gbtn,.app.white .bottom{background:#fff;color:#111;border-color:#ddd}.app.white input{background:#eee;color:#111}.app.white .sheet{background:#fff;color:#111}
-.app.darkblue{background:#000a2e;color:#fff}.app.rotate{transform:rotate(90deg);transform-origin:center;width:100vh;height:100vw;max-width:none}
 .top{display:flex;justify-content:space-between;align-items:center;padding:12px 14px}.top b{font-size:17px}.top b span{color:#1a2fd6}
 .setBtn{background:#111;border:1px solid #333;color:#fff;padding:7px 14px;border-radius:20px;font-size:13px;cursor:pointer}
 .head2{display:flex;justify-content:space-between;align-items:center;padding:4px 14px 10px;gap:8px}.head2 b{font-size:14px;white-space:nowrap}
@@ -32,8 +30,7 @@ input{width:100%;background:#1a1a1a;border:1px solid #2a2a2a;color:#fff;padding:
 .modal{position:absolute;inset:0;background:rgba(0,0,0,.7);display:none;align-items:flex-end;z-index:200}.modal.open{display:flex}.sheet{background:#161616;width:100%;border-radius:20px 20px 0 0;padding:20px;padding-bottom:30px}.srow{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #222;font-size:14px;font-weight:600}
 .tongo{position:relative;width:52px;height:28px;background:#333;border-radius:20px;cursor:pointer;flex-shrink:0}.tongo:after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;background:#fff;border-radius:50%;transition:.3s}.tongo.on{background:#0033cc}.tongo.on:after{left:27px}
 .aItem{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:11px;margin-top:8px;display:flex;justify-content:space-between;gap:8px;align-items:center}.aItem b{font-size:13px;display:block}.aItem p{font-size:11px;color:#888}.dlBtn{background:#00a651;color:#fff;border:none;padding:9px 12px;border-radius:8px;font-weight:800;font-size:12px;cursor:pointer;white-space:nowrap}
-/* NAME GATE - FIXED: Fully removed after Start, does NOT block tabs */
-.nameGate{position:fixed;inset:0;background:#000;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center}
+.nameGate{position:fixed;inset:0;background:#000;z-index:999;display:none;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center}
 .nameGate h1{font-size:28px}.nameGate h1 span{color:#1a2fd6}
 .nameGate p{color:#888;font-size:13px;margin:10px 0 20px}
 .nameGate input{margin-bottom:12px;text-align:center;font-size:16px;max-width:340px}
@@ -41,13 +38,11 @@ input{width:100%;background:#1a1a1a;border:1px solid #2a2a2a;color:#fff;padding:
 </style>
 </head>
 <body>
-<!-- NAME GATE - OUTSIDE APP, SO IT CANNOT BLOCK TABS AFTER -->
 <div class="nameGate" id="nameGate">
   <h1>Hit TV <span>by Inno</span></h1>
   <p>Welcome! Enter your name to start watching.<br>You will only do this once.</p>
   <input id="userNameInput" placeholder="Enter Your Name - e.g. Inno">
   <button class="sendBtn" onclick="saveUserName()">▶ Start Watching</button>
-  <p style="font-size:11px;margin-top:16px">Your name helps Admin know who is watching.</p>
 </div>
 
 <div class="app" id="app">
@@ -82,44 +77,41 @@ input{width:100%;background:#1a1a1a;border:1px solid #2a2a2a;color:#fff;padding:
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <script>
-const firebaseConfig={apiKey:"AIzaSyBT9bXCGb6WgriW1wodo6IeRKOUQ5jdCes",authDomain:"hit-tv-app-40fb9.firebaseapp.com",databaseURL:"https://hit-tv-app-40fb9-default-rtdb.firebaseio.com",projectId:"hit-tv-app-40fb9",storageBucket:"hit-tv-app-40fb9.firebasestorage.app",messagingSenderId:"740828744097",appId:"1:740828744097:web:49104b3522d02de64ce3e0"};
-firebase.initializeApp(firebaseConfig); const db=firebase.database();
+// ===== YOUR EXACT CONFIG - FROM YOU =====
+const firebaseConfig = {
+  apiKey: "AIzaSyBT9bXCGb6WgriW1wodo6IeRKOUQ5jdCes",
+  authDomain: "hit-tv-app-40fb9.firebaseapp.com",
+  databaseURL: "https://hit-tv-app-40fb9-default-rtdb.firebaseio.com",
+  projectId: "hit-tv-app-40fb9",
+  storageBucket: "hit-tv-app-40fb9.firebasestorage.app",
+  messagingSenderId: "740828744097",
+  appId: "1:740828744097:web:49104b3522d02de64ce3e0"
+};
+try{ firebase.initializeApp(firebaseConfig); }catch(e){ console.log('Firebase already init'); }
+const db = firebase.database();
+
 let soundOn = localStorage.getItem('hitTV_sound')==='on';
 let myName = localStorage.getItem('hitTV_userName') || '';
 let myId = localStorage.getItem('hitTV_userId') || ('user_'+Date.now()+'_'+Math.floor(Math.random()*9999));
 localStorage.setItem('hitTV_userId', myId);
 let lineup=[], currentUrl="", currentItem=null, override=null, timer=null, currentVideo=null, liveStartedAt=0, programsCache={}, isProgramPlaying=false;
 
-// ===== NAME GATE - FIXED, RUNS AFTER FIREBASE =====
 function checkNameGate(){
   let gate=document.getElementById('nameGate');
-  if(myName){
-    gate.style.display='none';
-    document.getElementById('welcomeName').innerText='Hi '+myName+' • LIVE';
-    let rn=document.getElementById('reqName'); if(rn) rn.value=myName;
-    reportSeen();
-  } else {
-    gate.style.display='flex';
-  }
+  if(myName){ gate.style.display='none'; document.getElementById('welcomeName').innerText='Hi '+myName+' • LIVE'; let rn=document.getElementById('reqName'); if(rn) rn.value=myName; }
+  else { gate.style.display='flex'; }
 }
 function saveUserName(){
   let n=document.getElementById('userNameInput').value.trim();
-  if(!n) return alert('Please enter your name to start watching');
-  myName=n;
-  localStorage.setItem('hitTV_userName', n);
-  db.ref('users/'+myId).set({name:n, device: navigator.userAgent.includes('Android')?'Android':navigator.userAgent.includes('iPhone')?'iPhone':'Phone/Web', lastSeen: Date.now()});
-  // FULLY REMOVE GATE - SO TABS WORK
-  let gate=document.getElementById('nameGate');
-  gate.style.display='none';
-  gate.remove();
+  if(!n) return alert('Please enter your name');
+  myName=n; localStorage.setItem('hitTV_userName', n);
+  try{ db.ref('users/'+myId).set({name:n, device:'Phone', lastSeen: Date.now()}); }catch(e){}
+  let gate=document.getElementById('nameGate'); gate.style.display='none';
   document.getElementById('welcomeName').innerText='Hi '+n+' • LIVE';
   document.getElementById('reqName').value=n;
   forceSound();
 }
-function forceSound(){ soundOn=true; localStorage.setItem('hitTV_sound','on'); let s=document.getElementById('soundStatus'); if(s) s.innerText='ON'; let v=document.querySelector('#playerHolder video'); if(v){v.muted=false;v.volume=1;v.play().catch(()=>{});} let ifr=document.querySelector('#playerHolder iframe'); if(ifr){ifr.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}','*');ifr.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[100]}','*');ifr.contentWindow.postMessage('{"event":"command","func":"play","args":""}','*');} }
-document.addEventListener('click',()=>{if(!soundOn) forceSound();}); document.addEventListener('touchstart',()=>{if(!soundOn) forceSound();},{passive:true});
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&soundOn) forceSound();}); window.addEventListener('focus',()=>{if(soundOn) forceSound();});
-
+function forceSound(){ soundOn=true; localStorage.setItem('hitTV_sound','on'); let s=document.getElementById('soundStatus'); if(s) s.innerText='ON'; let v=document.querySelector('#playerHolder video'); if(v){v.muted=false;v.volume=1;v.play().catch(()=>{});} let ifr=document.querySelector('#playerHolder iframe'); if(ifr){ try{ifr.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}','*');ifr.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[100]}','*');}catch(e){} } }
 function showTab(id,el){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));document.getElementById('page-'+id).classList.add('active');el.classList.add('active');}
 function openSettings(){document.getElementById('settingsModal').classList.add('open')}
 function closeSettings(){document.getElementById('settingsModal').classList.remove('open')}
@@ -149,14 +141,11 @@ function playItem(item, offsetSeconds, isProg){
     timer=setTimeout(()=>{ if(isProg){ isProgramPlaying=false; currentUrl=""; checkProgram(); } else { joinLive(); } }, remaining*1000);
     if(soundOn) setTimeout(forceSound,800);
   } else {
-    h.innerHTML=`<video src="${item.url}" autoplay playsinline preload="auto" ${soundOn?'':'muted'}></video>`; currentVideo=h.querySelector('video'); currentVideo.currentTime=offsetSeconds; if(soundOn){currentVideo.muted=false;currentVideo.volume=1;} currentVideo.play().catch(()=>{}); currentVideo.onended=()=>{ if(isProg){ isProgramPlaying=false; currentUrl=""; checkProgram(); } else joinLive(); }; timer=setTimeout(()=>{ if(isProg){ isProgramPlaying=false; currentUrl=""; checkProgram(); } else joinLive(); }, remaining*1000);
+    h.innerHTML=`<video src="${item.url}" autoplay playsinline preload="auto" ${soundOn?'':'muted'}></video>`; currentVideo=h.querySelector('video'); try{currentVideo.currentTime=offsetSeconds;}catch(e){} if(soundOn){currentVideo.muted=false;currentVideo.volume=1;} currentVideo.play().catch(()=>{}); currentVideo.onended=()=>{ if(isProg){ isProgramPlaying=false; currentUrl=""; checkProgram(); } else joinLive(); }; timer=setTimeout(()=>{ if(isProg){ isProgramPlaying=false; currentUrl=""; checkProgram(); } else joinLive(); }, remaining*1000);
   }
   if(!isProg){
     let idx=lineup.findIndex(x=>x.url===item.url); if(idx>=0){ let nxt=lineup[(idx+1)%lineup.length]; if(nxt){ document.getElementById('nextTitle').innerText=nxt.title; document.getElementById('artistNext').innerText=nxt.title; } }
-  } else {
-    document.getElementById('nextTitle').innerText='Back to Lineup after Program';
-    document.getElementById('artistNext').innerText='Back to Lineup';
-  }
+  } else { document.getElementById('nextTitle').innerText='Back to Lineup after Program'; document.getElementById('artistNext').innerText='Back to Lineup'; }
 }
 function checkProgram(){
   if(override) return;
@@ -180,13 +169,10 @@ function downloadCurrent(type){
   let yt=getYTId(currentUrl);
   if(yt){ window.open('https://www.youtube.com/watch?v='+yt, '_blank'); return; }
   let a=document.createElement('a'); a.href=currentUrl; a.download=currentItem.title+' - Hit TV by Inno'; a.target='_blank'; document.body.appendChild(a); a.click(); a.remove();
-  alert(type==='video'?'Downloading Video to your phone...':'Downloading Audio to your phone...');
 }
 function downloadVideo(){ downloadCurrent('video'); }
 function downloadAudio(){ downloadCurrent('audio'); }
-function downloadAudioFile(url,title){
-  let a=document.createElement('a'); a.href=url; a.download=title+' - Hit TV'; a.target='_blank'; document.body.appendChild(a); a.click(); a.remove();
-}
+function downloadAudioFile(url,title){ let a=document.createElement('a'); a.href=url; a.download=title+' - Hit TV'; a.target='_blank'; document.body.appendChild(a); a.click(); a.remove(); }
 function toggleMute(){ if(soundOn){soundOn=false;localStorage.setItem('hitTV_sound','off');document.getElementById('soundStatus').innerText='OFF';} else {forceSound();} let v=document.querySelector('#playerHolder video'); if(v) v.muted=!soundOn; }
 function pip(){if(currentVideo&&document.pictureInPictureEnabled){currentVideo.requestPictureInPicture()} else alert('PiP for MP4 only.');}
 function goFullscreen(){let el=document.querySelector('.liveBox'); if(el.requestFullscreen) el.requestFullscreen();}
@@ -202,4 +188,13 @@ function sendReq(){
   db.ref('requests').push({name:n, song:s, phone:ph, link:l, time:Date.now()});
   document.getElementById('reqName').value=myName||''; document.getElementById('reqSong').value=''; document.getElementById('reqPhone').value=''; document.getElementById('reqLink').value='';
   document.getElementById('reqMsg').innerText='Request submitted to Admin! ✅';
-  setTimeout(()=>{document.getElementById('
+  setTimeout(()=>{document.getElementById('reqMsg').innerText='';},3000);
+}
+function setTicker(text){ let el=document.getElementById('tickerText'); el.style.animation='none'; el.innerText=''; void el.offsetWidth; el.innerText=text; el.style.animation=''; }
+if(soundOn){document.getElementById('soundStatus').innerText='ON';}
+function reportSeen(){ if(!myName) return; try{ db.ref('users/'+myId).set({name:myName, device:'Phone', lastSeen: Date.now()}); }catch(e){} }
+setInterval(reportSeen, 60000);
+db.ref('lineup').on('value',s=>{ let v=s.val()||{}; lineup=Object.keys(v).map(k=>({...v[k],_key:k})); lineup.sort((a,b)=>(a.order||0)-(b.order||0)); if(lineup.length&&liveStartedAt&&!override) checkProgram(); if(lineup.length&&liveStartedAt&&!override&&!isProgramPlaying) joinLive(); });
+db.ref('liveState').on('value',s=>{ let d=s.val(); if(d&&d.startedAt){ liveStartedAt=d.startedAt; currentUrl=""; if(lineup.length&&!override) checkProgram(); } });
+db.ref('liveOverride').on('value',s=>{ let d=s.val(); if(d&&d.url){override=d;playItem(d,0,false)} else {override=null; if(lineup.length) checkProgram();} });
+db.ref('control').on('value',s=>{ let c=s.val()||{}; if(c.action==='restart'){ db.ref('liveState').set({startedAt:Date.now()}); db.ref('control').set({a
