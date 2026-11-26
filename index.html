@@ -86,6 +86,7 @@ function toggleDarkBlue(){let a=document.getElementById('app');a.classList.remov
 function getYTId(u){let m=u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);return m?m[1]:null}
 function joinLive(){
   if(!lineup.length||!liveStartedAt) return;
+let programsCache={}, programPlaying=null, programTimeout=null, isProgramPlaying=false;
   let total=lineup.reduce((s,x)=>s+(x.duration||240),0); if(total<=0) return;
   let elapsed=Math.floor((Date.now()-liveStartedAt)/1000); let pos=elapsed%total; let acc=0;
   for(let i=0;i<lineup.length;i++){ let dur=lineup[i].duration||240; if(pos<acc+dur){ playItem(lineup[i], pos-acc); return; } acc+=dur; }
