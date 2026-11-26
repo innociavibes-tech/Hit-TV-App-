@@ -125,9 +125,9 @@ let programsCache={}, programPlaying=null, programTimeout=null, isProgramPlaying
   let elapsed=Math.floor((Date.now()-liveStartedAt)/1000); let pos=elapsed%total; let acc=0;
   for(let i=0;i<lineup.length;i++){ let dur=lineup[i].duration||240; if(pos<acc+dur){ playItem(lineup[i], pos-acc); return; } acc+=dur; }
 }
-function playItem(item, offsetSeconds){
-  offsetSeconds=offsetSeconds||0; if(item.url===currentUrl && offsetSeconds===0) return;
-  currentUrl=item.url; currentItem=item;
+function playItem(item, offsetSeconds, isProg){
+  offsetSeconds=offsetSeconds||0; if(!isProg && isProgramPlaying) return;
+  if(item.url===currentUrl && offsetSeconds===0) return;
   document.getElementById('npTitle').innerText=item.title; document.getElementById('artistNow').innerText=item.title; document.getElementById('audioNow')?document.getElementById('audioNow').innerText=item.title:null;
   document.getElementById('noSignal').style.display='none';
   let h=document.getElementById('playerHolder'); let yt=getYTId(item.url); clearTimeout(timer);
