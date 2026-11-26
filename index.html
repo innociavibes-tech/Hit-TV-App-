@@ -187,7 +187,7 @@ db.ref('liveState').on('value',s=>{ let d=s.val(); if(d&&d.startedAt){ liveStart
 db.ref('liveOverride').on('value',s=>{ let d=s.val(); if(d&&d.url){override=d;playItem(d,0)} else {override=null; if(lineup.length) joinLive();} });
 db.ref('control').on('value',s=>{ let c=s.val()||{}; if(c.action==='restart'){ db.ref('liveState').set({startedAt:Date.now()}); db.ref('control').set({action:'none'}) } });
 db.ref('ticker').on('value',s=>{ let t=s.val(); if(t&&t.text) setTicker(t.text); });
-  db.ref('programs').on('value',s=>{ programsCache=s.val()||{}; checkProgram(); });
+db.ref('programs').on('value',s=>{ programsCache=s.val()||{}; });
 // ===== AUDIO STREAMS FROM ADMIN - DOWNLOADABLE =====
 db.ref('audioStreams').on('value',s=>{
   let v=s.val()||{}; let html='';
