@@ -158,6 +158,46 @@ db.ref('audioStreams').on('value',s=>{
   Object.keys(v).forEach(k=>{ let a=v[k]; html+=`<div class="aItem"><div><b>${a.title}</b><p>${a.detail||'Audio'}</p></div><button class="dlBtn" onclick="downloadAudioFile('${a.url}','${a.title}')">Download</button></div>`; });
   document.getElementById('audioList').innerHTML=html||'No audio streams yet. Admin will upload.';
 });
+  <script>
+// ===== SET PROGRAM - FORCE CODE - PASTE AT BOTTOM ONLY =====
+let _progList = {};
+let _progPlaying = false;
+let _origJoinLive = joinLive;
+function _getEAT(){
+  return new Date(new Date().toLocaleString("en-US",{timeZone:"Africa/Kampala"}));
+}
+function _checkProg(){
+  if(_progPlaying) return;
+  if(!lineup.length) return;
+  let now = _getEAT();
+  let hh = String(now.getHours()).padStart(2,'0');
+  let mm = String(now.getMinutes()).padStart(2,'0');
+  let hm = hh + ":" + mm;
+  let today = now.getFullYear()+"-"+now.getMonth()+"-"+now.getDate();
+  Object.keys(_progList).forEach(k=>{
+    let p = _progList[k];
+    if(!p || !p.startTime || !p.url) return;
+    if(p.startTime !== hm) return;
+    let playedKey = "progPlayed_"+k+"_"+today;
+    if(localStorage.getItem(playedKey)==="yes") return;
+    localStorage.setItem(playedKey,"yes");
+    _progPlaying = true;
+    if(timer) clearTimeout(timer);
+    currentUrl = "";
+    playItem({title:p.title||"Program", url:p.url, duration:p.duration||240}, 0);
+  });
+}
+joinLive = function(){
+  if(_progPlaying){
+    _progPlaying = false;
+    currentUrl = "";
+    _origJoinLive();
+    return;
+  }
+  _origJoinLive();
+};
+db.ref('programs').on('value', s=>{ _progList = s.val()||{}; _checkProg(); });
+setInterval(_checkProg, 10000);
 </script>
 </body>
                                                                                                                                                                                                                                                                       </html>
