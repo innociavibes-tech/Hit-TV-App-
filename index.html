@@ -158,7 +158,6 @@ db.ref('audioStreams').on('value',s=>{
   Object.keys(v).forEach(k=>{ let a=v[k]; html+=`<div class="aItem"><div><b>${a.title}</b><p>${a.detail||'Audio'}</p></div><button class="dlBtn" onclick="downloadAudioFile('${a.url}','${a.title}')">Download</button></div>`; });
   document.getElementById('audioList').innerHTML=html||'No audio streams yet. Admin will upload.';
 });
-  <script>
 // ===== SET PROGRAM - FORCE CODE - PASTE AT BOTTOM ONLY =====
 let _progList = {};
 let _progPlaying = false;
