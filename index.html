@@ -84,50 +84,15 @@ function toggleRotate(){document.getElementById('app').classList.toggle('rotate'
 function toggleWhite(){let a=document.getElementById('app');a.classList.remove('darkblue');document.getElementById('tongoDarkBlue').classList.remove('on');a.classList.toggle('white');document.getElementById('tongoWhite').classList.toggle('on');}
 function toggleDarkBlue(){let a=document.getElementById('app');a.classList.remove('white');document.getElementById('tongoWhite').classList.remove('on');a.classList.toggle('darkblue');document.getElementById('tongoDarkBlue').classList.toggle('on');}
 function getYTId(u){let m=u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);return m?m[1]:null}
-function getEATNow(){ return new Date(new Date().toLocaleString("en-US",{timeZone:"Africa/Kampala"})); }
-function checkProgram(){
-  if(programPlaying) return;
-  let eat=getEATNow();
-  let eatMins=eat.getHours()*60+eat.getMinutes();
-  let eatSecs=eat.getSeconds();
-  let found=null;
-  Object.keys(programsCache).forEach(k=>{
-    let p=programsCache[k]; if(!p.startTime) return;
-    let parts=p.startTime.split(':');
-    let startMins=parseInt(parts[0])*60+parseInt(parts[1]);
-    let durSecs=p.duration||1800;
-    let durMins=Math.ceil(durSecs/60);
-    let endMins=startMins+durMins;
-    let isActive=false; let offset=0;
-    if(endMins<=1440){
-      isActive=eatMins>=startMins && eatMins<endMins;
-      offset=(eatMins-startMins)*60+eatSecs;
-    } else {
-      if(eatMins>=startMins){ isActive=true; offset=(eatMins-startMins)*60+eatSecs; }
-      else if(eatMins<endMins-1440){ isActive=true; offset=(1440-startMins+eatMins)*60+eatSecs; }
-    }
-    if(isActive && offset<durSecs) found={key:k, prog:p, offset:offset, remaining:durSecs-offset};
-  });
-  if(found){
-    programPlaying=found; isProgramPlaying=true;
-    if(timer) clearTimeout(timer);
-    playItem(found.prog, found.offset, true);
-    clearTimeout(programTimeout);
-    programTimeout=setTimeout(()=>{ programPlaying=null; isProgramPlaying=false; currentUrl=""; if(lineup.length && liveStartedAt) joinLive(); }, found.remaining*1000);
-  } else {
-    if(lineup.length && liveStartedAt && !override) joinLive();
-  }
-  }
-  function joinLive(){
+function joinLive(){
   if(!lineup.length||!liveStartedAt) return;
-let programsCache={}, programPlaying=null, programTimeout=null, isProgramPlaying=false;
   let total=lineup.reduce((s,x)=>s+(x.duration||240),0); if(total<=0) return;
   let elapsed=Math.floor((Date.now()-liveStartedAt)/1000); let pos=elapsed%total; let acc=0;
   for(let i=0;i<lineup.length;i++){ let dur=lineup[i].duration||240; if(pos<acc+dur){ playItem(lineup[i], pos-acc); return; } acc+=dur; }
 }
-function playItem(item, offsetSeconds, isProg){
-  offsetSeconds=offsetSeconds||0; if(!isProg && isProgramPlaying) return;
-  if(item.url===currentUrl && offsetSeconds===0) return;
+function playItem(item, offsetSeconds){
+  offsetSeconds=offsetSeconds||0; if(item.url===currentUrl && offsetSeconds===0) return;
+  currentUrl=item.url; currentItem=item;
   document.getElementById('npTitle').innerText=item.title; document.getElementById('artistNow').innerText=item.title; document.getElementById('audioNow')?document.getElementById('audioNow').innerText=item.title:null;
   document.getElementById('noSignal').style.display='none';
   let h=document.getElementById('playerHolder'); let yt=getYTId(item.url); clearTimeout(timer);
