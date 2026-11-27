@@ -2,165 +2,174 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hit TV ADMIN V4 - by Inno</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Hit TV by Inno</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
-body{background:#0a0a0a;color:#fff}
-.top{background:#0033cc;padding:16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
-.top b{font-size:18px}.top span{font-size:12px;opacity:.8}
-.wrap{max-width:900px;margin:0 auto;padding:14px}
-.tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px}
-.tab{background:#1a1a1a;border:1px solid #333;padding:10px 14px;border-radius:20px;white-space:nowrap;cursor:pointer;font-size:13px;font-weight:700}
-.tab.active{background:#0033cc;border-color:#0033cc}
-.card{background:#161616;border:1px solid #222;border-radius:14px;padding:16px;margin-bottom:14px}
-.card h3{margin-bottom:12px;font-size:16px}
-input,select{width:100%;background:#1e1e1e;border:1px solid #333;color:#fff;padding:12px;border-radius:10px;margin-bottom:10px;outline:none}
-button{border:none;padding:12px 16px;border-radius:10px;font-weight:800;cursor:pointer}
-.btn-blue{background:#0033cc;color:#fff;width:100%}.btn-green{background:#00a651;color:#fff}.btn-red{background:#e60000;color:#fff}.btn-grey{background:#333;color:#fff}.btn-orange{background:#ff6600;color:#fff}
-.row{display:flex;gap:8px}.row button{flex:1}
-.item{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:10px;padding:12px;margin-top:10px}
-.item b{font-size:14px;display:block}.item p{font-size:12px;color:#aaa;margin-top:4px;word-break:break-all}
-.stat{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:14px}
-.stat div{background:#161616;border:1px solid #222;border-radius:12px;padding:14px;text-align:center}
-.stat b{font-size:20px;display:block;color:#00ff88}.stat small{color:#888;font-size:11px}
-.page{display:none}.page.active{display:block}
-.badge{background:#00a651;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:800}
-video{width:100%;border-radius:12px;background:#000}
+body{background:#000;display:flex;justify-content:center;min-height:100vh}
+.app{width:100%;height:100vh;height:100dvh;background:#0a0a0a;color:#fff;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;position:relative}
+.app.white{background:#f5f5f5;color:#111}.app.white .card,.app.white .box,.app.white .gbtn,.app.white .bottom{background:#fff;color:#111;border-color:#ddd}.app.white input{background:#eee;color:#111}.app.white .sheet{background:#fff;color:#111}
+.app.darkblue{background:#000a2e;color:#fff}
+.top{display:flex;justify-content:space-between;align-items:center;padding:12px 14px}.top b{font-size:17px}.top b span{color:#1a2fd6}
+.setBtn{background:#111;border:1px solid #333;color:#fff;padding:7px 14px;border-radius:20px;font-size:13px}
+.head2{display:flex;justify-content:space-between;align-items:center;padding:4px 14px 10px;gap:8px}.head2 b{font-size:14px}
+.pills{display:flex;gap:6px}.pill{background:#111;border:1px solid #333;padding:6px 10px;border-radius:20px;font-size:11px;white-space:nowrap}.pill.blue{background:#0033cc;border-color:#0033cc;font-weight:800}
+.liveBox{margin:0 12px;position:relative;width:calc(100% - 24px);aspect-ratio:16/11;background:#000;border-radius:12px 12px 0 0;overflow:hidden;border:1px solid #222;border-bottom:none}
+#playerHolder{position:absolute;inset:0;overflow:hidden;background:#000}
+.yt-zoom{position:absolute;left:-12%;top:-22%;width:124%;height:144%;overflow:hidden;pointer-events:none}.yt-zoom iframe{width:100%;height:100%;border:0;pointer-events:none}
+#playerHolder video{width:100%;height:100%;object-fit:cover;pointer-events:none}
+.expand{position:absolute;top:10px;right:10px;z-index:5;background:rgba(0,0,0,.7);color:#fff;border:none;width:32px;height:32px;border-radius:50%}
+.noSignal{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:#000;color:#fff;font-weight:800;text-align:center;padding:20px;z-index:2}
+.ticker{background:#0033cc;color:#fff;overflow:hidden;white-space:nowrap;height:32px;display:flex;align-items:center;margin:0 12px;border-radius:0 0 12px 12px}
+.tickerInner{display:inline-block;white-space:nowrap;font-size:13px;font-weight:600;padding-left:100%;animation:tick 20s linear infinite}
+@keyframes tick{to{transform:translateX(-100%)}}
+.row2{display:flex;gap:10px;padding:10px 12px}.box{flex:1;background:#161616;border:1px solid #222;border-radius:10px;padding:10px}.box small{color:#888;font-size:11px}.box b{font-size:14px;display:block;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 12px}.gbtn{background:#1e1e1e;border:1px solid #2a2a2a;color:#fff;padding:13px 6px;border-radius:10px;font-weight:600;font-size:13px}
+.note{padding:10px 12px;color:#888;font-size:12px}.card{background:#111;border:1px solid #222;border-radius:12px;margin:4px 12px 12px;padding:14px}.card h3{font-size:16px;margin-bottom:10px}
+input{width:100%;background:#1a1a1a;border:1px solid #2a2a2a;color:#fff;padding:13px;border-radius:10px;outline:none}
+.sendBtn{width:100%;background:#0033cc;color:#fff;border:none;padding:13px;border-radius:10px;font-weight:800;margin-top:10px}
+.page{display:none;flex:1}.page.active{display:block}.bottom{position:sticky;bottom:0;background:#111;border-top:1px solid #222;display:flex;padding:6px 4px;z-index:100}.nav{flex:1;text-align:center;padding:8px 2px;font-size:11px;color:#888;border-radius:10px}.nav.active{background:#0033cc;color:#fff}.nav b{display:block;font-size:16px}
+.modal{position:absolute;inset:0;background:rgba(0,0,0,.7);display:none;align-items:flex-end;z-index:200}.modal.open{display:flex}.sheet{background:#161616;width:100%;border-radius:20px 20px 0 0;padding:20px;padding-bottom:30px}.srow{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #222;font-size:14px;font-weight:600}
+.tongo{position:relative;width:52px;height:28px;background:#333;border-radius:20px;flex-shrink:0}.tongo:after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;background:#fff;border-radius:50%;transition:.3s}.tongo.on{background:#0033cc}.tongo.on:after{left:27px}
+.aItem{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:11px;margin-top:8px;display:flex;justify-content:space-between;gap:8px;align-items:center}.aItem b{font-size:13px;display:block}.aItem p{font-size:11px;color:#888}.dlBtn{background:#00a651;color:#fff;border:none;padding:9px 12px;border-radius:8px;font-weight:800;font-size:12px}
+#notifBar{display:none;background:#ff6600;color:#fff;padding:10px 12px;font-size:13px;font-weight:700;text-align:center;margin:0 12px;border-radius:10px}
+#camBanner{display:none;background:#e60000;color:#fff;text-align:center;padding:8px;font-weight:800;font-size:13px;margin:0 12px;border-radius:10px}
+#adBox{display:none;margin:0 12px 10px;background:#fff;border-radius:12px;overflow:hidden;position:relative}
+#adBox img{width:100%;display:block;max-height:180px;object-fit:cover}
+#adBox span{position:absolute;top:6px;left:6px;background:#ff6600;color:#fff;font-size:10px;font-weight:800;padding:3px 8px;border-radius:10px}
+#adClose{position:absolute;top:6px;right:6px;background:#000;color:#fff;border:none;width:26px;height:26px;border-radius:50%;font-weight:800}
+#welcome{position:fixed;inset:0;background:#000;z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px}
+.wbox{width:100%;max-width:380px;text-align:center}
+.wbox h1{font-size:32px}.wbox h1 span{color:#1a2fd6}
+.wbox p{color:#888;font-size:14px;margin:10px 0 24px}
+.wbox input{background:#111;border:1px solid #333;text-align:center;font-size:16px}
+.wbox button{width:100%;background:#0033cc;color:#fff;border:none;padding:15px;border-radius:12px;font-weight:800;font-size:16px;margin-top:14px}
+.liveBox.rotated{position:fixed!important;left:0;top:0;width:100vw!important;height:100vh!important;max-width:none;margin:0;z-index:999;border-radius:0;border:none;aspect-ratio:auto}
+.liveBox.rotated #playerHolder{transform:rotate(90deg);transform-origin:center;width:100vh;height:100vw;left:50%;top:50%;margin-left:-50vh;margin-top:-50vw}
+#rotateHint{display:none;position:fixed;bottom:12px;left:50%;transform:translateX(-50%);background:#0033cc;color:#fff;padding:10px 18px;border-radius:20px;font-size:13px;font-weight:700;z-index:1001}
 </style>
 </head>
 <body>
-<div id="login" style="max-width:400px;margin:80px auto;padding:20px;text-align:center">
-<h1>Hit TV <span style="color:#0033cc">ADMIN V4</span></h1><p style="color:#888;margin:10px 0 20px">by Inno - All Fixes</p>
-<div class="card"><input type="password" id="pass" placeholder="Enter Password"><button class="btn-blue" onclick="doLogin()">LOGIN</button><p style="font-size:12px;color:#888;margin-top:10px">Password: Inno123</p></div>
+<div id="welcome"><div class="wbox"><h1>Hit TV <span>by Inno</span></h1><p>Welcome to Hit TV<br>Enter your name to start watching</p><input id="welcomeName" placeholder="Enter your name"><button onclick="saveName()">▶ Start Watching</button><p style="font-size:11px;color:#555;margin-top:16px">You will only enter once. Next time you open, you go straight to TV.</p></div></div>
+<div id="rotateHint" onclick="toggleRotate()">Tap here to go back</div>
+<div class="app" id="app">
+<div class="top"><b>Hit TV <span>by Inno</span></b><button class="setBtn" onclick="openSettings()">Settings</button></div>
+<div id="notifBar"></div><div id="camBanner">📷 CAMERA LIVE - Hit TV by Inno</div>
+<div class="page active" id="page-home">
+<div class="head2"><b id="hiName">Hi • LIVE</b><div class="pills"><span class="pill">● LIVE • 24/7</span><span class="pill blue" onclick="forceSound()">TAP FOR SOUND</span></div></div>
+<div class="liveBox" id="liveBox"><div class="noSignal" id="noSignal"></div><div id="playerHolder"></div><button class="expand" onclick="goFullscreen()">↗</button></div>
+<div class="ticker"><div class="tickerInner" id="tickerText">Welcome to Hit TV by Inno</div></div>
+<div id="adBox" onclick="openAd()"><span>SPONSORED</span><button id="adClose" onclick="event.stopPropagation();document.getElementById('adBox').style.display='none'">X</button><img id="adImg" src=""><div style="padding:8px;color:#000;font-weight:800;font-size:13px;text-align:center" id="adTitle"></div></div>
+<div class="row2"><div class="box"><small>NOW PLAYING</small><b id="npTitle">-</b></div><div class="box"><small>NEXT</small><b id="nextTitle">-</b></div></div>
+<div class="grid"><button class="gbtn" onclick="downloadVideo()">Download Video</button><button class="gbtn" onclick="downloadAudio()">Download Audio</button><button class="gbtn" onclick="pip()">Picture in Picture</button><button class="gbtn" onclick="toggleMute()">Mute / Unmute</button></div>
+<div class="note">Real TV: No pause, no forward, no seek. You join where live is now.</div>
+<div class="card"><h3>Live Comments - To Admin</h3><input id="commentInput" placeholder="Write comment..."><button class="sendBtn" onclick="sendComment()">Send Comment</button><p id="commentMsg" style="font-size:12px;color:#aaa;margin-top:8px"></p></div>
 </div>
-<div id="main" style="display:none">
-<div class="top"><div><b>Hit TV ADMIN V4</b><br><span>● LIVE CONTROL • by Inno</span></div><button onclick="location.reload()" style="background:#fff;color:#000;padding:8px 14px">Logout</button></div>
-<div class="wrap">
-<div class="tabs">
-<div class="tab active" onclick="show('dash',this)">📊 Dashboard</div>
-<div class="tab" onclick="show('live',this)">📺 Live</div>
-<div class="tab" onclick="show('lineup',this)">🎬 Lineup</div>
-<div class="tab" onclick="show('prog',this)">🗓️ Programs</div>
-<div class="tab" onclick="show('audio',this)">🎵 Audio</div>
-<div class="tab" onclick="show('notif',this)">🔔 Notify</div>
-<div class="tab" onclick="show('req',this)">⭐ Requests</div>
-<div class="tab" onclick="show('com',this)">💬 Comments</div>
-<div class="tab" onclick="show('ads',this)">📢 Ads</div>
-<div class="tab" onclick="show('others',this)">👥 Others</div>
-</div>
-<div class="page active" id="p-dash">
-<div class="stat"><div><b id="cLineup">0</b><small>Lineup</small></div><div><b id="cProg">0</b><small>Programs</small></div><div><b id="cReq">0</b><small>Requests</small></div><div><b id="cUsers">0</b><small>Users</small></div></div>
-<div class="card"><h3>🔴 NOW PLAYING</h3><p>Title: <b id="nowT">-</b></p><p>Type: <span id="nowType">-</span> • Detail: <span id="nowDetail">-</span></p><p style="margin-top:10px"><span class="badge">LIVE FOR ALL VIEWERS</span></p></div>
-<div class="card"><h3>⚡ Quick Control</h3><div class="row"><button class="btn-green" onclick="controlAction('next')">⏭ NEXT VIDEO</button><button class="btn-grey" onclick="controlAction('restart')">🔄 RESTART LIVE</button></div><br><button class="btn-red" onclick="stopAll()">⏹ STOP ALL - REMOVE FROM PLAYING - Back to Lineup</button></div>
-</div>
-<div class="page" id="p-live">
-<div class="card"><h3>📺 Instant Live - FIXED: Auto Returns to Lineup</h3>
-<input id="ovTitle" placeholder="Title - e.g. BREAKING NEWS"><input id="ovUrl" placeholder="YouTube / MP4 Link"><input id="ovDetail" placeholder="Detail - e.g. INSTANT LIVE"><label style="font-size:12px;color:#888">How long to play? Seconds - After this it auto-stops and goes back to lineup</label><input id="ovDur" type="number" value="300" placeholder="300 = 5 min">
-<button class="btn-blue" onclick="startOverride()">▶ GO LIVE NOW FOR ALL VIEWERS</button><br><br>
-<button class="btn-red" style="width:100%" onclick="stopAll()">⏹ STOP ALL - REMOVE FROM PLAYING</button>
-<p style="font-size:12px;color:#00ff88;margin-top:8px">✅ Fixed: When time finishes, it deletes itself and viewer goes back to lineup song that was playing.</p></div>
-<div class="card"><h3>📷 Camera Live - FRONT CAMERA - FIXED</h3>
-<video id="camPreview" autoplay playsinline muted style="display:none"></video>
-<p id="camStatus" style="color:#888;font-size:12px;margin:8px 0">Camera is OFF</p>
-<div class="row"><button class="btn-green" onclick="startCameraReal()">📷 OPEN FRONT CAMERA + GO LIVE</button><button class="btn-red" onclick="stopCameraReal()">⏹ STOP CAMERA</button></div>
-<p style="font-size:12px;color:#888;margin-top:8px">It will ask permission, open your FRONT camera, show preview here, and tell viewers CAMERA LIVE. To show YOUR face to viewers live, viewer needs WebRTC fix - tell me and I will add it. For now viewer sees CAMERA LIVE screen + your camera is ON here.</p></div>
-</div>
-<div class="page" id="p-lineup">
-<div class="card"><h3>➕ Add to Lineup</h3><input id="lTitle" placeholder="Title"><input id="lUrl" placeholder="YouTube / MP4 Link"><input id="lDur" type="number" placeholder="Duration seconds - e.g. 240"><input id="lOrder" type="number" placeholder="Order - 1 = first, 2 = second"><button class="btn-blue" onclick="addLineup()">+ ADD TO LINEUP</button></div>
-<div class="card"><h3>🎬 Current Lineup</h3><div id="lineupList">Loading...</div></div>
-</div>
-<div class="page" id="p-prog">
-<div class="card"><h3>➕ Add Program - EAT / Kampala Time</h3><input id="pTitle" placeholder="Program Title"><input id="pUrl" placeholder="YouTube / MP4 Link"><label style="font-size:12px;color:#888">Start Time - EAT / Kampala</label><input id="pTime" type="time" value="19:30"><input id="pDur" type="number" placeholder="Duration seconds - e.g. 300"><button class="btn-blue" onclick="addProg()">+ SCHEDULE PROGRAM</button><p style="font-size:12px;color:#00ff88;margin-top:8px">✅ FIXED: When program finishes, viewer removes it in 2 sec and goes back to lineup song. Program stays for tomorrow unless you delete it.</p></div>
-<div class="card"><h3>🗓️ Scheduled Programs</h3><div id="progList">Loading...</div></div>
-</div>
-<div class="page" id="p-audio">
-<div class="card"><h3>➕ Add Audio - Link</h3><input id="aTitle" placeholder="Audio Title"><input id="aDetail" placeholder="Detail - e.g. New Song"><input id="aUrl" placeholder="MP3 / Audio Link"><button class="btn-blue" onclick="addAudio()">+ ADD AUDIO BY LINK</button></div>
-<div class="card"><h3>📁 Upload Audio From My Phone - NEW</h3><input id="upName" placeholder="Song Name - e.g. My New Song"><label style="font-size:12px;color:#888">Pick audio file from phone</label><input id="upFile" type="file" accept="audio/*"><button class="btn-orange" style="width:100%" onclick="uploadAudioFile()">📤 UPLOAD AUDIO FROM PHONE</button><p id="upStatus" style="font-size:12px;color:#00ff88;margin-top:8px"></p><p style="font-size:12px;color:#888">It uploads to Firebase Storage, then adds to Audio Streams. Viewers can download it.</p></div>
-<div class="card"><h3>🎵 Audio List</h3><div id="audioList">Loading...</div></div>
-</div>
-<div class="page" id="p-notif">
-<div class="card"><h3>🔔 Notification Bar</h3><input id="nText" placeholder="Message for all viewers"><div class="row"><button class="btn-green" onclick="setNotif(true)">SHOW</button><button class="btn-grey" onclick="setNotif(false)">HIDE</button></div></div>
-<div class="card"><h3>📰 Ticker Text - Works</h3><input id="tickText" placeholder="Welcome to Hit TV by Inno"><button class="btn-blue" onclick="saveTicker()">SAVE TICKER</button></div>
-</div>
-<div class="page" id="p-req"><div class="card"><h3>⭐ Artist Requests</h3><div id="reqList">Loading...</div></div></div>
-<div class="page" id="p-com"><div class="card"><h3>💬 Live Comments</h3><div id="comList">Loading...</div><br><button class="btn-red" onclick="clearCom()">Clear All Comments</button></div></div>
-<div class="page" id="p-ads"><div class="card"><h3>📢 Ads Control</h3><label style="font-size:12px;color:#888">Ads ON / OFF</label><select id="adsOn"><option value="on">ON - Show Ads</option><option value="off">OFF - Hide Ads</option></select><input id="adsTitle" placeholder="Ad Title"><input id="adsImg" placeholder="Ad Image Link"><input id="adsLink" placeholder="Ad Click Link"><input id="adsTime" type="number" placeholder="Show every X seconds - e.g. 300"><button class="btn-orange" onclick="saveAds()" style="width:100%">💾 SAVE ADS</button></div></div>
-<div class="page" id="p-others"><div class="card"><h3>👥 Others - ALL Users</h3><p style="font-size:12px;color:#888;margin-bottom:10px">Shows every viewer who opened Hit TV. Name + Last Seen (EAT). Viewer needs small presence code - I will send it when you say viewer fix. For now it shows users from Comments + Requests + Presence if available.</p><div id="usersList">Loading users...</div><br><button class="btn-grey" onclick="loadUsers()">🔄 Refresh Users</button></div></div>
-</div></div>
+<div class="page" id="page-notifications"><div style="padding:14px"><h3>Notifications</h3><div id="notifPage">No new notifications.</div></div></div>
+<div class="page" id="page-audio"><div style="padding:14px"><h3>Audio Streams - From Admin</h3><p style="color:#888;font-size:13px">Download to your phone.</p><div id="audioList">Loading audios...</div></div></div>
+<div class="page" id="page-artist"><div style="padding:14px"><h3>Artist Console</h3><div class="card" style="margin:10px 0"><p>Now On Air: <b id="artistNow">-</b></p><p style="margin-top:8px">Next: <b id="artistNext">-</b></p><p style="margin-top:8px;color:#00ff88">● ON AIR</p></div>
+<div class="card" style="margin:0"><h3>Request Song / Advertisement</h3><input id="reqName" placeholder="Artist Name" style="margin-bottom:8px"><input id="reqSong" placeholder="Song Title / Advertisement" style="margin-bottom:8px"><input id="reqPhone" placeholder="Phone / WhatsApp Number - e.g. +256..." style="margin-bottom:8px"><input id="reqLink" placeholder="YouTube / MP4 Link"><button class="sendBtn" onclick="sendReq()">Submit Request</button><p id="reqMsg" style="font-size:12px;color:#00ff88;margin-top:8px"></p></div></div></div>
+<div class="bottom"><div class="nav active" onclick="showTab('home',this)"><b>⌂</b>Home</div><div class="nav" onclick="showTab('notifications',this)"><b>○</b>Notifications</div><div class="nav" onclick="showTab('audio',this)"><b>♫</b>Audio Streams</div><div class="nav" onclick="showTab('artist',this)"><b>★</b>Artist Console</div></div>
+<div class="modal" id="settingsModal" onclick="if(event.target==this)closeSettings()"><div class="sheet"><h2>Settings - Hit TV by Inno</h2><div class="srow"><span>🔄 Rotate Live Player Only</span><div class="tongo" id="tongoRotate" onclick="toggleRotate()"></div></div><div class="srow"><span>☀️ White Mode</span><div class="tongo" id="tongoWhite" onclick="toggleWhite()"></div></div><div class="srow"><span>🌙 Dark Blue Mode</span><div class="tongo" id="tongoDarkBlue" onclick="toggleDarkBlue()"></div></div><div class="srow"><span>App</span><span>Hit TV by Inno</span></div><div class="srow"><span>Sound</span><span id="soundStatus">Tap For Sound</span></div><button class="sendBtn" onclick="closeSettings()">Done</button></div></div>
+ </div>
+<script>
+let soundOn=localStorage.getItem('hitTV_sound')==='on';
+function forceSound(){soundOn=true;localStorage.setItem('hitTV_sound','on');try{document.getElementById('soundStatus').innerText='ON';}catch(e){}let v=document.querySelector('#playerHolder video');if(v){v.muted=false;v.volume=1;v.play().catch(()=>{});}let f=document.querySelector('#playerHolder iframe');if(f){f.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}','*');f.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[100]}','*');}}
+document.addEventListener('click',()=>{if(!soundOn)forceSound();});document.addEventListener('touchstart',()=>{if(!soundOn)forceSound();},{passive:true});
+</script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
 <script>
 const firebaseConfig={apiKey:"AIzaSyBT9bXCGb6WgriW1wodo6IeRKOUQ5jdCes",authDomain:"hit-tv-app-40fb9.firebaseapp.com",databaseURL:"https://hit-tv-app-40fb9-default-rtdb.firebaseio.com",projectId:"hit-tv-app-40fb9",storageBucket:"hit-tv-app-40fb9.firebasestorage.app",messagingSenderId:"740828744097",appId:"1:740828744097:web:49104b3522d02de64ce3e0"};
-firebase.initializeApp(firebaseConfig);const db=firebase.database();const storage=firebase.storage();
-let camStream=null,ovTimer=null;
-function doLogin(){if(document.getElementById('pass').value==="Inno123"){document.getElementById('login').style.display='none';document.getElementById('main').style.display='block';loadAll();ensureLiveState();}else alert('Wrong Password');}
-function show(id,el){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.getElementById('p-'+id).classList.add('active');el.classList.add('active');}
-function ensureLiveState(){db.ref('liveState').once('value',s=>{if(!s.val()||!s.val().startedAt){db.ref('liveState').set({startedAt:Date.now()});}});}
-function nowKampalaAdmin(){return new Date(new Date().toLocaleString("en-US",{timeZone:"Africa/Kampala"}));}
-function todayEATAdmin(){let n=nowKampalaAdmin();return n.getFullYear()+"-"+(n.getMonth()+1)+"-"+n.getDate();}
-function loadAll(){
- db.ref('lineup').on('value',s=>{let d=s.val()||{};document.getElementById('cLineup').innerText=Object.keys(d).length;let arr=Object.keys(d).map(k=>({...d[k],_k:k})).sort((a,b)=>(a.order||0)-(b.order||0));let h='';arr.forEach(v=>{h+=`<div class="item"><b>${v.order||0}. ${v.title||''}</b><p>${v.url||''} • ${v.duration||240}s</p><div class="row"><button class="btn-green" onclick="playLineupNow('${v._k}')">Play Now</button><button class="btn-red" onclick="db.ref('lineup/${v._k}').remove()">Delete</button></div></div>`;});document.getElementById('lineupList').innerHTML=h||'Empty';});
- db.ref('programs').on('value',s=>{let d=s.val()||{};document.getElementById('cProg').innerText=Object.keys(d).length;let h='';Object.keys(d).forEach(k=>{let v=d[k];h+=`<div class="item"><b>${v.title} - ⏰ ${v.startTime} EAT</b><p>${v.url}<br>Duration: ${v.duration}s • Last Played: ${v.lastPlayed||'Not yet'}</p><div class="row"><button class="btn-grey" onclick="resetProg('${k}')">Reset - Play Today Again</button><button class="btn-red" onclick="db.ref('programs/${k}').remove()">Delete</button></div></div>`;});document.getElementById('progList').innerHTML=h||'No programs';});
- db.ref('audioStreams').on('value',s=>{let d=s.val()||{};let h='';Object.keys(d).forEach(k=>{let v=d[k];h+=`<div class="item"><b>${v.title}</b><p>${v.detail||''}<br>${v.url}</p><button class="btn-red" onclick="db.ref('audioStreams/${k}').remove()">Delete</button></div>`;});document.getElementById('audioList').innerHTML=h||'No audios';});
- db.ref('requests').on('value',s=>{let d=s.val()||{};document.getElementById('cReq').innerText=Object.keys(d).length;let h='';Object.keys(d).reverse().forEach(k=>{let v=d[k];h+=`<div class="item"><b>${v.name||''} - ${v.song||''}</b><p>Phone: ${v.phone||''}<br>Link: ${v.link||''}</p><div class="row"><button class="btn-green" onclick="approveReq('${k}')">Approve to Lineup</button><button class="btn-red" onclick="db.ref('requests/${k}').remove()">Delete</button></div></div>`;});document.getElementById('reqList').innerHTML=h||'No requests'; loadUsers();});
- db.ref('comments').on('value',s=>{let d=s.val()||{};let h='';Object.keys(d).reverse().forEach(k=>{h+=`<div class="item"><p>${d[k].text||''}</p><button class="btn-red" onclick="db.ref('comments/${k}').remove()">Delete</button></div>`;});document.getElementById('comList').innerHTML=h||'No comments';});
- db.ref('nowPlaying').on('value',s=>{let v=s.val()||{};document.getElementById('nowT').innerText=v.title||'-';document.getElementById('nowType').innerText=v.type||'-';document.getElementById('nowDetail').innerText=v.detail||'-';});
- db.ref('ticker').on('value',s=>{let v=s.val();if(v&&v.text)document.getElementById('tickText').value=v.text;});
- db.ref('notification').on('value',s=>{let v=s.val();if(v&&v.text)document.getElementById('nText').value=v.text;});
- db.ref('presence').on('value',s=>{let d=s.val()||{};document.getElementById('cUsers').innerText=Object.keys(d).length; loadUsers();});
- db.ref('ads').on('value',s=>{let v=s.val();if(v){document.getElementById('adsOn').value=v.on||'on';document.getElementById('adsTitle').value=v.title||'';document.getElementById('adsImg').value=v.image||'';document.getElementById('adsLink').value=v.link||'';document.getElementById('adsTime').value=v.interval||'';}});
+firebase.initializeApp(firebaseConfig);const db=firebase.database();
+let lineup=[],currentUrl="",currentItem=null,override=null,timer=null,currentVideo=null,liveStartedAt=0,programs={},progPlaying=false,progKey=null,progTimer=null,blacking=false,ovTimer=null,myId="",myName="";
+let adData=null,adTimer=null;
+let blackTimeout=null;
+function getMyId(){let id=localStorage.getItem('hitTV_id');if(!id){id='u_'+Date.now()+'_'+Math.floor(Math.random()*9999);localStorage.setItem('hitTV_id',id);}return id;}
+function saveName(){let n=document.getElementById('welcomeName').value.trim();if(!n){alert('Please enter your name');return;}localStorage.setItem('hitTV_name',n);myName=n;myId=getMyId();document.getElementById('welcome').style.display='none';document.getElementById('hiName').innerText='Hi '+n+' • LIVE';sendPresence();}
+function sendPresence(){if(!myName)return;db.ref('presence/'+myId).set({name:myName,lastSeen:Date.now()});}
+setInterval(()=>{sendPresence();},30000);
+let savedName=localStorage.getItem('hitTV_name');
+if(savedName){myName=savedName;myId=getMyId();document.getElementById('welcome').style.display='none';document.getElementById('hiName').innerText='Hi '+savedName+' • LIVE';sendPresence();}
+function showTab(id,el){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));document.getElementById('page-'+id).classList.add('active');el.classList.add('active');}
+function openSettings(){document.getElementById('settingsModal').classList.add('open')}
+function closeSettings(){document.getElementById('settingsModal').classList.remove('open')}
+function toggleRotate(){let lb=document.getElementById('liveBox');let on=lb.classList.toggle('rotated');document.getElementById('tongoRotate').classList.toggle('on',on);document.getElementById('rotateHint').style.display=on?'block':'none';closeSettings();}
+function toggleWhite(){let a=document.getElementById('app');a.classList.remove('darkblue');document.getElementById('tongoDarkBlue').classList.remove('on');a.classList.toggle('white');document.getElementById('tongoWhite').classList.toggle('on');}
+function toggleDarkBlue(){let a=document.getElementById('app');a.classList.remove('white');document.getElementById('tongoWhite').classList.remove('on');a.classList.toggle('darkblue');document.getElementById('tongoDarkBlue').classList.toggle('on');}
+function getYTId(u){if(!u)return null;let m=u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);return m?m[1]:null}
+function reportNowPlaying(item,type,startedAt,duration){db.ref('nowPlaying').set({title:item.title||'Playing',detail:item.detail||'',type:type||'LINEUP',startedAt:startedAt||Date.now(),duration:duration||240});}
+function blackScreenThen(fn){clearTimeout(blackTimeout);blacking=true;let h=document.getElementById('playerHolder');h.innerHTML='';if(currentVideo){try{currentVideo.pause();}catch(e){}}currentVideo=null;clearTimeout(timer);let ns=document.getElementById('noSignal');ns.style.display='flex';ns.innerHTML='BLACK - Switching...';blackTimeout=setTimeout(()=>{ns.style.display='none';blacking=false;fn();},2000);}
+function joinLive(){if(!lineup.length||!liveStartedAt)return;if(override)return;if(progPlaying)return;if(blacking)return;let total=lineup.reduce((s,x)=>s+(x.duration||240),0);if(total<=0)return;let elapsed=Math.floor((Date.now()-liveStartedAt)/1000);let pos=elapsed%total;let acc=0;for(let i=0;i<lineup.length;i++){let dur=lineup[i].duration||240;if(pos<acc+dur){if(lineup[i].url===currentUrl&&currentItem)return;playLineupItem(lineup[i],pos-acc,liveStartedAt+acc*1000);return;}acc+=dur;}}
+function playLineupItem(item,offset,startedAt){playAny(item,offset,'LINEUP',startedAt);}
+function playAny(item,offset,type,startedAt){
+ offset=offset||0;type=type||'LINEUP';startedAt=startedAt||Date.now();
+ currentUrl=item.url;currentItem=item;
+ document.getElementById('npTitle').innerText=item.title;document.getElementById('artistNow').innerText=item.title;document.getElementById('noSignal').style.display='none';
+ let h=document.getElementById('playerHolder');let yt=getYTId(item.url);clearTimeout(timer);
+ let remaining=(item.duration||240)-offset;if(remaining<=1)remaining=1;
+ reportNowPlaying(item,type,startedAt,item.duration||240);
+ if(yt){let mp=soundOn?'0':'1';h.innerHTML='<div class="yt-zoom"><iframe src="https://www.youtube-nocookie.com/embed/'+yt+'?autoplay=1&mute='+mp+'&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&enablejsapi=1&start='+Math.floor(offset)+'" allow="autoplay"></iframe></div>';if(soundOn)setTimeout(forceSound,800);}
+ else{h.innerHTML='<video src="'+item.url+'" autoplay playsinline preload="auto" '+(soundOn?'':'muted')+'></video>';currentVideo=h.querySelector('video');currentVideo.currentTime=offset;if(soundOn){currentVideo.muted=false;currentVideo.volume=1;}currentVideo.play().catch(()=>{});}
+ if(type==='LINEUP'){timer=setTimeout(()=>{currentUrl="";currentItem=null;blackScreenThen(()=>{joinLive();});},remaining*1000);}
+ let idx=lineup.findIndex(x=>x.url===item.url);if(idx>=0){let nxt=lineup[(idx+1)%lineup.length];if(nxt){document.getElementById('nextTitle').innerText=nxt.title;document.getElementById('artistNext').innerText=nxt.title;}}
 }
-function loadUsers(){
- db.ref('presence').once('value',s=>{
-  let p=s.val()||{}; let h='';
-  Object.keys(p).forEach(k=>{let u=p[k];let date=new Date(u.lastSeen||Date.now());let eat=date.toLocaleString('en-GB',{timeZone:'Africa/Kampala'});h+=`<div class="item"><b>👤 ${u.name||'Viewer '+k.slice(0,6)}</b><p>Last Seen (EAT): ${eat}<br>ID: ${k}</p></div>`;});
-  db.ref('requests').once('value',rs=>{let r=rs.val()||{};Object.keys(r).forEach(k=>{let v=r[k];h+=`<div class="item"><b>⭐ ${v.name||''} (From Request)</b><p>Song: ${v.song||''} • Phone: ${v.phone||''}</p></div>`;});document.getElementById('usersList').innerHTML=h||'No users yet - Viewers need to open app with new viewer code for presence to show.';});
- });
+function stopAllAndBack(){
+ progPlaying=false;progKey=null;override=null;
+ if(ovTimer)clearTimeout(ovTimer);if(progTimer)clearTimeout(progTimer);if(timer)clearTimeout(timer);
+ currentUrl="";currentItem=null;
 }
-function addLineup(){let t=document.getElementById('lTitle').value,u=document.getElementById('lUrl').value,d=parseInt(document.getElementById('lDur').value)||240,o=parseInt(document.getElementById('lOrder').value)||0;if(!t||!u)return alert('Fill Title + Link');db.ref('lineup').push({title:t,url:u,duration:d,order:o});alert('Added!');}
-function playLineupNow(k){db.ref('lineup/'+k).once('value',s=>{let v=s.val();let dur=parseInt(v.duration)||240;db.ref('liveOverride').set({title:v.title,detail:'INSTANT LIVE',url:v.url,startedAt:Date.now(),duration:dur,endsAt:Date.now()+dur*1000});alert('Playing NOW! Will auto-return after '+dur+'s');});}
-function startOverride(){let t=document.getElementById('ovTitle').value,u=document.getElementById('ovUrl').value,det=document.getElementById('ovDetail').value,dur=parseInt(document.getElementById('ovDur').value)||300;if(!u)return alert('Paste Link');if(ovTimer)clearTimeout(ovTimer);db.ref('liveOverride').set({title:t||'LIVE',detail:det||'INSTANT LIVE',url:u,startedAt:Date.now(),duration:dur,endsAt:Date.now()+dur*1000});ovTimer=setTimeout(()=>{stopAll();},dur*1000);alert('LIVE STARTED! Will auto-stop in '+dur+'s and go back to lineup.');}
-function stopAll(){if(ovTimer)clearTimeout(ovTimer);stopCameraOnly();db.ref('liveOverride').remove();alert('STOPPED ALL - Removed from playing - Back to Lineup song');}
-function stopCameraOnly(){if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}let v=document.getElementById('camPreview');if(v)v.style.display='none';let st=document.getElementById('camStatus');if(st)st.innerText='Camera is OFF';}
-function startCamera(){db.ref('liveOverride').set({type:'camera',startedAt:Date.now()});}
-async function startCameraReal(){
- try{
-  camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:true});
-  let v=document.getElementById('camPreview');v.style.display='block';v.srcObject=camStream;
-  document.getElementById('camStatus').innerText='✅ FRONT CAMERA ON - You are LIVE';
-  db.ref('liveOverride').set({type:'camera',startedAt:Date.now()});
-  alert('FRONT CAMERA OPEN + GO LIVE!');
- }catch(e){alert('Camera failed: '+e.message+' - Allow camera permission in browser');}
+function playOverride(){
+ if(!override)return;
+ document.getElementById('camBanner').style.display=override.type==='camera'?'block':'none';
+ if(override.type==='camera'){document.getElementById('npTitle').innerText='CAMERA LIVE - Hit TV by Inno';document.getElementById('artistNow').innerText='CAMERA LIVE';document.getElementById('noSignal').style.display='none';document.getElementById('playerHolder').innerHTML='<div style="width:100%;height:100%;background:#111;display:flex;align-items:center;justify-content:center;text-align:center"><div><div style="font-size:40px">📷</div><b>CAMERA LIVE</b><p style="font-size:13px;color:#aaa">Hit TV by Inno is live with camera</p></div></div>';reportNowPlaying({title:'CAMERA LIVE - Hit TV by Inno',detail:'CAMERA LIVE'},'CAMERA',override.startedAt||Date.now(),3600);return;}
+ let startedAt=override.startedAt||Date.now();let elapsed=Math.floor((Date.now()-startedAt)/1000);
+ let dur=parseInt(override.duration)||300;
+ if(elapsed>=dur){db.ref('liveOverride').remove();stopAllAndBack();blackScreenThen(()=>{joinLive();});return;}
+ if(ovTimer)clearTimeout(ovTimer);
+ ovTimer=setTimeout(()=>{db.ref('liveOverride').remove();stopAllAndBack();blackScreenThen(()=>{joinLive();});},(dur-elapsed)*1000);
+ playAny({title:override.title,detail:override.detail||'INSTANT LIVE',url:override.url,duration:dur},elapsed,'INSTANT LIVE',startedAt);
 }
-function stopCameraReal(){stopCameraOnly();db.ref('liveOverride').remove();}
-function addProg(){let t=document.getElementById('pTitle').value,u=document.getElementById('pUrl').value,tm=document.getElementById('pTime').value,d=parseInt(document.getElementById('pDur').value)||300;if(!t||!u||!tm)return alert('Fill Title + Link + Time');db.ref('programs').push({title:t,url:u,startTime:tm,duration:d,lastPlayed:""});alert('Program Scheduled for '+tm+' EAT! Will play every day.');}
-function resetProg(k){db.ref('programs/'+k).update({lastPlayed:""});alert('Reset! Can play again today.');}
-function addAudio(){let t=document.getElementById('aTitle').value,det=document.getElementById('aDetail').value,u=document.getElementById('aUrl').value;if(!t||!u)return alert('Fill Title + Link');db.ref('audioStreams').push({title:t,detail:det,url:u});alert('Audio Added!');}
-async function uploadAudioFile(){
- let f=document.getElementById('upFile').files[0];let name=document.getElementById('upName').value.trim()||(f?f.name:'Song');
- if(!f)return alert('Pick a file from your phone first');
- document.getElementById('upStatus').innerText='Uploading... wait...';
- try{
-  let ref=storage.ref('audios/'+Date.now()+'_'+f.name);
-  await ref.put(f); let url=await ref.getDownloadURL();
-  db.ref('audioStreams').push({title:name,detail:'Uploaded from Admin Phone',url:url});
-  document.getElementById('upStatus').innerText='✅ Uploaded! '+name+' added to Audio Streams.';
-  document.getElementById('upFile').value='';document.getElementById('upName').value='';
- }catch(e){document.getElementById('upStatus').innerText='Upload failed: '+e.message;}
+function nowKampala(){return new Date(new Date().toLocaleString("en-US",{timeZone:"Africa/Kampala"}));}
+function todayEAT(){let n=nowKampala();return n.getFullYear()+"-"+(n.getMonth()+1)+"-"+n.getDate();}
+function playProgram(p,key){
+ if(progPlaying&&progKey===key)return false;
+ let now=nowKampala();let dur=parseInt(p.duration)||300;let a=(p.startTime||"00:00").split(":");let startMin=parseInt(a[0])*60+parseInt(a[1]);let nowMin=now.getHours()*60+now.getMinutes();let offset=(nowMin-startMin)*60+now.getSeconds();
+ if(offset<0)offset=0;if(offset>=dur)return false;
+ if(currentVideo){try{currentVideo.pause();}catch(e){}}currentVideo=null;clearTimeout(timer);if(progTimer)clearTimeout(progTimer);if(ovTimer)clearTimeout(ovTimer);
+ progPlaying=true;progKey=key;document.getElementById('camBanner').style.display='none';document.getElementById('npTitle').innerText='PROGRAM: '+p.title;document.getElementById('artistNow').innerText='PROGRAM: '+p.title;
+ let startedAt=Date.now()-offset*1000;reportNowPlaying({title:'PROGRAM: '+p.title,detail:p.startTime+' • Program'},'PROGRAM',startedAt,dur);
+ let h=document.getElementById('playerHolder');let yt=getYTId(p.url);document.getElementById('noSignal').style.display='none';
+ if(yt){let mp=soundOn?'0':'1';h.innerHTML='<div class="yt-zoom"><iframe src="https://www.youtube-nocookie.com/embed/'+yt+'?autoplay=1&mute='+mp+'&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&enablejsapi=1&start='+Math.floor(offset)+'" allow="autoplay"></iframe></div>';if(soundOn)setTimeout(forceSound,800);}
+ else{h.innerHTML='<video src="'+p.url+'" autoplay playsinline preload="auto" '+(soundOn?'':'muted')+'></video>';currentVideo=h.querySelector('video');currentVideo.currentTime=offset;if(soundOn){currentVideo.muted=false;currentVideo.volume=1;}currentVideo.play().catch(()=>{});}
+ currentUrl=p.url;currentItem={title:p.title,url:p.url};
+ progTimer=setTimeout(()=>{progPlaying=false;progKey=null;currentUrl="";currentItem=null;db.ref('programs/'+key).update({lastPlayed:todayEAT()});blackScreenThen(()=>{joinLive();});},(dur-offset)*1000);return true;
 }
-function setNotif(on){let txt=document.getElementById('nText').value;if(on){db.ref('notification').set({text:txt});}else{db.ref('notification').remove();}alert(on?'Notification SHOWN':'Notification HIDDEN');}
-function saveTicker(){db.ref('ticker').set({text:document.getElementById('tickText').value});alert('Ticker Saved!');}
-function controlAction(a){db.ref('control').set({action:a,at:Date.now()});alert(a==='next'?'Next Video!':'Restarting Live...');setTimeout(()=>{db.ref('control').remove();},2000);}
-function approveReq(k){db.ref('requests/'+k).once('value',s=>{let v=s.val();if(v.link)db.ref('lineup').push({title:(v.name||'')+' - '+(v.song||''),url:v.link,duration:240,order:99});alert('Approved!');});}
-function clearCom(){if(confirm('Clear all comments?'))db.ref('comments').remove();}
-function saveAds(){db.ref('ads').set({on:document.getElementById('adsOn').value,title:document.getElementById('adsTitle').value,image:document.getElementById('adsImg').value,link:document.getElementById('adsLink').value,interval:parseInt(document.getElementById('adsTime').value)||300});alert('Ads Saved!');}
-// AUTO-CLEAN: If Admin was closed, clean expired Instant Live + expired Programs when Admin re-opens
-setInterval(()=>{
- db.ref('liveOverride').once('value',s=>{let d=s.val();if(d&&d.endsAt&&Date.now()>d.endsAt){db.ref('liveOverride').remove();}});
- db.ref('programs').once('value',s=>{let progs=s.val()||{};let today=todayEATAdmin();let now=nowKampalaAdmin();let nowMin=now.getHours()*60+now.getMinutes();Object.keys(progs).forEach(k=>{let p=progs[k];if(!p||!p.startTime)return;if(p.lastPlayed===today)return;let a=p.startTime.split(":");let startMin=parseInt(a[0])*60+parseInt(a[1]);let dur=parseInt(p.duration)||300;let passed=(nowMin-startMin)*60+now.getSeconds();if(passed>=dur){db.ref('programs/'+k).update({lastPlayed:today});}});});
-},5000);
+function checkProgram(){if(progPlaying)return;if(override)return;let now=nowKampala();let today=todayEAT();let found=false;Object.keys(programs).forEach(k=>{if(found)return;let p=programs[k];if(!p||!p.startTime||!p.url)return;if(p.lastPlayed===today)return;let a=p.startTime.split(":");let startMin=parseInt(a[0])*60+parseInt(a[1]);let nowMin=now.getHours()*60+now.getMinutes();let dur=parseInt(p.duration)||300;let passed=(nowMin-startMin)*60+now.getSeconds();if(passed>=0&&passed<dur){if(playProgram(p,k))found=true;}});}
+function openAd(){if(adData&&adData.link)window.open(adData.link,'_blank');}
+function showAd(){if(!adData||adData.on!=='on'||!adData.image){document.getElementById('adBox').style.display='none';return;}document.getElementById('adImg').src=adData.image;document.getElementById('adTitle').innerText=adData.title||'Sponsored';document.getElementById('adBox').style.display='block';}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){if(override)playOverride();else if(!progPlaying)joinLive();}});
+setInterval(checkProgram,5000);
+function downloadCurrent(type){if(!currentItem||!currentUrl)return alert('No song playing now');let yt=getYTId(currentUrl);if(yt){window.open('https://www.youtube.com/watch?v='+yt,'_blank');return;}let a=document.createElement('a');a.href=currentUrl;a.download=currentItem.title+' - Hit TV by Inno';a.target='_blank';document.body.appendChild(a);a.click();a.remove();alert(type==='video'?'Downloading Video to your phone...':'Downloading Audio to your phone...');}
+function downloadVideo(){downloadCurrent('video');}
+function downloadAudio(){downloadCurrent('audio');}
+function downloadAudioFile(url,title){let a=document.createElement('a');a.href=url;a.download=title+' - Hit TV';a.target='_blank';document.body.appendChild(a);a.click();a.remove();}
+function toggleMute(){if(soundOn){soundOn=false;localStorage.setItem('hitTV_sound','off');document.getElementById('soundStatus').innerText='OFF';}else{forceSound();}let v=document.querySelector('#playerHolder video');if(v)v.muted=!soundOn;}
+function pip(){if(currentVideo&&document.pictureInPictureEnabled){currentVideo.requestPictureInPicture()}else alert('PiP for MP4 only.');}
+function goFullscreen(){let el=document.querySelector('.liveBox');if(el.requestFullscreen)el.requestFullscreen();}
+function sendComment(){let v=document.getElementById('commentInput').value.trim();if(!v)return;db.ref('comments').push({text:v,name:myName||'Viewer',time:Date.now()});document.getElementById('commentMsg').innerText='Comment sent to Admin!';document.getElementById('commentInput').value='';}
+function sendReq(){let n=document.getElementById('reqName').value.trim(),s=document.getElementById('reqSong').value.trim(),ph=document.getElementById('reqPhone').value.trim(),l=document.getElementById('reqLink').value.trim();if(!n||!s)return alert('Fill Name + Song');db.ref('requests').push({name:n,song:s,phone:ph,link:l,time:Date.now()});document.getElementById('reqName').value='';document.getElementById('reqSong').value='';document.getElementById('reqPhone').value='';document.getElementById('reqLink').value='';document.getElementById('reqMsg').innerText='Request submitted to Admin! ✅';setTimeout(()=>{document.getElementById('reqMsg').innerText='';},3000);}
+function setTicker(text){let el=document.getElementById('tickerText');el.style.animation='none';el.innerText='';void el.offsetWidth;el.innerText=text;el.style.animation='';}
+if(soundOn){document.getElementById('soundStatus').innerText='ON';}
+db.ref('lineup').on('value',s=>{let v=s.val()||{};lineup=Object.keys(v).map(k=>({...v[k],_key:k}));lineup.sort((a,b)=>(a.order||0)-(b.order||0));if(lineup.length&&liveStartedAt&&!override&&!progPlaying)joinLive();});
+db.ref('liveState').on('value',s=>{let d=s.val();if(d&&d.startedAt){liveStartedAt=d.startedAt;if(lineup.length&&!override&&!progPlaying)joinLive();}});
+db.ref('liveOverride').on('value',s=>{let d=s.val();if(d&&(d.url||d.type==='camera')){override=d;playOverride();}else{override=null;if(ovTimer)clearTimeout(ovTimer);document.getElementById('camBanner').style.display='none';if(lineup.length&&!progPlaying){blackScreenThen(()=>{joinLive();});}}});
+db.ref('control').on('value',s=>{let c=s.val()||{};if(c.action==='restart'){stopAllAndBack();db.ref('liveState').set({startedAt:Date.now()});}if(c.action==='next'){stopAllAndBack();blackScreenThen(()=>{joinLive();});}});
+db.ref('ticker').on('value',s=>{let t=s.val();if(t&&t.text)setTicker(t.text);});
+db.ref('notification').on('value',s=>{let n=s.val();let bar=document.getElementById('notifBar');let pg=document.getElementById('notifPage');if(n&&n.text){bar.style.display='block';bar.innerText='🔔 '+n.text;pg.innerText='🔔 '+n.text;}else{bar.style.display='none';pg.innerText='No new notifications.';}});
+db.ref('programs').on('value',s=>{programs=s.val()||{};checkProgram();});
+db.ref('ads').on('value',s=>{adData=s.val()||null;showAd();});
+db.ref('audioStreams').on('value',s=>{let v=s.val()||{};let html='';Object.keys(v).forEach(k=>{let a=v[k];html+=`<div class="aItem"><div><b>${a.title}</b><p>${a.detail||'Audio'}</p></div><button class="dlBtn" onclick="downloadAudioFile('${a.url}','${a.title}')">Download</button></div>`;});document.getElementById('audioList').innerHTML=html||'No audio streams yet. Admin will upload.';});
 </script>
 </body>
 </html>
