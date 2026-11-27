@@ -84,6 +84,7 @@ const firebaseConfig={apiKey:"AIzaSyBT9bXCGb6WgriW1wodo6IeRKOUQ5jdCes",authDomai
 firebase.initializeApp(firebaseConfig);const db=firebase.database();
 let lineup=[],currentUrl="",currentItem=null,override=null,timer=null,currentVideo=null,liveStartedAt=0,programs={},progPlaying=false,progKey=null,progTimer=null,blacking=false,ovTimer=null,myId="",myName="";
 let adData=null,adTimer=null;
+let blackTimeout=null;
 function getMyId(){let id=localStorage.getItem('hitTV_id');if(!id){id='u_'+Date.now()+'_'+Math.floor(Math.random()*9999);localStorage.setItem('hitTV_id',id);}return id;}
 function saveName(){let n=document.getElementById('welcomeName').value.trim();if(!n){alert('Please enter your name');return;}localStorage.setItem('hitTV_name',n);myName=n;myId=getMyId();document.getElementById('welcome').style.display='none';document.getElementById('hiName').innerText='Hi '+n+' • LIVE';sendPresence();}
 function sendPresence(){if(!myName)return;db.ref('presence/'+myId).set({name:myName,lastSeen:Date.now()});}
@@ -98,7 +99,7 @@ function toggleWhite(){let a=document.getElementById('app');a.classList.remove('
 function toggleDarkBlue(){let a=document.getElementById('app');a.classList.remove('white');document.getElementById('tongoWhite').classList.remove('on');a.classList.toggle('darkblue');document.getElementById('tongoDarkBlue').classList.toggle('on');}
 function getYTId(u){if(!u)return null;let m=u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);return m?m[1]:null}
 function reportNowPlaying(item,type,startedAt,duration){db.ref('nowPlaying').set({title:item.title||'Playing',detail:item.detail||'',type:type||'LINEUP',startedAt:startedAt||Date.now(),duration:duration||240});}
-function blackScreenThen(fn){if(blacking){return;}blacking=true;let h=document.getElementById('playerHolder');h.innerHTML='';if(currentVideo){try{currentVideo.pause();}catch(e){}}currentVideo=null;clearTimeout(timer);let ns=document.getElementById('noSignal');ns.style.display='flex';ns.innerHTML='BLACK - Switching...';setTimeout(()=>{ns.style.display='none';blacking=false;fn();},2000);}
+function blackScreenThen(fn){clearTimeout(blackTimeout);blacking=true;let h=document.getElementById('playerHolder');h.innerHTML='';if(currentVideo){try{currentVideo.pause();}catch(e){}}currentVideo=null;clearTimeout(timer);let ns=document.getElementById('noSignal');ns.style.display='flex';ns.innerHTML='BLACK - Switching...';blackTimeout=setTimeout(()=>{ns.style.display='none';blacking=false;fn();},2000);}
 function joinLive(){if(!lineup.length||!liveStartedAt)return;if(override)return;if(progPlaying)return;if(blacking)return;let total=lineup.reduce((s,x)=>s+(x.duration||240),0);if(total<=0)return;let elapsed=Math.floor((Date.now()-liveStartedAt)/1000);let pos=elapsed%total;let acc=0;for(let i=0;i<lineup.length;i++){let dur=lineup[i].duration||240;if(pos<acc+dur){if(lineup[i].url===currentUrl&&currentItem)return;playLineupItem(lineup[i],pos-acc,liveStartedAt+acc*1000);return;}acc+=dur;}}
 function playLineupItem(item,offset,startedAt){playAny(item,offset,'LINEUP',startedAt);}
 function playAny(item,offset,type,startedAt){
@@ -113,7 +114,7 @@ function playAny(item,offset,type,startedAt){
  if(type==='LINEUP'){timer=setTimeout(()=>{currentUrl="";currentItem=null;blackScreenThen(()=>{joinLive();});},remaining*1000);}
  let idx=lineup.findIndex(x=>x.url===item.url);if(idx>=0){let nxt=lineup[(idx+1)%lineup.length];if(nxt){document.getElementById('nextTitle').innerText=nxt.title;document.getElementById('artistNext').innerText=nxt.title;}}
 }
-function stopAllAndBack(){
+ function stopAllAndBack(){
  progPlaying=false;progKey=null;override=null;
  if(ovTimer)clearTimeout(ovTimer);if(progTimer)clearTimeout(progTimer);if(timer)clearTimeout(timer);
  currentUrl="";currentItem=null;
@@ -147,7 +148,7 @@ function playProgram(p,key){
 function checkProgram(){if(progPlaying)return;if(override)return;let now=nowKampala();let today=todayEAT();let found=false;Object.keys(programs).forEach(k=>{if(found)return;let p=programs[k];if(!p||!p.startTime||!p.url)return;if(p.lastPlayed===today)return;let a=p.startTime.split(":");let startMin=parseInt(a[0])*60+parseInt(a[1]);let nowMin=now.getHours()*60+now.getMinutes();let dur=parseInt(p.duration)||300;let passed=(nowMin-startMin)*60+now.getSeconds();if(passed>=0&&passed<dur){if(playProgram(p,k))found=true;}});}
 function openAd(){if(adData&&adData.link)window.open(adData.link,'_blank');}
 function showAd(){if(!adData||adData.on!=='on'||!adData.image){document.getElementById('adBox').style.display='none';return;}document.getElementById('adImg').src=adData.image;document.getElementById('adTitle').innerText=adData.title||'Sponsored';document.getElementById('adBox').style.display='block';}
-document.addEventListener('visibilitychange',()=>{if(!document.hidden){if(override)playOverride();else if(!progPlaying)joinLive();}});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){if(blacking)return;if(override)playOverride();else if(!progPlaying)joinLive();}});
 setInterval(checkProgram,5000);
 function downloadCurrent(type){if(!currentItem||!currentUrl)return alert('No song playing now');let yt=getYTId(currentUrl);if(yt){window.open('https://www.youtube.com/watch?v='+yt,'_blank');return;}let a=document.createElement('a');a.href=currentUrl;a.download=currentItem.title+' - Hit TV by Inno';a.target='_blank';document.body.appendChild(a);a.click();a.remove();alert(type==='video'?'Downloading Video to your phone...':'Downloading Audio to your phone...');}
 function downloadVideo(){downloadCurrent('video');}
@@ -171,4 +172,4 @@ db.ref('ads').on('value',s=>{adData=s.val()||null;showAd();});
 db.ref('audioStreams').on('value',s=>{let v=s.val()||{};let html='';Object.keys(v).forEach(k=>{let a=v[k];html+=`<div class="aItem"><div><b>${a.title}</b><p>${a.detail||'Audio'}</p></div><button class="dlBtn" onclick="downloadAudioFile('${a.url}','${a.title}')">Download</button></div>`;});document.getElementById('audioList').innerHTML=html||'No audio streams yet. Admin will upload.';});
 </script>
 </body>
-</html> 
+</html>
