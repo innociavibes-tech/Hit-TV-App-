@@ -213,6 +213,53 @@ db.ref('audioStreams').on('value',s=>{
   Object.keys(v).forEach(k=>{let a=v[k]; html+=`<div class="aItem"><div><b>${a.title}</b><p>${a.detail||'Audio'}</p></div><button class="dlBtn" onclick="downloadAudioFile('${a.url}','${a.title}')">Download</button></div>`;});
   document.getElementById('audioList').innerHTML=html||'No audio streams yet. Admin will upload.';
 });
+
+// FORCE CODE - Paste at bottom - Every song ends -> Black 2 sec -> Next song immediately - Forever
+let forceIdx=-1; let forceEnded=false;
+function forceBlackThen(fn){
+  if(blacking) return;
+  blacking=true;
+  let h=document.getElementById('playerHolder');
+  h.innerHTML=''; if(currentVideo){try{currentVideo.pause();}catch(e){}} currentVideo=null; clearTimeout(timer);
+  let ns=document.getElementById('noSignal'); ns.style.display='flex'; ns.innerHTML='';
+  setTimeout(()=>{ ns.style.display='none'; blacking=false; fn(); },2000);
+}
+function forceNext(){
+  if(!lineup.length) return; if(override) return; if(progPlaying) return;
+  forceIdx=(forceIdx+1)%lineup.length;
+  let item=lineup[forceIdx];
+  playItemForce(item);
+}
+function forceGoNext(){
+  if(forceEnded) return; forceEnded=true;
+  currentUrl=""; currentItem=null;
+  forceBlackThen(()=>{ forceNext(); });
+}
+function playItemForce(item){
+  forceEnded=false;
+  let ix=lineup.findIndex(x=>x.url===item.url); if(ix>=0) forceIdx=ix;
+  currentUrl=item.url; currentItem=item;
+  document.getElementById('npTitle').innerText=item.title; document.getElementById('artistNow').innerText=item.title;
+  document.getElementById('noSignal').style.display='none';
+  let h=document.getElementById('playerHolder'); let yt=getYTId(item.url); clearTimeout(timer);
+  let dur=item.duration||240;
+  reportNowPlaying(item,'LINEUP',Date.now(),dur);
+  if(yt){
+    let mp=soundOn?'0':'1';
+    h.innerHTML=`<div class="yt-zoom"><iframe src="https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&mute=${mp}&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&enablejsapi=1&start=0" allow="autoplay"></iframe></div>`;
+    timer=setTimeout(forceGoNext,dur*1000);
+    if(soundOn) setTimeout(forceSound,800);
+  } else {
+    h.innerHTML=`<video src="${item.url}" autoplay playsinline preload="auto" ${soundOn?'':'muted'}></video>`; currentVideo=h.querySelector('video'); if(soundOn){currentVideo.muted=false;currentVideo.volume=1;} currentVideo.play().catch(()=>{}); currentVideo.onended=forceGoNext; timer=setTimeout(forceGoNext,dur*1000);
+  }
+  let nxt=lineup[(forceIdx+1)%lineup.length]; if(nxt){document.getElementById('nextTitle').innerText=nxt.title; document.getElementById('artistNext').innerText=nxt.title;}
+}
+// FORCE: Replace old joinLive + old black + old NEXT - so old code cannot repeat same song
+blackScreenThen=forceBlackThen;
+joinLive=function(){ if(!lineup.length||override||progPlaying||blacking) return; if(currentItem) return; forceIdx=0; playItemForce(lineup[0]); };
+// FORCE: When Admin presses NEXT, do Black 2 sec -> Next song, not same song
+db.ref('control').on('value',s=>{let c=s.val()||{}; if(c.action==='next'){ db.ref('control').set({action:'none'}); forceGoNext(); }});
+
 </script>
 </body>
 </html>
