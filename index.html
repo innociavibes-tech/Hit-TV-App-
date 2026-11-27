@@ -290,79 +290,7 @@ setInterval(()=>{
     }
   }catch(e){ console.log("watchdog",e); }
 },2000);
-  <!-- HIT TV FORCE OFFLINE - VIEWER -->
-<div id="hitOfflineBanner" style="display:none;background:#ff6600;color:#fff;text-align:center;padding:11px 10px;font-weight:800;font-size:13px;line-height:1.4;position:fixed;top:0;left:0;right:0;z-index:999999">📶 You're offline - Hit TV App will load itself when you're back online</div>
 
-/* When banner shows, push app down so banner doesn't cover tabs */
-body.hit-offline{padding-top:42px !important}
-body.hit-offline #hitOfflineBanner{display:block !important}
-
-// ===== HIT TV FORCE OFFLINE - DO NOT REMOVE =====
-(function(){
-  let wasOffline = false;
-  let banner = document.getElementById('hitOfflineBanner');
-  let checking = false;
-
-  function showOffline(){
-    if(!wasOffline){
-      wasOffline = true;
-      banner.style.display = 'block';
-      document.body.classList.add('hit-offline');
-      // Stop video trying to load endlessly when offline
-      try{
-        let videos = document.querySelectorAll('video, iframe');
-        videos.forEach(v=>{ try{ if(v.pause) v.pause(); }catch(e){} });
-      }catch(e){}
-    }
-  }
-
-  function showOnline(){
-    if(wasOffline){
-      wasOffline = false;
-      banner.style.display = 'none';
-      document.body.classList.remove('hit-offline');
-      // Auto reload Hit TV by itself
-      setTimeout(()=>{ location.reload(); }, 500);
-    } else {
-      banner.style.display = 'none';
-      document.body.classList.remove('hit-offline');
-    }
-  }
-
-  // 1. Instant - Browser events
-  window.addEventListener('offline', showOffline);
-  window.addEventListener('online', showOnline);
-
-  // 2. FORCE - Real internet check every 2 seconds (navigator.onLine lies sometimes)
-  async function forceCheck(){
-    if(checking) return;
-    checking = true;
-    try{
-      // Try to reach Google with 2 sec timeout
-      let ctrl = new AbortController();
-      let t = setTimeout(()=>ctrl.abort(), 2000);
-      await fetch('https://www.google.com/favicon.ico', {mode:'no-cors', cache:'no-store', signal:ctrl.signal});
-      clearTimeout(t);
-      if(!navigator.onLine && false){} // ignore
-      showOnline();
-    }catch(e){
-      showOffline();
-    }
-    checking = false;
-  }
-
-  // 3. Check immediately on load, then every 2 sec - NOT 10 minutes
-  forceCheck();
-  setInterval(forceCheck, 2000);
-
-  // 4. Also check on any click / tab change
-  document.addEventListener('click', forceCheck);
-  document.addEventListener('visibilitychange', function(){ if(!document.hidden) forceCheck(); });
-
-  // 5. If page starts offline, show banner instantly
-  if(!navigator.onLine) showOffline();
-})();
-<!-- END HIT TV FORCE OFFLINE -->
 </script>
 </body>
 </html>
