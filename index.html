@@ -243,6 +243,54 @@ db.ref('audioStreams').on('value',s=>{
   Object.keys(v).forEach(k=>{let a=v[k]; html+=`<div class="aItem"><div><b>${a.title}</b><p>${a.detail||'Audio'}</p></div><button class="dlBtn" onclick="downloadAudioFile('${a.url}','${a.title}')">Download</button></div>`;});
   document.getElementById('audioList').innerHTML=html||'No audio streams yet. Admin will upload.';
 });
+  
+// ===== HIT TV - WATCHDOG V3 - Paste before </body> =====
+setInterval(()=>{
+  try{
+    // 1. If a program is playing and its end time passed, FORCE KILL IT
+    if(typeof progPlaying !== 'undefined' && progPlaying && window._progEndAt && Date.now() >= window._progEndAt){
+      let k = window._progKey || progKey;
+      progPlaying=false; progKey=null; currentUrl=""; currentItem=null;
+      if(typeof progTimer !== 'undefined' && progTimer) clearTimeout(progTimer);
+      window._progEndAt = 0;
+      let h=document.getElementById('playerHolder');
+      h.innerHTML='';
+      let ns=document.getElementById('noSignal');
+      ns.style.display='flex'; ns.innerHTML=''; ns.style.background='#000';
+      setTimeout(()=>{
+        ns.style.display='none';
+        if(k) db.ref('programs/'+k).remove();
+        setTimeout(()=>{ if(typeof joinLive==='function') joinLive(); },200);
+      },2000);
+      return;
+    }
+    // 2. Even if progPlaying is stuck, check wall-clock: StartTime + Duration passed?
+    if(typeof programs !== 'undefined' && programs){
+      let now = new Date(new Date().toLocaleString("en-US",{timeZone:"Africa/Kampala"}));
+      let nowMin = now.getHours()*60 + now.getMinutes();
+      Object.keys(programs).forEach(k=>{
+        let p = programs[k]; if(!p || !p.startTime) return;
+        let a = p.startTime.split(":"); let startMin = parseInt(a[0])*60 + parseInt(a[1]);
+        let dur = parseInt(p.duration)||300;
+        let passed = (nowMin - startMin)*60 + now.getSeconds();
+        // If program time passed, and we are stuck on it, kill it
+        if(passed >= dur){
+          // If this is the playing program, force black + delete
+          if(progPlaying && (progKey===k || window._progKey===k)){
+            progPlaying=false; progKey=null; currentUrl=""; currentItem=null;
+            let h=document.getElementById('playerHolder'); h.innerHTML='';
+            let ns=document.getElementById('noSignal'); ns.style.display='flex'; ns.innerHTML='';
+            setTimeout(()=>{ ns.style.display='none'; db.ref('programs/'+k).remove(); setTimeout(()=>{ joinLive(); },200); },2000);
+          } else {
+            // Not playing, just delete expired program so it never replays
+            db.ref('programs/'+k).remove();
+          }
+        }
+      });
+    }
+  }catch(e){ console.log("watchdog",e); }
+},2000);
+</script>
 </script>
 </body>
 </html>
