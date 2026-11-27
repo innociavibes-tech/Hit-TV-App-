@@ -34,6 +34,11 @@ input{width:100%;background:#1a1a1a;border:1px solid #2a2a2a;color:#fff;padding:
 .aItem{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:11px;margin-top:8px;display:flex;justify-content:space-between;gap:8px;align-items:center}.aItem b{font-size:13px;display:block}.aItem p{font-size:11px;color:#888}.dlBtn{background:#00a651;color:#fff;border:none;padding:9px 12px;border-radius:8px;font-weight:800;font-size:12px;cursor:pointer;white-space:nowrap}
 #notifBar{display:none;background:#ff6600;color:#fff;padding:10px 12px;font-size:13px;font-weight:700;text-align:center;margin:0 12px;border-radius:10px}
 #camBanner{display:none;background:#e60000;color:#fff;text-align:center;padding:8px;font-weight:800;font-size:13px;margin:0 12px;border-radius:10px}
+/* ADDED ONLY - Ads Box */
+#adBox{display:none;margin:0 12px 10px;background:#fff;border-radius:12px;overflow:hidden;position:relative;cursor:pointer}
+#adBox img{width:100%;display:block;max-height:180px;object-fit:cover}
+#adBox span{position:absolute;top:6px;left:6px;background:#ff6600;color:#fff;font-size:10px;font-weight:800;padding:3px 8px;border-radius:10px}
+#adClose{position:absolute;top:6px;right:6px;background:#000;color:#fff;border:none;width:26px;height:26px;border-radius:50%;font-weight:800;cursor:pointer}
 </style>
 </head>
 <body>
@@ -44,6 +49,7 @@ input{width:100%;background:#1a1a1a;border:1px solid #2a2a2a;color:#fff;padding:
 <div class="head2"><b>Hi Inno ADMIN • LIVE</b><div class="pills"><span class="pill">● LIVE • 24/7</span><span class="pill blue" onclick="forceSound()">TAP FOR SOUND</span></div></div>
 <div class="liveBox"><div class="noSignal" id="noSignal"></div><div id="playerHolder"></div><button class="expand" onclick="goFullscreen()">↗</button></div>
 <div class="ticker"><div class="tickerInner" id="tickerText">Welcome to Hit TV by Inno</div></div>
+<div id="adBox" onclick="openAd()"><span>SPONSORED</span><button id="adClose" onclick="event.stopPropagation();document.getElementById('adBox').style.display='none'">X</button><img id="adImg" src=""><div style="padding:8px;color:#000;font-weight:800;font-size:13px;text-align:center" id="adTitle"></div></div>
 <div class="row2"><div class="box"><small>NOW PLAYING</small><b id="npTitle">-</b></div><div class="box"><small>NEXT</small><b id="nextTitle">-</b></div></div>
 <div class="grid"><button class="gbtn" onclick="downloadVideo()">Download Video</button><button class="gbtn" onclick="downloadAudio()">Download Audio</button><button class="gbtn" onclick="pip()">Picture in Picture</button><button class="gbtn" onclick="toggleMute()">Mute / Unmute</button></div>
 <div class="note">Real TV: No pause, no forward, no seek. You join where live is now.</div>
@@ -68,8 +74,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&soundOn)f
 const firebaseConfig={apiKey:"AIzaSyBT9bXCGb6WgriW1wodo6IeRKOUQ5jdCes",authDomain:"hit-tv-app-40fb9.firebaseapp.com",databaseURL:"https://hit-tv-app-40fb9-default-rtdb.firebaseio.com",projectId:"hit-tv-app-40fb9",storageBucket:"hit-tv-app-40fb9.firebasestorage.app",messagingSenderId:"740828744097",appId:"1:740828744097:web:49104b3522d02de64ce3e0"};
 firebase.initializeApp(firebaseConfig);const db=firebase.database();
 let lineup=[],currentUrl="",currentItem=null,override=null,timer=null,currentVideo=null,liveStartedAt=0,programs={},progPlaying=false,progKey=null,progTimer=null,blacking=false;
-function getDead(){try{return JSON.parse(localStorage.getItem('hitTV_deadProg')||'[]')}catch(e){return[]}}
-function markDead(k){let d=getDead(); if(!d.includes(k)){d.push(k); localStorage.setItem('hitTV_deadProg',JSON.stringify(d));}}
+let adData=null;
 function showTab(id,el){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));document.getElementById('page-'+id).classList.add('active');el.classList.add('active');}
 function openSettings(){document.getElementById('settingsModal').classList.add('open')}
 function closeSettings(){document.getElementById('settingsModal').classList.remove('open')}
@@ -79,8 +84,7 @@ function toggleDarkBlue(){let a=document.getElementById('app');a.classList.remov
 function getYTId(u){if(!u)return null;let m=u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);return m?m[1]:null}
 function reportNowPlaying(item,type,startedAt,duration){db.ref('nowPlaying').set({title:item.title||'Playing',detail:item.detail||'',type:type||'LINEUP',startedAt:startedAt||Date.now(),duration:duration||240});}
 function blackScreenThen(fn){
-  if(blacking) return;
-  blacking=true;
+  if(blacking) return; blacking=true;
   let h=document.getElementById('playerHolder');
   h.innerHTML=''; if(currentVideo){try{currentVideo.pause();}catch(e){}} currentVideo=null; clearTimeout(timer);
   let ns=document.getElementById('noSignal'); ns.style.display='flex'; ns.innerHTML='';
@@ -130,20 +134,22 @@ function playOverride(){
   clearTimeout(timer);
 }
 function nowKampala(){return new Date(new Date().toLocaleString("en-US",{timeZone:"Africa/Kampala"}));}
+function todayEAT(){ let n=nowKampala(); return n.getFullYear()+"-"+(n.getMonth()+1)+"-"+n.getDate(); }
+/* --- ADDED 1: PROGRAM FIX - DAILY REPEAT, EAT --- */
 function playProgram(p,key){
   if(progPlaying&&progKey===key) return false;
-  if(getDead().includes(key)) return false;
   let now=nowKampala(); let dur=parseInt(p.duration)||300;
   let a=(p.startTime||"00:00").split(":"); let startMin=parseInt(a[0])*60+parseInt(a[1]);
   let nowMin=now.getHours()*60+now.getMinutes(); let offset=(nowMin-startMin)*60+now.getSeconds();
-  if(offset<0) offset=0; if(offset>=dur){markDead(key); db.ref('programs/'+key).remove(); return false;}
+  if(offset<0) offset=0; if(offset>=dur) return false;
+  if(currentVideo){try{currentVideo.pause();}catch(e){}} currentVideo=null; clearTimeout(timer); if(progTimer) clearTimeout(progTimer);
   progPlaying=true; progKey=key;
   document.getElementById('camBanner').style.display='none';
   document.getElementById('npTitle').innerText='PROGRAM: '+p.title; document.getElementById('artistNow').innerText='PROGRAM: '+p.title;
   let startedAt=Date.now()-offset*1000;
   reportNowPlaying({title:'PROGRAM: '+p.title,detail:p.startTime+' • Program'},'PROGRAM',startedAt,dur);
   let h=document.getElementById('playerHolder'); let yt=getYTId(p.url);
-  document.getElementById('noSignal').style.display='none'; clearTimeout(timer); if(progTimer) clearTimeout(progTimer);
+  document.getElementById('noSignal').style.display='none';
   if(yt){
     let mp=soundOn?'0':'1';
     h.innerHTML=`<div class="yt-zoom"><iframe src="https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&mute=${mp}&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&enablejsapi=1&start=${Math.floor(offset)}" allow="autoplay"></iframe></div>`;
@@ -153,113 +159,21 @@ function playProgram(p,key){
   }
   currentUrl=p.url; currentItem={title:p.title,url:p.url};
   progTimer=setTimeout(()=>{
-    markDead(key);
-    db.ref('programs/'+key).remove();
     progPlaying=false; progKey=null; currentUrl=""; currentItem=null;
-    blackScreenThen(()=>{joinLive();});
+    db.ref('programs/'+key).update({lastPlayed: todayEAT()});
+    blackScreenThen(()=>{ joinLive(); });
   },(dur-offset)*1000);
   return true;
 }
 function checkProgram(){
   if(progPlaying) return;
   if(override) return;
-  let now=nowKampala(); let found=false; let dead=getDead();
+  let now=nowKampala(); let today=todayEAT();
+  let found=false;
   Object.keys(programs).forEach(k=>{
-    if(found) return; if(dead.includes(k)) return;
-    let p=programs[k]; if(!p||!p.startTime||!p.url) return;
+    if(found) return; let p=programs[k]; if(!p||!p.startTime||!p.url) return;
+    if(p.lastPlayed===today) return;
     let a=p.startTime.split(":"); let startMin=parseInt(a[0])*60+parseInt(a[1]);
     let nowMin=now.getHours()*60+now.getMinutes(); let dur=parseInt(p.duration)||300;
     let passed=(nowMin-startMin)*60+now.getSeconds();
-    if(passed>=0&&passed<dur){ if(playProgram(p,k)) found=true; }
-    else if(passed>=dur){markDead(k); db.ref('programs/'+k).remove();}
-  });
-}
-document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ if(override) playOverride(); else if(!progPlaying){currentUrl=""; currentItem=null; joinLive();} }});
-setInterval(checkProgram,5000);
-function downloadCurrent(type){
-  if(!currentItem||!currentUrl) return alert('No song playing now');
-  let yt=getYTId(currentUrl);
-  if(yt){window.open('https://www.youtube.com/watch?v='+yt,'_blank');return;}
-  let a=document.createElement('a'); a.href=currentUrl; a.download=currentItem.title+' - Hit TV by Inno'; a.target='_blank'; document.body.appendChild(a); a.click(); a.remove();
-  alert(type==='video'?'Downloading Video to your phone...':'Downloading Audio to your phone...');
-}
-function downloadVideo(){downloadCurrent('video');}
-function downloadAudio(){downloadCurrent('audio');}
-function downloadAudioFile(url,title){let a=document.createElement('a'); a.href=url; a.download=title+' - Hit TV'; a.target='_blank'; document.body.appendChild(a); a.click(); a.remove();}
-function tapSound(){forceSound();}
-function toggleMute(){if(soundOn){soundOn=false;localStorage.setItem('hitTV_sound','off');document.getElementById('soundStatus').innerText='OFF';}else{forceSound();}let v=document.querySelector('#playerHolder video');if(v) v.muted=!soundOn;}
-function pip(){if(currentVideo&&document.pictureInPictureEnabled){currentVideo.requestPictureInPicture()}else alert('PiP for MP4 only.');}
-function goFullscreen(){let el=document.querySelector('.liveBox'); if(el.requestFullscreen) el.requestFullscreen();}
-function sendComment(){let v=document.getElementById('commentInput').value.trim(); if(!v) return; db.ref('comments').push({text:v,time:Date.now()}); document.getElementById('commentMsg').innerText='Comment sent to Admin!'; document.getElementById('commentInput').value='';}
-function sendReq(){
-  let n=document.getElementById('reqName').value.trim(),s=document.getElementById('reqSong').value.trim(),ph=document.getElementById('reqPhone').value.trim(),l=document.getElementById('reqLink').value.trim();
-  if(!n||!s) return alert('Fill Name + Song');
-  db.ref('requests').push({name:n,song:s,phone:ph,link:l,time:Date.now()});
-  document.getElementById('reqName').value='';document.getElementById('reqSong').value='';document.getElementById('reqPhone').value='';document.getElementById('reqLink').value='';
-  document.getElementById('reqMsg').innerText='Request submitted to Admin! ✅';
-  setTimeout(()=>{document.getElementById('reqMsg').innerText='';},3000);
-}
-function setTicker(text){let el=document.getElementById('tickerText'); el.style.animation='none'; el.innerText=''; void el.offsetWidth; el.innerText=text; el.style.animation='';}
-if(soundOn){document.getElementById('soundStatus').innerText='ON';}
-db.ref('lineup').on('value',s=>{let v=s.val()||{}; lineup=Object.keys(v).map(k=>({...v[k],_key:k})); lineup.sort((a,b)=>(a.order||0)-(b.order||0)); if(lineup.length&&liveStartedAt&&!override&&!progPlaying) joinLive();});
-db.ref('liveState').on('value',s=>{let d=s.val(); if(d&&d.startedAt){liveStartedAt=d.startedAt; if(lineup.length&&!override&&!progPlaying){currentUrl=""; currentItem=null; joinLive();}}});
-db.ref('liveOverride').on('value',s=>{let d=s.val(); if(d&&(d.url||d.type==='camera')){override=d; playOverride();}else{override=null; document.getElementById('camBanner').style.display='none'; if(lineup.length&&!progPlaying){currentUrl=""; currentItem=null; joinLive();}}});
-db.ref('control').on('value',s=>{let c=s.val()||{}; if(c.action==='restart'){db.ref('liveState').set({startedAt:Date.now()}); db.ref('control').set({action:'none'})} if(c.action==='next'){let idx=lineup.findIndex(x=>x.url===currentUrl); if(idx>=0){let n=lineup[(idx+1)%lineup.length]; currentUrl=""; currentItem=null; blackScreenThen(()=>{playItem(n,0,'LINEUP',Date.now());});}}});
-db.ref('ticker').on('value',s=>{let t=s.val(); if(t&&t.text) setTicker(t.text);});
-db.ref('notification').on('value',s=>{let n=s.val(); let bar=document.getElementById('notifBar'); let pg=document.getElementById('notifPage'); if(n&&n.text){bar.style.display='block'; bar.innerText='🔔 '+n.text; pg.innerText='🔔 '+n.text;}else{bar.style.display='none'; pg.innerText='No new notifications.';}});
-db.ref('programs').on('value',s=>{programs=s.val()||{}; checkProgram();});
-db.ref('audioStreams').on('value',s=>{
-  let v=s.val()||{}; let html='';
-  Object.keys(v).forEach(k=>{let a=v[k]; html+=`<div class="aItem"><div><b>${a.title}</b><p>${a.detail||'Audio'}</p></div><button class="dlBtn" onclick="downloadAudioFile('${a.url}','${a.title}')">Download</button></div>`;});
-  document.getElementById('audioList').innerHTML=html||'No audio streams yet. Admin will upload.';
-});
-
-// FORCE CODE - Paste at bottom - Every song ends -> Black 2 sec -> Next song immediately - Forever
-let forceIdx=-1; let forceEnded=false;
-function forceBlackThen(fn){
-  if(blacking) return;
-  blacking=true;
-  let h=document.getElementById('playerHolder');
-  h.innerHTML=''; if(currentVideo){try{currentVideo.pause();}catch(e){}} currentVideo=null; clearTimeout(timer);
-  let ns=document.getElementById('noSignal'); ns.style.display='flex'; ns.innerHTML='';
-  setTimeout(()=>{ ns.style.display='none'; blacking=false; fn(); },2000);
-}
-function forceNext(){
-  if(!lineup.length) return; if(override) return; if(progPlaying) return;
-  forceIdx=(forceIdx+1)%lineup.length;
-  let item=lineup[forceIdx];
-  playItemForce(item);
-}
-function forceGoNext(){
-  if(forceEnded) return; forceEnded=true;
-  currentUrl=""; currentItem=null;
-  forceBlackThen(()=>{ forceNext(); });
-}
-function playItemForce(item){
-  forceEnded=false;
-  let ix=lineup.findIndex(x=>x.url===item.url); if(ix>=0) forceIdx=ix;
-  currentUrl=item.url; currentItem=item;
-  document.getElementById('npTitle').innerText=item.title; document.getElementById('artistNow').innerText=item.title;
-  document.getElementById('noSignal').style.display='none';
-  let h=document.getElementById('playerHolder'); let yt=getYTId(item.url); clearTimeout(timer);
-  let dur=item.duration||240;
-  reportNowPlaying(item,'LINEUP',Date.now(),dur);
-  if(yt){
-    let mp=soundOn?'0':'1';
-    h.innerHTML=`<div class="yt-zoom"><iframe src="https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&mute=${mp}&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&enablejsapi=1&start=0" allow="autoplay"></iframe></div>`;
-    timer=setTimeout(forceGoNext,dur*1000);
-    if(soundOn) setTimeout(forceSound,800);
-  } else {
-    h.innerHTML=`<video src="${item.url}" autoplay playsinline preload="auto" ${soundOn?'':'muted'}></video>`; currentVideo=h.querySelector('video'); if(soundOn){currentVideo.muted=false;currentVideo.volume=1;} currentVideo.play().catch(()=>{}); currentVideo.onended=forceGoNext; timer=setTimeout(forceGoNext,dur*1000);
-  }
-  let nxt=lineup[(forceIdx+1)%lineup.length]; if(nxt){document.getElementById('nextTitle').innerText=nxt.title; document.getElementById('artistNext').innerText=nxt.title;}
-}
-// FORCE: Replace old joinLive + old black + old NEXT - so old code cannot repeat same song
-blackScreenThen=forceBlackThen;
-joinLive=function(){ if(!lineup.length||override||progPlaying||blacking) return; if(currentItem) return; forceIdx=0; playItemForce(lineup[0]); };
-// FORCE: When Admin presses NEXT, do Black 2 sec -> Next song, not same song
-db.ref('control').on('value',s=>{let c=s.val()||{}; if(c.action==='next'){ db.ref('control').set({action:'none'}); forceGoNext(); }});
-
-</script>
-</body>
-</html>
+    if(passed>=0&&passed<dur){ if(playProgram(p,k)) found=tru
