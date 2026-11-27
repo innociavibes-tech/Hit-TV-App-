@@ -102,13 +102,14 @@ function toggleWhite(){let a=document.getElementById('app');a.classList.remove('
 function toggleDarkBlue(){let a=document.getElementById('app');a.classList.remove('white');document.getElementById('tongoWhite').classList.remove('on');a.classList.toggle('darkblue');document.getElementById('tongoDarkBlue').classList.toggle('on');}
 function getYTId(u){if(!u)return null;let m=u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);return m?m[1]:null}
 function reportNowPlaying(item,type,startedAt,duration){db.ref('nowPlaying').set({title:item.title||'Playing',detail:item.detail||'',type:type||'LINEUP',startedAt:startedAt||Date.now(),duration:duration||240});}
-function blackScreenThen(fn){
-  if(blacking) return; blacking=true;
+  function blackScreenThen(fn){
+  // FIX: never block - always do 2 sec black then run fn
   let h=document.getElementById('playerHolder');
   h.innerHTML=''; if(currentVideo){try{currentVideo.pause();}catch(e){}} currentVideo=null; clearTimeout(timer);
   let ns=document.getElementById('noSignal'); ns.style.display='flex'; ns.innerHTML='';
-  setTimeout(()=>{ ns.style.display='none'; blacking=false; fn(); },2000);
-}
+  blacking=true;
+  setTimeout(()=>{ ns.style.display='none'; blacking=false; if(fn) fn(); },2000);
+  }
 function joinLive(){
   if(!lineup.length||!liveStartedAt) return; if(override) return; if(progPlaying) return; if(blacking) return;
   let total=lineup.reduce((s,x)=>s+(x.duration||240),0); if(total<=0) return;
