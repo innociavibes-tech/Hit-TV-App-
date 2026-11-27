@@ -68,6 +68,9 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&soundOn)f
 const firebaseConfig={apiKey:"AIzaSyBT9bXCGb6WgriW1wodo6IeRKOUQ5jdCes",authDomain:"hit-tv-app-40fb9.firebaseapp.com",databaseURL:"https://hit-tv-app-40fb9-default-rtdb.firebaseio.com",projectId:"hit-tv-app-40fb9",storageBucket:"hit-tv-app-40fb9.firebasestorage.app",messagingSenderId:"740828744097",appId:"1:740828744097:web:49104b3522d02de64ce3e0"};
 firebase.initializeApp(firebaseConfig);const db=firebase.database();
 let lineup=[],currentUrl="",currentItem=null,override=null,timer=null,currentVideo=null,liveStartedAt=0,programs={},progPlaying=false,progKey=null,progTimer=null,blacking=false;
+// FIX 1 - dead programs never repeat
+function getDead(){try{return JSON.parse(localStorage.getItem('hitTV_deadProg')||'[]')}catch(e){return[]}}
+function markDead(k){let d=getDead(); if(!d.includes(k)){d.push(k); localStorage.setItem('hitTV_deadProg',JSON.stringify(d));}}
 function showTab(id,el){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));document.getElementById('page-'+id).classList.add('active');el.classList.add('active');}
 function openSettings(){document.getElementById('settingsModal').classList.add('open')}
 function closeSettings(){document.getElementById('settingsModal').classList.remove('open')}
@@ -76,8 +79,10 @@ function toggleWhite(){let a=document.getElementById('app');a.classList.remove('
 function toggleDarkBlue(){let a=document.getElementById('app');a.classList.remove('white');document.getElementById('tongoWhite').classList.remove('on');a.classList.toggle('darkblue');document.getElementById('tongoDarkBlue').classList.toggle('on');}
 function getYTId(u){if(!u)return null;let m=u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);return m?m[1]:null}
 function reportNowPlaying(item,type,startedAt,duration){db.ref('nowPlaying').set({title:item.title||'Playing',detail:item.detail||'',type:type||'LINEUP',startedAt:startedAt||Date.now(),duration:duration||240});}
+// FIX 2 - black screen never lost, if already blacking wait and retry
 function blackScreenThen(fn){
-  if(blacking) return; blacking=true;
+  if(blacking){setTimeout(()=>{blackScreenThen(fn)},500); return;}
+  blacking=true;
   let h=document.getElementById('playerHolder');
   h.innerHTML=''; if(currentVideo){try{currentVideo.pause();}catch(e){}} currentVideo=null; clearTimeout(timer);
   let ns=document.getElementById('noSignal'); ns.style.display='flex'; ns.innerHTML='';
@@ -111,7 +116,7 @@ function playItem(item,offsetSeconds,type,startedAt){
   }
   let idx=lineup.findIndex(x=>x.url===item.url); if(idx>=0){let nxt=lineup[(idx+1)%lineup.length]; if(nxt){document.getElementById('nextTitle').innerText=nxt.title; document.getElementById('artistNext').innerText=nxt.title;}}
 }
-  function playOverride(){
+function playOverride(){
   if(!override) return;
   document.getElementById('camBanner').style.display=override.type==='camera'?'block':'none';
   if(override.type==='camera'){
@@ -129,10 +134,11 @@ function playItem(item,offsetSeconds,type,startedAt){
 function nowKampala(){return new Date(new Date().toLocaleString("en-US",{timeZone:"Africa/Kampala"}));}
 function playProgram(p,key){
   if(progPlaying&&progKey===key) return false;
+  if(getDead().includes(key)) return false;
   let now=nowKampala(); let dur=parseInt(p.duration)||300;
   let a=(p.startTime||"00:00").split(":"); let startMin=parseInt(a[0])*60+parseInt(a[1]);
   let nowMin=now.getHours()*60+now.getMinutes(); let offset=(nowMin-startMin)*60+now.getSeconds();
-  if(offset<0) offset=0; if(offset>=dur) return false;
+  if(offset<0) offset=0; if(offset>=dur){markDead(key); db.ref('programs/'+key).remove(); return false;}
   progPlaying=true; progKey=key;
   document.getElementById('camBanner').style.display='none';
   document.getElementById('npTitle').innerText='PROGRAM: '+p.title; document.getElementById('artistNow').innerText='PROGRAM: '+p.title;
@@ -149,8 +155,9 @@ function playProgram(p,key){
   }
   currentUrl=p.url; currentItem={title:p.title,url:p.url};
   progTimer=setTimeout(()=>{
-    progPlaying=false; progKey=null; currentUrl=""; currentItem=null;
+    markDead(key);
     db.ref('programs/'+key).remove();
+    progPlaying=false; progKey=null; currentUrl=""; currentItem=null;
     blackScreenThen(()=>{joinLive();});
   },(dur-offset)*1000);
   return true;
@@ -158,16 +165,18 @@ function playProgram(p,key){
 function checkProgram(){
   if(progPlaying) return;
   if(override) return;
-  let now=nowKampala(); let found=false;
+  let now=nowKampala(); let found=false; let dead=getDead();
   Object.keys(programs).forEach(k=>{
-    if(found) return; let p=programs[k]; if(!p||!p.startTime||!p.url) return;
+    if(found) return; if(dead.includes(k)) return;
+    let p=programs[k]; if(!p||!p.startTime||!p.url) return;
     let a=p.startTime.split(":"); let startMin=parseInt(a[0])*60+parseInt(a[1]);
     let nowMin=now.getHours()*60+now.getMinutes(); let dur=parseInt(p.duration)||300;
     let passed=(nowMin-startMin)*60+now.getSeconds();
     if(passed>=0&&passed<dur){ if(playProgram(p,k)) found=true; }
+    else if(passed>=dur){markDead(k); db.ref('programs/'+k).remove();}
   });
 }
-document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ if(override) playOverride(); else if(!progPlaying) joinLive(); }});
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ if(override) playOverride(); else if(!progPlaying){currentUrl=""; currentItem=null; joinLive();} }});
 setInterval(checkProgram,5000);
 function downloadCurrent(type){
   if(!currentItem||!currentUrl) return alert('No song playing now');
@@ -195,8 +204,8 @@ function sendReq(){
 function setTicker(text){let el=document.getElementById('tickerText'); el.style.animation='none'; el.innerText=''; void el.offsetWidth; el.innerText=text; el.style.animation='';}
 if(soundOn){document.getElementById('soundStatus').innerText='ON';}
 db.ref('lineup').on('value',s=>{let v=s.val()||{}; lineup=Object.keys(v).map(k=>({...v[k],_key:k})); lineup.sort((a,b)=>(a.order||0)-(b.order||0)); if(lineup.length&&liveStartedAt&&!override&&!progPlaying) joinLive();});
-db.ref('liveState').on('value',s=>{let d=s.val(); if(d&&d.startedAt){liveStartedAt=d.startedAt; if(lineup.length&&!override&&!progPlaying) joinLive();}});
-db.ref('liveOverride').on('value',s=>{let d=s.val(); if(d&&(d.url||d.type==='camera')){override=d; playOverride();}else{override=null; document.getElementById('camBanner').style.display='none'; if(lineup.length&&!progPlaying) joinLive();}});
+db.ref('liveState').on('value',s=>{let d=s.val(); if(d&&d.startedAt){liveStartedAt=d.startedAt; if(lineup.length&&!override&&!progPlaying){currentUrl=""; currentItem=null; blackScreenThen(()=>{joinLive();});}}});
+db.ref('liveOverride').on('value',s=>{let d=s.val(); if(d&&(d.url||d.type==='camera')){override=d; playOverride();}else{override=null; document.getElementById('camBanner').style.display='none'; if(lineup.length&&!progPlaying){currentUrl=""; currentItem=null; blackScreenThen(()=>{joinLive();});}}});
 db.ref('control').on('value',s=>{let c=s.val()||{}; if(c.action==='restart'){db.ref('liveState').set({startedAt:Date.now()}); db.ref('control').set({action:'none'})} if(c.action==='next'){let idx=lineup.findIndex(x=>x.url===currentUrl); if(idx>=0){let n=lineup[(idx+1)%lineup.length]; currentUrl=""; currentItem=null; blackScreenThen(()=>{playItem(n,0,'LINEUP',Date.now());});}}});
 db.ref('ticker').on('value',s=>{let t=s.val(); if(t&&t.text) setTicker(t.text);});
 db.ref('notification').on('value',s=>{let n=s.val(); let bar=document.getElementById('notifBar'); let pg=document.getElementById('notifPage'); if(n&&n.text){bar.style.display='block'; bar.innerText='🔔 '+n.text; pg.innerText='🔔 '+n.text;}else{bar.style.display='none'; pg.innerText='No new notifications.';}});
