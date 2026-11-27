@@ -290,7 +290,7 @@ setInterval(()=>{
     }
   }catch(e){ console.log("watchdog",e); }
 },2000);
-  
+
 /* ===== ROTATE FULL FIX ===== */
 .app.rotate-full{
   position:fixed !important; top:0 !important; left:0 !important;
@@ -311,10 +311,9 @@ setInterval(()=>{
 }
 #rotateBackBtn.show{ display:block; }
 .app.rotate-full #rotateBackBtn{ display:block; }
-</style>
+
 
 <button id="rotateBackBtn" onclick="exitRotate()">↩ RETURN</button>
-
 
 // ===== HIT TV - MUTE + ROTATE FORCE FIX =====
 
@@ -411,7 +410,6 @@ document.addEventListener('fullscreenchange', ()=>{
 });
 
 console.log("MUTE + ROTATE FIX LOADED");
-
 </script>
 </body>
 </html>
