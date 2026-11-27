@@ -75,12 +75,24 @@ const firebaseConfig = {
   appId: "1:740828744097:web:49104b3522d02de64ce3e0"
 };
 firebase.initializeApp(firebaseConfig);const db=firebase.database();
+
+// --- USERS + LAST SEEN - FOR ADMIN ---
 let myUserId = localStorage.getItem('hitTV_userId');
 if(!myUserId){ myUserId = 'USER_' + Date.now() + '_' + Math.floor(Math.random()*9999); localStorage.setItem('hitTV_userId', myUserId); }
 let myUserName = localStorage.getItem('hitTV_userName') || 'Viewer';
-function updatePresence(){ db.ref('users/' + myUserId).set({ name: myUserName, lastSeen: Date.now(), lastSeenText: new Date().toLocaleString("en-US",{timeZone:"Africa/Kampala"}), online: true, device: (navigator.userAgent||'').slice(0,80) }); }
-updatePresence(); setInterval(updatePresence, 30000);
+function updatePresence(){
+  db.ref('users/' + myUserId).set({
+    name: myUserName,
+    lastSeen: Date.now(),
+    lastSeenText: new Date().toLocaleString("en-US",{timeZone:"Africa/Kampala"}),
+    online: true,
+    device: (navigator.userAgent||'').slice(0,80)
+  });
+}
+updatePresence();
+setInterval(updatePresence, 30000);
 window.addEventListener('beforeunload', ()=>{ db.ref('users/' + myUserId + '/online').set(false); });
+
 let lineup=[],currentUrl="",currentItem=null,override=null,timer=null,currentVideo=null,liveStartedAt=0,programs={},progPlaying=false,progKey=null,progTimer=null,blacking=false;
 function showTab(id,el){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));document.getElementById('page-'+id).classList.add('active');el.classList.add('active');}
 function openSettings(){document.getElementById('settingsModal').classList.add('open')}
@@ -91,11 +103,11 @@ function toggleDarkBlue(){let a=document.getElementById('app');a.classList.remov
 function getYTId(u){if(!u)return null;let m=u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);return m?m[1]:null}
 function reportNowPlaying(item,type,startedAt,duration){db.ref('nowPlaying').set({title:item.title||'Playing',detail:item.detail||'',type:type||'LINEUP',startedAt:startedAt||Date.now(),duration:duration||240});}
 function blackScreenThen(fn){
+  if(blacking) return; blacking=true;
   let h=document.getElementById('playerHolder');
   h.innerHTML=''; if(currentVideo){try{currentVideo.pause();}catch(e){}} currentVideo=null; clearTimeout(timer);
   let ns=document.getElementById('noSignal'); ns.style.display='flex'; ns.innerHTML='';
-  blacking=true;
-  setTimeout(()=>{ ns.style.display='none'; blacking=false; if(fn) fn(); },2000);
+  setTimeout(()=>{ ns.style.display='none'; blacking=false; fn(); },2000);
 }
 function joinLive(){
   if(!lineup.length||!liveStartedAt) return; if(override) return; if(progPlaying) return; if(blacking) return;
@@ -124,7 +136,8 @@ function playItem(item,offsetSeconds,type,startedAt){
     h.innerHTML=`<video src="${item.url}" autoplay playsinline preload="auto" ${soundOn?'':'muted'}></video>`; currentVideo=h.querySelector('video'); currentVideo.currentTime=offsetSeconds; if(soundOn){currentVideo.muted=false;currentVideo.volume=1;} currentVideo.play().catch(()=>{}); currentVideo.onended=()=>{currentUrl=""; currentItem=null; blackScreenThen(()=>{joinLive();});}; timer=setTimeout(()=>{currentUrl=""; currentItem=null; blackScreenThen(()=>{joinLive();});},remaining*1000);
   }
   let idx=lineup.findIndex(x=>x.url===item.url); if(idx>=0){let nxt=lineup[(idx+1)%lineup.length]; if(nxt){document.getElementById('nextTitle').innerText=nxt.title; document.getElementById('artistNext').innerText=nxt.title;}}
-}function playOverride(){
+}
+  function playOverride(){
   if(!override) return;
   document.getElementById('camBanner').style.display=override.type==='camera'?'block':'none';
   if(override.type==='camera'){
@@ -161,29 +174,17 @@ function playProgram(p,key){
     h.innerHTML=`<video src="${p.url}" autoplay playsinline preload="auto" ${soundOn?'':'muted'}></video>`; currentVideo=h.querySelector('video'); currentVideo.currentTime=offset; if(soundOn){currentVideo.muted=false;currentVideo.volume=1;} currentVideo.play().catch(()=>{});
   }
   currentUrl=p.url; currentItem={title:p.title,url:p.url};
-  // FIXED: Save exact end time, so even if timer is cleared it still ends
-  let progEndAt = Date.now() + (dur-offset)*1000;
-  window._progEndAt = progEndAt;
-  window._progKey = key;
-  if(progTimer) clearTimeout(progTimer);
-  progTimer=setTimeout(()=>{ forceEndProgram(key); },(dur-offset)*1000);
+  // --- NEW: PROGRAM END = 2 SEC BLACK + DELETE ITSELF + BACK TO LINEUP WHERE IT WAS ---
+  progTimer=setTimeout(()=>{
+    progPlaying=false; progKey=null; currentUrl=""; currentItem=null;
+    blackScreenThen(()=>{
+      db.ref('programs/'+key).remove();
+      joinLive();
+    });
+  },(dur-offset)*1000);
   return true;
 }
-function forceEndProgram(key){
-  progPlaying=false; progKey=null; currentUrl=""; currentItem=null;
-  if(progTimer) clearTimeout(progTimer); progTimer=null;
-  window._progEndAt = 0;
-  blackScreenThen(()=>{
-    db.ref('programs/'+key).remove();
-    setTimeout(()=>{ joinLive(); },100);
-  });
-}
 function checkProgram(){
-  // FIX 1: If program should have ended but timer failed, force end it
-  if(progPlaying && window._progEndAt && Date.now() >= window._progEndAt){
-    forceEndProgram(window._progKey || progKey);
-    return;
-  }
   if(progPlaying) return;
   if(override) return;
   let now=nowKampala(); let found=false;
@@ -193,9 +194,6 @@ function checkProgram(){
     let nowMin=now.getHours()*60+now.getMinutes(); let dur=parseInt(p.duration)||300;
     let passed=(nowMin-startMin)*60+now.getSeconds();
     if(passed>=0&&passed<dur){ if(playProgram(p,k)) found=true; }
-    else if(passed>=dur){
-      db.ref('programs/'+k).remove();
-    }
   });
 }
 document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ if(override) playOverride(); else if(!progPlaying) joinLive(); }});
@@ -248,4 +246,3 @@ db.ref('audioStreams').on('value',s=>{
 </script>
 </body>
 </html>
-  
