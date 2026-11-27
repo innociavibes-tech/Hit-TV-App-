@@ -290,126 +290,41 @@ setInterval(()=>{
     }
   }catch(e){ console.log("watchdog",e); }
 },2000);
-
-/* ===== ROTATE FULL FIX ===== */
-.app.rotate-full{
-  position:fixed !important; top:0 !important; left:0 !important;
-  width:100vh !important; height:100vw !important;
-  max-width:none !important; transform:rotate(90deg) !important;
-  transform-origin:center center !important;
-  /* Center it perfectly */
-  margin:0 !important; z-index:9999 !important;
-  /* Push to center of screen */
-  top:50% !important; left:50% !important;
-  margin-top:-50vw !important; margin-left:-50vh !important;
-}
-#rotateBackBtn{
-  display:none; position:fixed; top:12px; right:12px; z-index:10000;
-  background:#e60000; color:#fff; border:none;
-  padding:10px 14px; border-radius:20px; font-weight:800; font-size:13px;
-  box-shadow:0 4px 15px rgba(0,0,0,.5);
-}
-#rotateBackBtn.show{ display:block; }
-.app.rotate-full #rotateBackBtn{ display:block; }
-
-
+<style>
+#rotateBackBtn{display:none;position:fixed;top:12px;right:12px;z-index:10000;background:#e60000;color:#fff;border:none;padding:10px 14px;border-radius:20px;font-weight:800;font-size:13px}
+#rotateBackBtn.show{display:block}
+.app.rotate-full{position:fixed!important;top:50%!important;left:50%!important;width:100vh!important;height:100vw!important;transform:rotate(90deg)!important;margin-top:-50vw!important;margin-left:-50vh!important;z-index:9999!important;max-width:none!important}
+</style>
 <button id="rotateBackBtn" onclick="exitRotate()">↩ RETURN</button>
-
-// ===== HIT TV - MUTE + ROTATE FORCE FIX =====
-
-// --- 1. MUTE / UNMUTE FORCE FIX ---
+<script>
 window.toggleMute = function(){
-  soundOn = !soundOn;
-  localStorage.setItem('hitTV_sound', soundOn ? 'on' : 'off');
-  let st = document.getElementById('soundStatus');
-  if(st) st.innerText = soundOn ? 'ON' : 'OFF';
-
-  // MP4 video
-  let v = document.querySelector('#playerHolder video');
-  if(v){
-    v.muted = !soundOn;
-    v.volume = soundOn ? 1 : 0;
-    if(soundOn) v.play().catch(()=>{});
-  }
-
-  // YouTube iframe - force unmute / mute
-  let f = document.querySelector('#playerHolder iframe');
-  if(f){
-    try{
-      if(soundOn){
-        f.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}','*');
-        f.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[100]}','*');
-        f.contentWindow.postMessage('{"event":"command","func":"play","args":""}','*');
-      } else {
-        f.contentWindow.postMessage('{"event":"command","func":"mute","args":""}','*');
-      }
-    }catch(e){}
-  }
-
-  // Update all mute buttons text
-  document.querySelectorAll('.gbtn').forEach(b=>{
-    if(b.innerText.includes('Mute')) b.innerText = soundOn ? 'Mute' : 'Unmute 🔊';
-  });
+  try{
+    window.soundOn = !window.soundOn;
+    localStorage.setItem('hitTV_sound', window.soundOn?'on':'off');
+    var st=document.getElementById('soundStatus'); if(st) st.innerText=window.soundOn?'ON':'OFF';
+    var v=document.querySelector('#playerHolder video');
+    if(v){ v.muted=!window.soundOn; v.volume=window.soundOn?1:0; if(window.soundOn) v.play().catch(()=>{}); }
+    var f=document.querySelector('#playerHolder iframe');
+    if(f){ try{ f.contentWindow.postMessage('{"event":"command","func":"'+(window.soundOn?'unMute':'mute')+'","args":""}','*'); if(window.soundOn) f.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[100]}','*'); }catch(e){} }
+  }catch(e){ console.log(e); }
 };
-
-// Also fix forceSound to actually work
-window.forceSound = function(){
-  soundOn = true;
-  localStorage.setItem('hitTV_sound','on');
-  let st = document.getElementById('soundStatus');
-  if(st) st.innerText = 'ON';
-  let v = document.querySelector('#playerHolder video');
-  if(v){ v.muted=false; v.volume=1; v.play().catch(()=>{}); }
-  let f = document.querySelector('#playerHolder iframe');
-  if(f){
-    try{
-      f.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}','*');
-      f.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[100]}','*');
-      f.contentWindow.postMessage('{"event":"command","func":"play","args":""}','*');
-    }catch(e){}
-  }
-};
-
-// --- 2. ROTATE FULL FIX ---
-window.toggleRotate = function(){
-  let app = document.getElementById('app');
-  let isRot = app.classList.contains('rotate-full');
-  if(isRot){ exitRotate(); } else { enterRotate(); }
-};
-
 window.enterRotate = function(){
-  let app = document.getElementById('app');
-  app.classList.add('rotate-full');
-  app.classList.remove('rotate');
-  let t = document.getElementById('tongoRotate');
-  if(t) t.classList.add('on');
-  let btn = document.getElementById('rotateBackBtn');
-  if(btn) btn.classList.add('show');
-  // Try real fullscreen too
-  try{ if(app.requestFullscreen) app.requestFullscreen(); }catch(e){}
-  closeSettings();
+  var app=document.getElementById('app'); if(!app) return;
+  app.classList.add('rotate-full'); app.classList.remove('rotate');
+  var b=document.getElementById('rotateBackBtn'); if(b) b.classList.add('show');
+  var t=document.getElementById('tongoRotate'); if(t) t.classList.add('on');
+  if(typeof closeSettings==='function') closeSettings();
 };
-
 window.exitRotate = function(){
-  let app = document.getElementById('app');
-  app.classList.remove('rotate-full');
-  app.classList.remove('rotate');
-  let t = document.getElementById('tongoRotate');
-  if(t) t.classList.remove('on');
-  let btn = document.getElementById('rotateBackBtn');
-  if(btn) btn.classList.remove('show');
-  try{ if(document.exitFullscreen) document.exitFullscreen(); }catch(e){}
+  var app=document.getElementById('app'); if(!app) return;
+  app.classList.remove('rotate-full'); app.classList.remove('rotate');
+  var b=document.getElementById('rotateBackBtn'); if(b) b.classList.remove('show');
+  var t=document.getElementById('tongoRotate'); if(t) t.classList.remove('on');
 };
-
-// If user presses phone back / fullscreen exit, also un-rotate
-document.addEventListener('fullscreenchange', ()=>{
-  if(!document.fullscreenElement){
-    let app = document.getElementById('app');
-    // Keep rotated if toggle still on, don't auto exit - user uses RETURN button
-  }
-});
-
-console.log("MUTE + ROTATE FIX LOADED");
+window.toggleRotate = function(){
+  var app=document.getElementById('app');
+  if(app && app.classList.contains('rotate-full')) exitRotate(); else enterRotate();
+};
 </script>
 </body>
 </html>
