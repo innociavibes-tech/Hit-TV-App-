@@ -71,10 +71,21 @@ input{width:100%;background:#1a1a1a;border:1px solid #2a2a2a;color:#fff;padding:
 <div class="card" style="margin:0"><h3>Request Song / Advertisement</h3><input id="reqName" placeholder="Artist Name" style="margin-bottom:8px"><input id="reqSong" placeholder="Song Title / Advertisement" style="margin-bottom:8px"><input id="reqPhone" placeholder="Phone / WhatsApp Number - e.g. +256..." style="margin-bottom:8px"><input id="reqLink" placeholder="YouTube / MP4 Link"><button class="sendBtn" onclick="sendReq()">Submit Request</button><p id="reqMsg" style="font-size:12px;color:#00ff88;margin-top:8px"></p></div></div></div>
 <div class="bottom"><div class="nav active" onclick="showTab('home',this)"><b>⌂</b>Home</div><div class="nav" onclick="showTab('notifications',this)"><b>○</b>Notifications</div><div class="nav" onclick="showTab('audio',this)"><b>♫</b>Audio Streams</div><div class="nav" onclick="showTab('artist',this)"><b>★</b>Artist Console</div></div>
 <div class="modal" id="settingsModal" onclick="if(event.target==this)closeSettings()"><div class="sheet"><h2>Settings - Hit TV by Inno</h2><div class="srow"><span>🔄 Rotate Live Player Only</span><div class="tongo" id="tongoRotate" onclick="toggleRotate()"></div></div><div class="srow"><span>☀️ White Mode</span><div class="tongo" id="tongoWhite" onclick="toggleWhite()"></div></div><div class="srow"><span>🌙 Dark Blue Mode</span><div class="tongo" id="tongoDarkBlue" onclick="toggleDarkBlue()"></div></div><div class="srow"><span>App</span><span>Hit TV by Inno</span></div><div class="srow"><span>Sound</span><span id="soundStatus">Tap For Sound</span></div><button class="sendBtn" onclick="closeSettings()">Done</button></div></div>
-</div>
+                   </div>
 <script>
 let soundOn=localStorage.getItem('hitTV_sound')==='on';
-function forceSound(){soundOn=true;localStorage.setItem('hitTV_sound','on');try{document.getElementById('soundStatus').innerText='ON';}catch(e){}let v=document.querySelector('#playerHolder video');if(v){v.muted=false;v.volume=1;v.play().catch(()=>{});}let f=document.querySelector('#playerHolder iframe');if(f){f.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}','*');f.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[100]}','*');}}
+function forceSound(){
+ soundOn=true;localStorage.setItem('hitTV_sound','on');
+ try{document.getElementById('soundStatus').innerText='ON';}catch(e){}
+ let v=document.querySelector('#playerHolder video');
+ if(v){v.muted=false;v.volume=1;v.play().catch(()=>{});}
+ let f=document.querySelector('#playerHolder iframe');
+ if(f){
+  f.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}','*');
+  f.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[100]}','*');
+  f.contentWindow.postMessage('{"event":"command","func":"play","args":""}','*');
+ }
+}
 document.addEventListener('click',()=>{if(!soundOn)forceSound();});document.addEventListener('touchstart',()=>{if(!soundOn)forceSound();},{passive:true});
 </script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -109,7 +120,7 @@ function playAny(item,offset,type,startedAt){
  let h=document.getElementById('playerHolder');let yt=getYTId(item.url);clearTimeout(timer);
  let remaining=(item.duration||240)-offset;if(remaining<=1)remaining=1;
  reportNowPlaying(item,type,startedAt,item.duration||240);
- if(yt){let mp=soundOn?'0':'1';h.innerHTML='<div class="yt-zoom"><iframe src="https://www.youtube-nocookie.com/embed/'+yt+'?autoplay=1&mute='+mp+'&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&enablejsapi=1&start='+Math.floor(offset)+'" allow="autoplay"></iframe></div>';if(soundOn)setTimeout(forceSound,800);}
+ if(yt){let mp=soundOn?'0':'1';h.innerHTML='<div class="yt-zoom"><iframe src="https://www.youtube.com/embed/'+yt+'?autoplay=1&mute='+mp+'&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&enablejsapi=1&start='+Math.floor(offset)+'" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>';if(soundOn){setTimeout(forceSound,800);setTimeout(forceSound,2000);}}
  else{h.innerHTML='<video src="'+item.url+'" autoplay playsinline preload="auto" '+(soundOn?'':'muted')+'></video>';currentVideo=h.querySelector('video');currentVideo.currentTime=offset;if(soundOn){currentVideo.muted=false;currentVideo.volume=1;}currentVideo.play().catch(()=>{});}
  if(type==='LINEUP'){timer=setTimeout(()=>{currentUrl="";currentItem=null;blackScreenThen(()=>{joinLive();});},remaining*1000);}
  let idx=lineup.findIndex(x=>x.url===item.url);if(idx>=0){let nxt=lineup[(idx+1)%lineup.length];if(nxt){document.getElementById('nextTitle').innerText=nxt.title;document.getElementById('artistNext').innerText=nxt.title;}}
@@ -142,7 +153,7 @@ function playProgram(p,key){
  progPlaying=true;progKey=key;document.getElementById('camBanner').style.display='none';document.getElementById('npTitle').innerText='PROGRAM: '+p.title;document.getElementById('artistNow').innerText='PROGRAM: '+p.title;
  let startedAt=Date.now()-offset*1000;reportNowPlaying({title:'PROGRAM: '+p.title,detail:p.startTime+' • Program'},'PROGRAM',startedAt,dur);
  let h=document.getElementById('playerHolder');let yt=getYTId(p.url);document.getElementById('noSignal').style.display='none';
- if(yt){let mp=soundOn?'0':'1';h.innerHTML='<div class="yt-zoom"><iframe src="https://www.youtube-nocookie.com/embed/'+yt+'?autoplay=1&mute='+mp+'&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&enablejsapi=1&start='+Math.floor(offset)+'" allow="autoplay"></iframe></div>';if(soundOn)setTimeout(forceSound,800);}
+ if(yt){let mp=soundOn?'0':'1';h.innerHTML='<div class="yt-zoom"><iframe src="https://www.youtube.com/embed/'+yt+'?autoplay=1&mute='+mp+'&controls=0&disablekb=1&fs=0&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&enablejsapi=1&start='+Math.floor(offset)+'" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>';if(soundOn){setTimeout(forceSound,800);setTimeout(forceSound,2000);}}
  else{h.innerHTML='<video src="'+p.url+'" autoplay playsinline preload="auto" '+(soundOn?'':'muted')+'></video>';currentVideo=h.querySelector('video');currentVideo.currentTime=offset;if(soundOn){currentVideo.muted=false;currentVideo.volume=1;}currentVideo.play().catch(()=>{});}
  currentUrl=p.url;currentItem={title:p.title,url:p.url};
  progTimer=setTimeout(()=>{progPlaying=false;progKey=null;currentUrl="";currentItem=null;db.ref('programs/'+key).update({lastPlayed:todayEAT()});blackScreenThen(()=>{joinLive();});},(dur-offset)*1000);return true;
@@ -156,7 +167,17 @@ function downloadCurrent(type){if(!currentItem||!currentUrl)return alert('No son
 function downloadVideo(){downloadCurrent('video');}
 function downloadAudio(){downloadCurrent('audio');}
 function downloadAudioFile(url,title){let a=document.createElement('a');a.href=url;a.download=title+' - Hit TV';a.target='_blank';document.body.appendChild(a);a.click();a.remove();}
-function toggleMute(){if(soundOn){soundOn=false;localStorage.setItem('hitTV_sound','off');document.getElementById('soundStatus').innerText='OFF';}else{forceSound();}let v=document.querySelector('#playerHolder video');if(v)v.muted=!soundOn;}
+function toggleMute(){
+ if(soundOn){
+  soundOn=false;localStorage.setItem('hitTV_sound','off');
+  document.getElementById('soundStatus').innerText='OFF';
+  let v=document.querySelector('#playerHolder video');if(v)v.muted=true;
+  let f=document.querySelector('#playerHolder iframe');
+  if(f) f.contentWindow.postMessage('{"event":"command","func":"mute","args":""}','*');
+ }else{
+  forceSound();
+ }
+}
 function pip(){if(currentVideo&&document.pictureInPictureEnabled){currentVideo.requestPictureInPicture()}else alert('PiP for MP4 only.');}
 function goFullscreen(){let el=document.querySelector('.liveBox');if(el.requestFullscreen)el.requestFullscreen();}
 function sendComment(){let v=document.getElementById('commentInput').value.trim();if(!v)return;db.ref('comments').push({text:v,name:myName||'Viewer',time:Date.now()});document.getElementById('commentMsg').innerText='Comment sent to Admin!';document.getElementById('commentInput').value='';}
@@ -175,3 +196,5 @@ db.ref('audioStreams').on('value',s=>{let v=s.val()||{};let html='';Object.keys(
 </script>
 </body>
 </html>
+
+ 
