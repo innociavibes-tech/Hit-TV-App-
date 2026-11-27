@@ -124,9 +124,7 @@ function playItem(item,offsetSeconds,type,startedAt){
     h.innerHTML=`<video src="${item.url}" autoplay playsinline preload="auto" ${soundOn?'':'muted'}></video>`; currentVideo=h.querySelector('video'); currentVideo.currentTime=offsetSeconds; if(soundOn){currentVideo.muted=false;currentVideo.volume=1;} currentVideo.play().catch(()=>{}); currentVideo.onended=()=>{currentUrl=""; currentItem=null; blackScreenThen(()=>{joinLive();});}; timer=setTimeout(()=>{currentUrl=""; currentItem=null; blackScreenThen(()=>{joinLive();});},remaining*1000);
   }
   let idx=lineup.findIndex(x=>x.url===item.url); if(idx>=0){let nxt=lineup[(idx+1)%lineup.length]; if(nxt){document.getElementById('nextTitle').innerText=nxt.title; document.getElementById('artistNext').innerText=nxt.title;}}
-}
-
-function playOverride(){
+}function playOverride(){
   if(!override) return;
   document.getElementById('camBanner').style.display=override.type==='camera'?'block':'none';
   if(override.type==='camera'){
@@ -250,3 +248,4 @@ db.ref('audioStreams').on('value',s=>{
 </script>
 </body>
 </html>
+  
