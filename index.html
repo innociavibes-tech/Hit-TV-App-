@@ -290,7 +290,59 @@ setInterval(()=>{
     }
   }catch(e){ console.log("watchdog",e); }
 },2000);
+<!-- HIT TV 5 MIN OFFLINE RULE -->
+<div id="hitBanner" style="display:none;background:#ff6600;color:#fff;text-align:center;padding:11px 8px;font-weight:800;font-size:13px;position:fixed;top:0;left:0;right:0;z-index:999999">📶 You're offline - <span id="hitTimer">05:00</span> left - App will load itself when you're back online</div>
 
+(function(){
+  let offlineTimer = null;
+  let secondsLeft = 300; // 5 minutes = 300 seconds
+  let banner = document.getElementById('hitBanner');
+  let timerText = document.getElementById('hitTimer');
+  let isOffline = false;
+
+  function format(s){
+    let m = Math.floor(s/60);
+    let sec = s%60;
+    return (m<10?'0'+m:m)+':'+(sec<10?'0'+sec:sec);
+  }
+
+  function start5Min(){
+    if(isOffline) return;
+    isOffline = true;
+    secondsLeft = 300;
+    banner.style.display = 'block';
+    document.body.style.paddingTop = '42px';
+
+    offlineTimer = setInterval(()=>{
+      secondsLeft--;
+      timerText.innerText = format(secondsLeft);
+      // Check real internet every second
+      fetch('https://www.google.com/favicon.ico',{mode:'no-cors',cache:'no-store'}).then(()=>{
+        // Back online before 5 min -> cancel
+        stopOffline();
+      }).catch(()=>{});
+      if(secondsLeft <= 0){
+        clearInterval(offlineTimer);
+        // 5 MINUTES OVER -> Go to OUR offline page
+        window.location.href = 'offline.html';
+      }
+    }, 1000);
+  }
+
+  function stopOffline(){
+    if(!isOffline) return;
+    isOffline = false;
+    clearInterval(offlineTimer);
+    banner.style.display = 'none';
+    document.body.style.paddingTop = '0px';
+  }
+
+  window.addEventListener('offline', start5Min);
+  window.addEventListener('online', stopOffline);
+  if(!navigator.onLine) start5Min();
+})();
+
+<!-- END 5 MIN RULE -->
 
 </script>
 </body>
