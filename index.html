@@ -292,5 +292,58 @@ setInterval(()=>{
 },2000);
 
 </script>
+  <style>
+#liveBox.rotated{position:fixed!important;left:0!important;top:0!important;width:100vw!important;height:100vh!important;max-width:none!important;margin:0!important;z-index:9999!important;border-radius:0!important;border:none!important;aspect-ratio:auto!important;background:#000}
+#liveBox.rotated #playerHolder{transform:rotate(90deg);transform-origin:center center;width:100vh!important;height:100vw!important;left:50%!important;top:50%!important;margin-left:-50vh!important;margin-top:-50vw!important}
+#returnBtn{display:none;position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:#0033cc;color:#fff;border:none;padding:11px 20px;border-radius:25px;font-size:14px;font-weight:800;z-index:10000;box-shadow:0 4px 15px rgba(0,0,0,.5)}
+#returnBtn.show{display:block}
+</style>
+<button id="returnBtn" onclick="toggleRotate()">↩ Return</button>
+<script>
+// ===== FORCE MUTE / UNMUTE - WORKS FOR YOUTUBE + MP4 =====
+let soundOn = localStorage.getItem('hitTV_sound') === 'on';
+function forceSound(){
+  soundOn = true;
+  localStorage.setItem('hitTV_sound','on');
+  let s = document.getElementById('soundStatus'); if(s) s.innerText = 'ON';
+  let v = document.querySelector('#playerHolder video');
+  if(v){ v.muted = false; v.volume = 1; v.play().catch(()=>{}); }
+  let f = document.querySelector('#playerHolder iframe');
+  if(f){
+    f.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}','*');
+    f.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[100]}','*');
+    f.contentWindow.postMessage('{"event":"command","func":"play","args":""}','*');
+  }
+}
+function toggleMute(){
+  if(soundOn){
+    soundOn = false;
+    localStorage.setItem('hitTV_sound','off');
+    let s = document.getElementById('soundStatus'); if(s) s.innerText = 'OFF';
+    let v = document.querySelector('#playerHolder video'); if(v) v.muted = true;
+    let f = document.querySelector('#playerHolder iframe');
+    if(f) f.contentWindow.postMessage('{"event":"command","func":"mute","args":""}','*');
+  }else{
+    forceSound();
+  }
+}
+// Auto-force sound on first tap anywhere
+document.addEventListener('click',()=>{ if(!soundOn) forceSound(); });
+document.addEventListener('touchstart',()=>{ if(!soundOn) forceSound(); },{passive:true});
+
+// ===== FORCE ROTATE - PLAYER ONLY TO FULL SCREEN =====
+function toggleRotate(){
+  let lb = document.getElementById('liveBox');
+  if(!lb) return;
+  let on = lb.classList.toggle('rotated');
+  let btn = document.getElementById('returnBtn');
+  if(btn) btn.classList.toggle('show', on);
+  let tongo = document.getElementById('tongoRotate');
+  if(tongo) tongo.classList.toggle('on', on);
+  // close settings if open
+  let m = document.getElementById('settingsModal');
+  if(m) m.classList.remove('open');
+}
+</script>
 </body>
 </html>
