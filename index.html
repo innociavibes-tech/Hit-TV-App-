@@ -291,6 +291,123 @@ setInterval(()=>{
   }catch(e){ console.log("watchdog",e); }
 },2000);
 
+// ===== HIT TV - FIX 1: OFFLINE 3 MINUTES + OFFLINE PAGE INSIDE APP - START =====
+// This keeps user INSIDE app for 3 minutes, does NOT kick them out.
+// After 3 minutes, shows offline page INSIDE app (light/dark follows your theme)
+(function(){
+  // Create banner + offline overlay once
+  if(!document.getElementById('hitReconnectBanner')){
+    var banner = document.createElement('div');
+    banner.id = 'hitReconnectBanner';
+    banner.style.cssText = 'display:none;position:fixed;top:0;left:0;right:0;background:#ff8c00;color:#fff;text-align:center;padding:11px 10px;font-weight:800;font-size:13px;z-index:99999;font-family:Arial';
+    banner.innerText = '⚠️ Connection Lost - Reconnecting... Please stay, we will be back';
+    document.body.appendChild(banner);
+  }
+  if(!document.getElementById('hitOfflineOverlay')){
+    var ov = document.createElement('div');
+    ov.id = 'hitOfflineOverlay';
+    ov.style.cssText = 'display:none;position:fixed;inset:0;z-index:99998;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;background:#0a0a0a;color:#fff;font-family:Arial';
+    ov.innerHTML = '<div style="font-size:48px">📺</div><h2 style="margin:12px 0 6px">Hit TV by Inno</h2><p id="hitOfflineText" style="font-size:14px;opacity:.8">No internet connection.<br>Check your connection and try again.</p><button onclick="location.reload()" style="margin-top:18px;background:#0033cc;color:#fff;border:none;padding:13px 24px;border-radius:10px;font-weight:800;font-size:14px">RETRY CONNECTION</button><p style="margin-top:12px;font-size:12px;opacity:.6">You are still inside Hit TV</p>';
+    document.body.appendChild(ov);
+  }
+
+  var offlineStart = null;
+  var checkTimer = null;
+
+  function applyOfflineTheme(){
+    var app = document.getElementById('app');
+    var ov = document.getElementById('hitOfflineOverlay');
+    if(app && app.classList.contains('white')){
+      ov.style.background = '#f5f5f5'; ov.style.color = '#111';
+    } else if(app && app.classList.contains('darkblue')){
+      ov.style.background = '#000a2e'; ov.style.color = '#fff';
+    } else {
+      ov.style.background = '#0a0a0a'; ov.style.color = '#fff';
+    }
+    ov.style.display = 'flex';
+  }
+
+  function startOffline(){
+    if(offlineStart) return;
+    offlineStart = Date.now();
+    document.getElementById('hitReconnectBanner').style.display = 'block';
+    checkTimer = setInterval(function(){
+      if(navigator.onLine){ stopOffline(); return; }
+      var passed = Date.now() - offlineStart;
+      var left = Math.ceil((180000 - passed)/1000);
+      var b = document.getElementById('hitReconnectBanner');
+      if(b) b.innerText = '⚠️ Connection Lost - Reconnecting... ' + left + 's left - Please stay';
+      if(passed >= 180000){
+        clearInterval(checkTimer);
+        document.getElementById('hitReconnectBanner').style.display = 'none';
+        applyOfflineTheme();
+      }
+    }, 5000);
+  }
+  function stopOffline(){
+    offlineStart = null;
+    if(checkTimer) clearInterval(checkTimer);
+    var b = document.getElementById('hitReconnectBanner');
+    if(b) b.style.display = 'none';
+    var ov = document.getElementById('hitOfflineOverlay');
+    if(ov) ov.style.display = 'none';
+  }
+  window.addEventListener('offline', startOffline);
+  window.addEventListener('online', function(){ stopOffline(); setTimeout(function(){ if(typeof joinLive==='function') joinLive(); },500); });
+  if(!navigator.onLine) startOffline();
+})();
+// ===== HIT TV - FIX 1: OFFLINE 3 MINUTES - END =====
+
+// ===== HIT TV - FIX 2: ROTATE ONLY PLAYER - NOT WHOLE SCREEN - START =====
+(function(){
+  // CSS for rotated player only
+  var st = document.createElement('style');
+  st.innerHTML = '.liveBox.player-rotated{position:fixed !important;top:50% !important;left:50% !important;width:100vh !important;height:100vw !important;max-width:none !important;margin:0 !important;transform:translate(-50%,-50%) rotate(90deg) !important;z-index:99990 !important;border-radius:0 !important;border:none !important;aspect-ratio:auto !important;} .liveBox.player-rotated .ticker{border-radius:0 !important;} #rotateBackBtn{display:none;position:fixed;top:14px;right:14px;z-index:99999;background:rgba(0,0,0,.8);color:#fff;border:1px solid #fff;width:42px;height:42px;border-radius:50%;font-size:20px;cursor:pointer;} #rotateBackBtn.show{display:block;}';
+  document.head.appendChild(st);
+
+  // Create small return button
+  if(!document.getElementById('rotateBackBtn')){
+    var btn = document.createElement('button');
+    btn.id = 'rotateBackBtn';
+    btn.innerText = '✕';
+    btn.onclick = function(){ exitPlayerRotate(); };
+    document.body.appendChild(btn);
+  }
+
+  function exitPlayerRotate(){
+    var box = document.querySelector('.liveBox');
+    if(box) box.classList.remove('player-rotated');
+    var b = document.getElementById('rotateBackBtn');
+    if(b) b.classList.remove('show');
+    var t = document.getElementById('tongoRotate');
+    if(t) t.classList.remove('on');
+    // Remove old whole-screen rotate if it was on
+    var app = document.getElementById('app');
+    if(app) app.classList.remove('rotate');
+  }
+
+  // OVERRIDE old toggleRotate - now rotates ONLY player
+  window.toggleRotate = function(){
+    var box = document.querySelector('.liveBox');
+    var app = document.getElementById('app');
+    if(app) app.classList.remove('rotate'); // STOP rotating whole screen
+    if(!box) return;
+    var isRotated = box.classList.contains('player-rotated');
+    if(isRotated){
+      exitPlayerRotate();
+    } else {
+      box.classList.add('player-rotated');
+      document.getElementById('rotateBackBtn').classList.add('show');
+      document.getElementById('tongoRotate').classList.add('on');
+      // Close settings so user sees rotated player
+      var m = document.getElementById('settingsModal');
+      if(m) m.classList.remove('open');
+    }
+  };
+  window.exitPlayerRotate = exitPlayerRotate;
+})();
+// ===== HIT TV - FIX 2: ROTATE ONLY PLAYER - END =====
+
 </script>
 </body>
 </html>
