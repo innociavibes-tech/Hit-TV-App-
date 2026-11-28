@@ -297,11 +297,10 @@ setInterval(()=>{
 #liveBox.rotated #playerHolder{transform:rotate(90deg);transform-origin:center center;width:100vh!important;height:100vw!important;left:50%!important;top:50%!important;margin-left:-50vh!important;margin-top:-50vw!important}
 #returnBtn{display:none;position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:#0033cc;color:#fff;border:none;padding:11px 20px;border-radius:25px;font-size:14px;font-weight:800;z-index:10000;box-shadow:0 4px 15px rgba(0,0,0,.5)}
 #returnBtn.show{display:block}
-</style>
 <button id="returnBtn" onclick="toggleRotate()">↩ Return</button>
 <script>
 // ===== FORCE MUTE / UNMUTE - WORKS FOR YOUTUBE + MP4 =====
-let soundOn = localStorage.getItem('hitTV_sound') === 'on';
+soundOn = localStorage.getItem('hitTV_sound') === 'on';
 function forceSound(){
   soundOn = true;
   localStorage.setItem('hitTV_sound','on');
